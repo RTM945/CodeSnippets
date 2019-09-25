@@ -1,1 +1,1 @@
-just my solutions for the exercises of the Go Tour.
+fuck go
