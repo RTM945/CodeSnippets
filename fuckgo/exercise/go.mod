@@ -1,4 +1,4 @@
-module fuckgo
+module exercise
 
 go 1.13
 
