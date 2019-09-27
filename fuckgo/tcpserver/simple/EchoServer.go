@@ -3,6 +3,7 @@ package simple
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"net"
 )
@@ -34,8 +35,15 @@ func handleConnection(conn net.Conn) {
 	reader := bufio.NewReader(conn)
 	for {
 		response, err := reader.ReadBytes(byte('\n'))
-		if err == nil {
+		switch err {
+		case nil:
 			fmt.Printf("---> %s: %s\n", conn.RemoteAddr().String(), string(response))
+		case io.EOF:
+			fmt.Println("remote closed", err)
+			break
+		default:
+			fmt.Println("ERROR", err)
+			break
 		}
 		if string(response) == "END" {
 			conn.Write([]byte("bye"))
