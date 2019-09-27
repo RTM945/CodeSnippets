@@ -3,19 +3,20 @@ package simple
 import (
 	"bufio"
 	"fmt"
-	"io"
 	"log"
 	"net"
 )
 
 type EchoServer struct {
+	l net.Listener
 }
 
-func (server EchoServer) start(port string, c chan int) {
+func (server *EchoServer) Start(port string, c chan int) {
 	l, err := net.Listen("tcp", port)
 	if err != nil {
 		log.Fatal(err)
 	}
+	server.l = l
 	defer l.Close()
 	fmt.Println("start server")
 	c <- 1
@@ -29,27 +30,27 @@ func (server EchoServer) start(port string, c chan int) {
 	}
 }
 
+func (server *EchoServer) Close() {
+	server.l.Close()
+}
+
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 	fmt.Printf("handle %s \n", conn.RemoteAddr().String())
 	reader := bufio.NewReader(conn)
 	for {
-		response, err := reader.ReadBytes(byte('\n'))
-		switch err {
-		case nil:
-			fmt.Printf("---> %s: %s\n", conn.RemoteAddr().String(), string(response))
-		case io.EOF:
-			fmt.Println("remote closed", err)
-			break
-		default:
+		line, _, err := reader.ReadLine()
+		if err != nil {
 			fmt.Println("ERROR", err)
 			break
-		}
-		if string(response) == "END" {
-			conn.Write([]byte("bye"))
-			break
 		} else {
-			conn.Write([]byte(string(string(response))))
+			msg := string(line)
+			fmt.Printf("---> %s: %s\n", conn.RemoteAddr().String(), msg)
+			fmt.Fprintln(conn, msg)
+			if msg == "END" {
+				fmt.Println("connection end")
+				break
+			}
 		}
 	}
 }
