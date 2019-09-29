@@ -5,26 +5,22 @@ import (
 	"io/ioutil"
 	"net/http"
 	_ "net/http/pprof"
+	"sync"
 	"time"
 )
 
 func main() {
-	//var wg sync.WaitGroup
-	count := 1 * 10000
+	var wg sync.WaitGroup
+	count := 1 * 1000
 	start := time.Now()
-	ch := make(chan int)
 	for i := 0; i < count; i++ {
-		//wg.Add(1)
+		wg.Add(1)
 		go request(func() {
-			//wg.Done()
-			ch <- 1
+			wg.Done()
 		})
 	}
-	//wg.Wait()
-	for _ = range ch {
-		<-ch
-	}
-	fmt.Printf("cost %v", time.Since(start))
+	wg.Wait()
+	fmt.Printf("spend %v\n", time.Since(start))
 }
 
 //run ../webapp/main.go first
@@ -37,13 +33,13 @@ func request(cb func()) {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 
 	expected := "1"
 	if string(body) != expected {
-		fmt.Printf("resp: %s", string(body))
+		fmt.Printf("resp: %s\n", string(body))
 	}
 	cb()
 }
