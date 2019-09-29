@@ -4,11 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"html/template"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	_ "net/http/pprof"
 	"regexp"
+	"time"
 )
 
 type Page struct {
@@ -103,6 +106,10 @@ func main() {
 	http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
+	http.HandleFunc("/test", func(w http.ResponseWriter, req *http.Request) {
+		time.Sleep(10 * time.Second)
+		io.WriteString(w, "1")
+	})
 
 	if *addr {
 		l, err := net.Listen("tcp", "127.0.0.1:0")
