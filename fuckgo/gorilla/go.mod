@@ -1,4 +1,4 @@
-module webrtc-web
+module gorilla_test
 
 go 1.13
 
