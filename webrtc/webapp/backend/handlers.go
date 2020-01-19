@@ -38,9 +38,6 @@ func pairHandler(w http.ResponseWriter, r *http.Request) {
 	redirect := "/login"
 	username := r.FormValue("username")
 	password := r.FormValue("password")
-	if username == "" || password == "" {
-
-	}
 	if username != "" && password != "" {
 		if auth(username, password) {
 			setSession(username, w)
