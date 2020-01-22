@@ -2,9 +2,13 @@ package me.rtmsoft.webrtc.signal;
 
 import me.rtmsoft.webrtc.signal.vo.PairVO;
 import me.rtmsoft.webrtc.signal.vo.SdpVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.core.MessagePostProcessor;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -26,6 +30,8 @@ import java.util.concurrent.TimeUnit;
 @Controller
 public class SignalController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SignalController.class);
+
     Map<String, Answer> answers = new ConcurrentHashMap<>();
 
     @Autowired
@@ -45,6 +51,7 @@ public class SignalController {
         }else{
             answer.setToken(token);
             answers.put(answer.getName(), answer);
+            LOGGER.info("register {}", answer);
         }
     }
 
@@ -56,7 +63,7 @@ public class SignalController {
     }
 
     @MessageExceptionHandler
-    @SendToUser("/user/errors")
+    @SendToUser("/queue/errors")
     public String handleException(Throwable exception) {
         return exception.getMessage();
     }
@@ -68,6 +75,7 @@ public class SignalController {
         if (answer != null && answer.getToken().equals(pairVO.getToken())) {
             //配对成功写入session
             session.setAttribute("user", pairVO.getName());
+            LOGGER.info("pair {}", answer);
             return ResponseEntity.status(HttpStatus.OK).build();
         }
         return ResponseEntity.status(HttpStatus.I_AM_A_TEAPOT).build();
@@ -85,6 +93,7 @@ public class SignalController {
             //发送给answer
             Offer offer = new Offer(user);
             offerManager.add(offer);
+            LOGGER.info("offer {}", offer.getUser());
             messagingTemplate.convertAndSendToUser(user, "/queue/offer", sdpVO);
             //等待answer的sdp
             try{

@@ -16,9 +16,16 @@ public class CustomSubProtocolWebSocketHandler extends SubProtocolWebSocketHandl
     }
 
     @Override
+    public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+        //如果没有经过http连接设置session，这里的session没有attributes
+        LOGGER.info("建立ws连接");
+        super.afterConnectionEstablished(session);
+    }
+
+    @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        String user = (String) session.getAttributes().get("user");
-        LOGGER.info("{}断开连接", user);
+//        String user = (String) session.getAttributes().get("user");
+        LOGGER.info("断开ws连接");
         super.afterConnectionClosed(session, closeStatus);
     }
 }

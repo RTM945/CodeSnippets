@@ -24,4 +24,12 @@ public class Answer implements Principal {
     public void setToken(String token) {
         this.token = token;
     }
+
+    @Override
+    public String toString() {
+        return "Answer{" +
+                "name='" + name + '\'' +
+                ", token='" + token + '\'' +
+                '}';
+    }
 }

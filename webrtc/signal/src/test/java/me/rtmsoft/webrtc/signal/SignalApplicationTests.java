@@ -50,8 +50,8 @@ class SignalApplicationTests {
     String offer = "test_offer";
     String answer = "test_answer";
 
-    String wsOnErrors = "/queue/errors";
-    String wsOffer = "/queue/offer";
+    String wsOnErrors = "/user/queue/errors";
+    String wsOffer = "/user/queue/offer";
     String wsRegister = "/app/register";
 
     @Test
@@ -63,6 +63,7 @@ class SignalApplicationTests {
         stompHeaders.add("user", user);
         ListenableFuture<StompSession> future = stompClient.connect(baseUrl, (WebSocketHttpHeaders) null, stompHeaders, new StompSessionHandlerAdapter() {});
         StompSession stompSession = future.get(1, TimeUnit.SECONDS);
+
         stompSession.subscribe(wsOnErrors, new WSErrorHandler(stompSession));
         stompSession.subscribe(wsOffer, new WSOfferHandler(stompSession));
         stompSession.send(wsRegister + "/" + token, null);
@@ -77,12 +78,14 @@ class SignalApplicationTests {
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<PairVO> pairRequest = new HttpEntity<>(pairVO, headers);
         ResponseEntity<String> result = restTemplate.postForEntity(uri, pairRequest, String.class);
+        String cookie = result.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
         if (result.getStatusCode() == HttpStatus.OK) {
             baseUrl = "http://localhost:" + port + "/offer";
             uri = new URI(baseUrl);
             SdpVO sdpVO = new SdpVO();
             sdpVO.setSdp(offer);
             headers = new HttpHeaders();
+            headers.add("Cookie", cookie);
             HttpEntity<SdpVO> offerRequest = new HttpEntity<>(sdpVO, headers);
             result = restTemplate.postForEntity(uri, offerRequest, String.class);
         }
