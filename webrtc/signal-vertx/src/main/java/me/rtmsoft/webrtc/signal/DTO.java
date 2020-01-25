@@ -2,7 +2,7 @@ package me.rtmsoft.webrtc.signal;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-public class Dto {
+public class DTO {
 
     private int evt;
 
@@ -11,9 +11,6 @@ public class Dto {
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String sdp;
-
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
-    private String msg;
 
     public int getEvt() {
         return evt;
@@ -39,22 +36,13 @@ public class Dto {
         this.sdp = sdp;
     }
 
-    public String getMsg() {
-        return msg;
+    public DTO() {
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public Dto() {
-    }
-
-    public Dto(int evt, String token, String sdp, String msg) {
+    public DTO(int evt, String token, String sdp) {
         this.evt = evt;
         this.token = token;
         this.sdp = sdp;
-        this.msg = msg;
     }
 
     @Override
@@ -63,7 +51,6 @@ public class Dto {
                 "evt=" + evt +
                 ", token='" + token + '\'' +
                 ", sdp='" + sdp + '\'' +
-                ", msg='" + msg + '\'' +
                 '}';
     }
 }

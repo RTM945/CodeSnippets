@@ -20,11 +20,10 @@ public class Server extends AbstractVerticle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
 
-    private static final Map<String, Client> CLIENTS = new ConcurrentHashMap<>();
+    private static final Map<String, ServerWebSocket> CLIENTS = new ConcurrentHashMap<>();
 
     public static final int OFFER = 0;
     public static final int ANSWER = 1;
-    public static final int ERROR = 2;
 
     @Override
     public void start(Promise<Void> startPromise) {
@@ -35,7 +34,7 @@ public class Server extends AbstractVerticle {
         root.route("/signalling").handler(this::handleSignal);
         root.post("/offer").handler(this::offer);
         root.errorHandler(500, rc -> {
-            System.err.println("Handling failure");
+            LOGGER.error("Handling failure");
             Throwable failure = rc.failure();
             if (failure != null) {
                 failure.printStackTrace();
@@ -44,33 +43,22 @@ public class Server extends AbstractVerticle {
         vertx.createHttpServer()
                 .requestHandler(root)
                 .listen(9090, ar -> {
-                   LOGGER.info("signalling starts at 9090");
+                    LOGGER.info("signalling starts at 9090");
                     startPromise.complete();
                 });
     }
 
     private void offer(RoutingContext context) {
-        Dto dto = Json.decodeValue(context.getBodyAsString(), Dto.class);
-        Client client = CLIENTS.get(dto.getToken());
-        if (client != null) {
+        DTO dto = Json.decodeValue(context.getBodyAsString(), DTO.class);
+        ServerWebSocket ws = CLIENTS.get(dto.getToken());
+        if (ws != null) {
             dto.setEvt(OFFER);
-            client.send(dto);
-            try {
-                dto = new Dto();
-                String answer = client.getAnswer();
-                if (StringUtil.isNullOrEmpty(answer)) {
-                    dto.setEvt(ERROR);
-                    dto.setMsg("can't pair");
-                }else {
-                    dto.setEvt(ANSWER);
-                    dto.setSdp(answer);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            context.response()
-                    .putHeader("content-type", "application/json")
-                    .end(Json.encode(dto));
+            ws.writeTextMessage(Json.encode(dto)).textMessageHandler(msg -> {
+                DTO answer = Json.decodeValue(msg, DTO.class);
+                context.response()
+                        .putHeader("content-type", "application/json")
+                        .end(Json.encode(answer));
+            });
         }
     }
 
@@ -86,16 +74,7 @@ public class Server extends AbstractVerticle {
             return;
         }
         LOGGER.info("register " + token);
-        final Client client = new Client(token, ws);
-        CLIENTS.put(token, client);
-        ws.textMessageHandler(msg -> {
-            LOGGER.info("receive answer");
-            Dto dto = Json.decodeValue(msg, Dto.class);
-            LOGGER.info(dto);
-            if (dto.getEvt() == ANSWER) {
-                client.setAnswer(dto.getSdp());
-            }
-        });
+        CLIENTS.put(token, ws);
         ws.closeHandler(event -> CLIENTS.remove(token));
     }
 }
