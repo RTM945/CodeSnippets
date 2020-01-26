@@ -34,32 +34,26 @@ public class PrincipalChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (accessor != null && accessor.getCommand() == StompCommand.CONNECT) {
             String sessionId = accessor.getSessionId();
-            Object raw = message
-                    .getHeaders()
-                    .get(SimpMessageHeaderAccessor.NATIVE_HEADERS);
-            if (raw instanceof Map) {
-                try {
-                    String token = ((LinkedList) ((Map) raw).get("token")).get(0).toString();
-                    String type = ((LinkedList) ((Map) raw).get("type")).get(0).toString();
-                    if ("offer".equals(type) || "answer".equals(type)) {
-                        if (!peerManager.isRegistered(token)) {
-                            Peer peer = new Peer(token, type, sessionId);
-                            peerManager.add(peer);
-                            accessor.setUser(peer);
-                            LOGGER.info(sessionId + " set principal " + peer.getName());
-                        }else{
-                            sessionManager.close(sessionId, CloseStatus.SERVICE_RESTARTED);
-                        }
-                    }else {
-                        sessionManager.close(sessionId, CloseStatus.PROTOCOL_ERROR);
+            try {
+                String token = accessor.getNativeHeader("token").get(0);
+                String type = accessor.getNativeHeader("type").get(0);
+                if ("offer".equals(type) || "answer".equals(type)) {
+                    if (!peerManager.isRegistered(token)) {
+                        Peer peer = new Peer(token, type, sessionId);
+                        peerManager.add(peer);
+                        accessor.setUser(peer);
+                        LOGGER.info(sessionId + " set principal " + peer.getName());
+                    }else{
+                        sessionManager.close(sessionId, CloseStatus.SERVICE_RESTARTED);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                }else {
                     sessionManager.close(sessionId, CloseStatus.PROTOCOL_ERROR);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                sessionManager.close(sessionId, CloseStatus.PROTOCOL_ERROR);
             }
         }
-
         return message;
     }
 }

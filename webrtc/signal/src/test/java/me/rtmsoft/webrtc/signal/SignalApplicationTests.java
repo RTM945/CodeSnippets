@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -21,9 +20,7 @@ import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class SignalApplicationTests {
@@ -41,6 +38,22 @@ public class SignalApplicationTests {
         StompSession offer = createPeer(baseUrl, token, "offer");
         offer.send("/app/sdp", "offer's sdp");
         TimeUnit.SECONDS.sleep(1);
+    }
+
+    @Test
+    void testWrongType() {
+        String baseUrl = "ws://localhost:" + port + "/signalling";
+        WebSocketStompClient stompClient = new WebSocketStompClient(new SockJsClient(Collections.singletonList(new WebSocketTransport(new StandardWebSocketClient()))));
+        stompClient.setMessageConverter(new StringMessageConverter());
+        StompHeaders stompHeaders = new StompHeaders();
+        stompHeaders.add("token", UUID.randomUUID().toString());
+        stompHeaders.add("type", "wrong type");
+        stompClient.connect(baseUrl, (WebSocketHttpHeaders) null, stompHeaders, new StompSessionHandlerAdapter() {
+            @Override
+            public void handleTransportError(StompSession session, Throwable exception) {
+                exception.printStackTrace();
+            }
+        });
     }
 
     StompSession createPeer(String baseUrl, String token, String type) throws Exception {
