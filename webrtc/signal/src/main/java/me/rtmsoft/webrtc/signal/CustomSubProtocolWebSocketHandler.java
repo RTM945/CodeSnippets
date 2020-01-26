@@ -34,7 +34,7 @@ public class CustomSubProtocolWebSocketHandler extends SubProtocolWebSocketHandl
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus closeStatus) throws Exception {
-        LOGGER.info(session.getId() + "断开连接");
+        LOGGER.info(session.getId() + " connection closed");
         sessionManager.remove(session);
         peerManager.remove(session.getId());
         super.afterConnectionClosed(session, closeStatus);
