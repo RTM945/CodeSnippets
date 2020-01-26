@@ -5,18 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketSession;
-
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Map;
 
 @Component
 public class PrincipalChannelInterceptor implements ChannelInterceptor {
@@ -37,7 +32,7 @@ public class PrincipalChannelInterceptor implements ChannelInterceptor {
             try {
                 String token = accessor.getNativeHeader("token").get(0);
                 String type = accessor.getNativeHeader("type").get(0);
-                if ("offer".equals(type) || "answer".equals(type)) {
+                if (("offer".equals(type) || "answer".equals(type)) && !StringUtils.isEmpty(token)) {
                     if (!peerManager.isRegistered(token)) {
                         Peer peer = new Peer(token, type, sessionId);
                         peerManager.add(peer);
