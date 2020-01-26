@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+	<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+	<script src="./js/stomp.js"></script>
+</head>
+<body>
+    <div>
+        <div>
+            <input type="text" id="token" placeholder="Type a token"/>
+            <select id="type">
+                <option value="offer" selected>offer</option>
+                <option value="answer">answer</option>
+            </select>
+            <button id="connect" onclick="connect();">Connect</button>
+        </div>
+        <br />
+        <div id="conversationDiv">
+            <p id="response"></p>
+        </div>
+    </div>
+    <script type="text/javascript">
+        var stompClient = null;
+        function connect() {
+            var token = document.getElementById("token").value;
+            var type = document.getElementById("type").value;
+            var socket = new SockJS('http://localhost:8080/signalling');
+            stompClient = Stomp.over(socket);  
+            stompClient.connect({
+                "token": token,
+                "type": type,
+            }, function(frame) {
+                console.log('Connected: ' + frame);
+                stompClient.subscribe('/user/queue/onsdp', function(msg) {
+                    show(msg.body);
+                    if (type == 'answer') {
+                    stompClient.send("/app/sdp", {}, "answer's sdp");
+                }
+                });
+                if (type == 'offer') {
+                    stompClient.send("/app/sdp", {}, "offer's sdp");
+                }
+            }, function(frame) {
+                console.log("connect failue");
+            });
+        }
+
+        function show(msg) {
+            var response = document.getElementById('response');
+            var p = document.createElement('p');
+            p.style.wordWrap = 'break-word';
+            p.appendChild(document.createTextNode(msg));
+            response.appendChild(p);
+        }
+    </script>
+</body>
+</html>
