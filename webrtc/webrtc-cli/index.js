@@ -1,9 +1,10 @@
 $('#dirBtn').on('click', () => {
-    let path = window.dir()
-    if (path != undefined) {
-        $('#fileRoot').val(path)
-    }
-});
+    window.electron.sendSync('dir', null, (path) => {
+        if (path != undefined) {
+            $('#fileRoot').val(path)
+        }
+    })
+})
 
 let stompClient = null;
 function connect(signal) {
@@ -18,23 +19,33 @@ function connect(signal) {
         stompClient.subscribe('/user/queue/onsdp', function (msg) {
             stompClient.send("/app/sdp", {}, "answer's sdp");
         });
-        window.showMsg("connect success, you token: " + token)
+        showMsg("connect success, your token: " + token)
         document.title = document.title + ' ' + token
     }, function (frame) {
-        window.showMsg("connect failue");
+        showMsg("connect failue");
         stompClient = null
     });
 }
 
-$('#connectBtn').on('click', () => {
+window.electron.on('app-close', _ => {
+    if(stompClient != null) {
+        stompClient.disconnect(() => {
+            showMsg("Bye~");
+            window.electron.send('closed')
+        })
+    }
+})
+
+$('#connectBtn').on('click', async () => {
     let signalServer = $('#signal').val()
-    signalServer = "http://localhost:8080/signalling" //for test
+    signalServer = 'http://localhost:8080/signalling' //for test
     if (signalServer == '') {
-        window.showMsg("signal server address can't be null!")
+        showMsg("signal server address can't be null!")
         return
     }
-    if (!window.checkDir($('#fileRoot').val())) {
-        window.showMsg("wrong file root!")
+    let check = await checkDir($('#fileRoot').val())
+    if (!check) {
+        showMsg("wrong file root!")
         return
     }
     if(stompClient != null) {
@@ -42,7 +53,20 @@ $('#connectBtn').on('click', () => {
         return
     }
     connect(signalServer)
-});
+})
+
+function showMsg(msg) {
+    window.electron.send('showMsg', msg)
+}
+
+async function checkDir(dir) {
+    const result = await new Promise(resolve => {
+        window.electron.sendSync('checkDir', dir, (result) => {
+            resolve(result)
+        })
+    })
+    return result
+}
 
 function makeid(length) {
     let result = '';
