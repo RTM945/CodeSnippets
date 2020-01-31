@@ -25,4 +25,13 @@ public class SignalController {
             messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/onsdp", sdp);
         }
     }
+
+    @MessageMapping("/candidate")
+    public void candidate(@Payload String candidate, Principal principal) {
+        Peer peer = (Peer) principal;
+        Peer pair = peerManager.pair(peer);
+        if(pair != null) {
+            messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/oncandidate", candidate);
+        }
+    }
 }

@@ -1,8 +1,8 @@
 const { app, BrowserWindow, Menu, dialog } = require('electron')
 const path = require('path')
 const url = require('url')
-const ipc = require('electron').ipcMain;
-const fs = require("fs");
+const ipc = require('electron').ipcMain
+const fs = require("fs")
 
 let win
 let status = 0
@@ -36,18 +36,18 @@ app.once('ready', () => {
     win.on('close', function (e) {
         if (status == 0) {
             if (win) {
-                e.preventDefault();
-                win.webContents.send('app-close');
+                e.preventDefault()
+                win.webContents.send('app-close')
             }
         }
     })
 })
 
 ipc.on('closed', _ => {
-    status = 1;
-    win = null;
+    status = 1
+    win = null
     if (process.platform !== 'darwin') {
-        app.quit();
+        app.quit()
     }
 })
 

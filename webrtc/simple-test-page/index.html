@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Test</title>
-	<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-	<script src="./js/stomp.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="./js/stomp.js"></script>
+    <script src="./js/adapter.js"></script>
 </head>
+
 <body>
     <div>
         <div>
-            <input type="text" id="token" placeholder="Type a token"/>
+            <input type="text" id="token" placeholder="Type a token" />
             <select id="type">
                 <option value="offer" selected>offer</option>
                 <option value="answer">answer</option>
@@ -22,29 +25,64 @@
         </div>
     </div>
     <script type="text/javascript">
+        var servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
         var stompClient = null;
         function connect() {
             var token = document.getElementById("token").value;
             var type = document.getElementById("type").value;
             var socket = new SockJS('http://localhost:8080/signalling');
-            stompClient = Stomp.over(socket);  
+            stompClient = Stomp.over(socket);
             stompClient.connect({
                 "token": token,
                 "type": type,
-            }, function(frame) {
+            }, async function (frame) {
                 console.log('Connected: ' + frame);
-                stompClient.subscribe('/user/queue/onsdp', function(msg) {
+                let pc = createPeer(stompClient, type == 'offer');
+                stompClient.subscribe('/user/queue/onsdp', async function (msg) {
                     show(msg.body);
-                    if (type == 'answer') {
-                    stompClient.send("/app/sdp", {}, "answer's sdp");
-                }
+                    let desc = JSON.parse(msg.body)
+                    if (type == 'answer' && desc.type == 'offer') {
+                        pc.setRemoteDescription(new RTCSessionDescription(desc))
+                            .then(_ => pc.createAnswer())
+                            .then(answer => pc.setLocalDescription(answer))
+                            .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify(pc.localDescription)));
+                    } else if (type == 'offer' && desc.type == 'answer') {
+                        pc.setRemoteDescription(new RTCSessionDescription(desc));
+                    }
                 });
+                stompClient.subscribe('/user/queue/oncandidate', function (msg) {
+                    if (msg.body) {
+                        show(msg.body);
+                        pc.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.body)));
+                    }
+                })
+
                 if (type == 'offer') {
-                    stompClient.send("/app/sdp", {}, "offer's sdp");
+                    pc.createOffer()
+                        .then(offer => pc.setLocalDescription(offer))
+                        .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify(pc.localDescription)));
                 }
-            }, function(frame) {
+            }, function (frame) {
                 console.log("connect failue");
             });
+        }
+
+        function createPeer(stompClient, offer) {
+            pc = new RTCPeerConnection(servers)
+            console.log(pc)
+            pc.onicecandidate = (event => event.candidate ? stompClient.send("/app/candidate", {}, JSON.stringify(event.candidate)) : console.log("Sent All Ice"));
+            if (offer) {
+                let channel = pc.createDataChannel('data');
+                console.log("offer data channel created!")
+                channel.onmessage = (event) => show(event.data);
+            } else {
+                pc.ondatachannel = (event) => {
+                    let channel = event.channel;
+                    console.log("answer data channel created!")
+                    channel.send("hello~")
+                };
+            }
+            return pc
         }
 
         function show(msg) {
@@ -56,4 +94,5 @@
         }
     </script>
 </body>
+
 </html>

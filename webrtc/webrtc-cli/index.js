@@ -6,31 +6,47 @@ $('#dirBtn').on('click', () => {
     })
 })
 
-let stompClient = null;
+let stompClient = null
 function connect(signal) {
-    let token = makeid(6);
-    let type = 'answer';
-    let socket = new SockJS(signal);
-    stompClient = Stomp.over(socket);
+    let token = makeid(6)
+    let type = 'answer'
+    let socket = new SockJS(signal)
+    stompClient = Stomp.over(socket)
     stompClient.connect({
         "token": token,
         "type": type,
-    }, function (frame) {
-        stompClient.subscribe('/user/queue/onsdp', function (msg) {
-            stompClient.send("/app/sdp", {}, "answer's sdp");
-        });
+    }, _ => {
+        $('#fileRoot').prop('readonly', true)
+        $('#dirBtn').off()
+        let pc = createPeer(stompClient)
+        stompClient.subscribe('/user/queue/onsdp', function (msg) {   
+            pc.setRemoteDescription(msg)       
+            stompClient.send("/app/sdp", {}, "answer's sdp")
+        })
         showMsg("connect success, your token: " + token)
         document.title = document.title + ' ' + token
-    }, function (frame) {
-        showMsg("connect failue");
+    }, _ => {
+        showMsg("connect failue")
         stompClient = null
-    });
+    })
+}
+
+const servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
+
+function createPeer(stompClient) {
+    let pc = null
+    pc = new RTCPeerConnection(servers)
+    console.log(pc)
+    pc.oniceconnectionstatechange = (e) => {
+        console.log(e)
+    }
+    return pc
 }
 
 window.electron.on('app-close', _ => {
-    if(stompClient != null) {
+    if (stompClient != null) {
         stompClient.disconnect(() => {
-            showMsg("Bye~");
+            showMsg("Bye~")
             window.electron.send('closed')
         })
     }
@@ -48,7 +64,7 @@ $('#connectBtn').on('click', async () => {
         showMsg("wrong file root!")
         return
     }
-    if(stompClient != null) {
+    if (stompClient != null) {
         window.showMsg("already connected!")
         return
     }
@@ -69,11 +85,11 @@ async function checkDir(dir) {
 }
 
 function makeid(length) {
-    let result = '';
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let charactersLength = characters.length;
+    let result = ''
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let charactersLength = characters.length
     for (var i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        result += characters.charAt(Math.floor(Math.random() * charactersLength))
     }
-    return result;
+    return result
 }
