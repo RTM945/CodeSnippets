@@ -68,7 +68,7 @@
         }
 
         function createPeer(stompClient, offer) {
-            pc = new RTCPeerConnection(servers)
+            let pc = new RTCPeerConnection(servers)
             console.log(pc)
             pc.onicecandidate = (event => event.candidate ? stompClient.send("/app/candidate", {}, JSON.stringify(event.candidate)) : console.log("Sent All Ice"));
             if (offer) {

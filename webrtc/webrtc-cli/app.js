@@ -55,10 +55,30 @@ ipc.on('showMsg', (_, msg) => {
     dialog.showMessageBoxSync({ message: msg })
 })
 
+let root
 ipc.on('dir', (event) => {
-    event.returnValue = dialog.showOpenDialogSync({ properties: ['openDirectory'] })
+    let dir = dialog.showOpenDialogSync({ properties: ['openDirectory'] })
+    event.returnValue = dir
+    if(dir) {
+        root = dir[0]
+    }
 })
 
 ipc.on('checkDir', (event, dir) => {
     event.returnValue = fs.existsSync(dir) && fs.lstatSync(dir).isDirectory()
+})
+
+ipc.on('listFiles', (event, dir) => {
+    if (dir == null) {
+        dir = root
+    }
+    let list = []
+    console.log(dir)
+    fs.readdirSync(dir).forEach(file => {
+        let filePath = path.join(dir, file)
+        console.log(filePath)
+        let stat = fs.lstatSync(filePath)
+        list.push({name: file, dir: stat.isDirectory()})
+    });
+    event.returnValue = list
 })

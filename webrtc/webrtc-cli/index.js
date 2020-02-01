@@ -19,10 +19,24 @@ function connect(signal) {
         $('#fileRoot').prop('readonly', true)
         $('#dirBtn').off()
         let pc = createPeer(stompClient)
-        stompClient.subscribe('/user/queue/onsdp', function (msg) {   
-            pc.setRemoteDescription(msg)       
-            stompClient.send("/app/sdp", {}, "answer's sdp")
+        stompClient.subscribe('/user/queue/onsdp', function (msg) {
+            console.log(msg.body);
+            let desc = JSON.parse(msg.body)
+            if (desc.type == 'offer') {
+                pc.setRemoteDescription(new RTCSessionDescription(desc))
+                    .then(_ => pc.createAnswer())
+                    .then(answer => pc.setLocalDescription(answer))
+                    .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify(pc.localDescription)));
+            }
         })
+
+        stompClient.subscribe('/user/queue/oncandidate', function (msg) {
+            if (msg.body) {
+                console.log(msg.body);
+                pc.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.body)));
+            }
+        })
+
         showMsg("connect success, your token: " + token)
         document.title = document.title + ' ' + token
     }, _ => {
@@ -32,27 +46,34 @@ function connect(signal) {
 }
 
 const servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
-
 function createPeer(stompClient) {
-    let pc = null
-    pc = new RTCPeerConnection(servers)
+    let pc = new RTCPeerConnection(servers)
     console.log(pc)
-    pc.oniceconnectionstatechange = (e) => {
-        console.log(e)
+    pc.onicecandidate = (event => event.candidate ? stompClient.send("/app/candidate", {}, JSON.stringify(event.candidate)) : console.log("Sent All Ice"))
+    pc.ondatachannel = ({ channel }) => {
+        console.log("answer data channel created!")
+        channel.onmessage = ({ data }) => handler(data)
+        window.electron.sendSync('listFiles', null, (data) => {
+            channel.send(JSON.stringify({ handler: 'listFiles', data: data }))
+        })
     }
     return pc
 }
 
+function handler(data) {
+
+}
+
 window.electron.on('app-close', _ => {
     if (stompClient != null) {
-        stompClient.disconnect(() => {
+        stompClient.disconnect(_ => {
             showMsg("Bye~")
-            window.electron.send('closed')
         })
     }
+    window.electron.send('closed')
 })
 
-$('#connectBtn').on('click', async () => {
+$('#connectBtn').on('click', async _ => {
     let signalServer = $('#signal').val()
     signalServer = 'http://localhost:8080/signalling' //for test
     if (signalServer == '') {
