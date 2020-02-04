@@ -56,7 +56,6 @@
                         pc.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.body)));
                     }
                 })
-
                 if (type == 'offer') {
                     pc.createOffer()
                         .then(offer => pc.setLocalDescription(offer))
@@ -70,17 +69,29 @@
         function createPeer(stompClient, offer) {
             let pc = new RTCPeerConnection(servers)
             console.log(pc)
-            pc.onicecandidate = (event => event.candidate ? stompClient.send("/app/candidate", {}, JSON.stringify(event.candidate)) : console.log("Sent All Ice"));
+            pc.onicecandidate = (event) => {
+                if (event.candidate && !offer) {
+                    stompClient.send("/app/candidate", {}, JSON.stringify(event.candidate))
+                } else {
+                    console.log("Sent All Ice")
+                }
+            }
             if (offer) {
                 let channel = pc.createDataChannel('data');
                 console.log("offer data channel created!")
-                channel.onmessage = (event) => show(event.data);
+                channel.onmessage = (event) => {
+                    show(event.data)
+                    channel.send("hello answer~")
+                }
             } else {
                 pc.ondatachannel = (event) => {
                     let channel = event.channel;
                     console.log("answer data channel created!")
-                    channel.send("hello~")
-                };
+                    channel.send("hello offer~")
+                    channel.onmessage = (event) => {
+                        show(event.data)
+                    }
+                }
             }
             return pc
         }
