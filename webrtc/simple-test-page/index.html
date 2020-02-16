@@ -40,7 +40,9 @@
                 let pc = createPeer(stompClient, type == 'offer');
                 stompClient.subscribe('/user/queue/onsdp', async function (msg) {
                     show(msg.body);
-                    let desc = JSON.parse(msg.body)
+                    let dto = JSON.parse(msg.body)
+                    let remote = dto.remote
+                    let desc = JSON.parse(dto.value)
                     if (type == 'answer' && desc.type == 'offer') {
                         pc.setRemoteDescription(new RTCSessionDescription(desc))
                             .then(_ => pc.createAnswer())
@@ -53,7 +55,10 @@
                 stompClient.subscribe('/user/queue/oncandidate', function (msg) {
                     if (msg.body) {
                         show(msg.body);
-                        pc.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.body)));
+                        let dto = JSON.parse(msg.body)
+                        let remote = dto.remote
+                        let candidate = dto.value
+                        pc.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
                     }
                 })
                 if (type == 'offer') {

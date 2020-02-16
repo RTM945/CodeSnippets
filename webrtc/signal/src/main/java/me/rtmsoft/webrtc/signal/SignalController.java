@@ -1,5 +1,7 @@
 package me.rtmsoft.webrtc.signal;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -10,6 +12,8 @@ import java.security.Principal;
 
 @Controller
 public class SignalController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SignalController.class);
 
     @Autowired
     private PeerManager peerManager;
@@ -22,7 +26,8 @@ public class SignalController {
         Peer peer = (Peer) principal;
         Peer pair = peerManager.pair(peer);
         if(pair != null) {
-            messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/onsdp", sdp);
+            DTO dto = new DTO(peer.getSessionId(), sdp);
+            messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/onsdp", dto);
         }
     }
 
@@ -31,7 +36,8 @@ public class SignalController {
         Peer peer = (Peer) principal;
         Peer pair = peerManager.pair(peer);
         if(pair != null) {
-            messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/oncandidate", candidate);
+            DTO dto = new DTO(peer.getSessionId(), candidate);
+            messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/oncandidate", dto);
         }
     }
 }

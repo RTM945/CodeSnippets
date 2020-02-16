@@ -1,14 +1,9 @@
-$('#dirBtn').on('click', () => {
-    window.electron.sendSync('dir', null, (path) => {
-        if (path != undefined) {
-            $('#fileRoot').val(path)
-        }
-    })
-})
+const peerMap = new Map()
+const servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
+var stompClient = null
 
-let stompClient = null
 function connect(signal) {
-    let token = makeid(6)
+    let token = 1//makeid(6)
     let type = 'answer'
     let socket = new SockJS(signal)
     stompClient = Stomp.over(socket)
@@ -18,25 +13,9 @@ function connect(signal) {
     }, _ => {
         $('#fileRoot').prop('readonly', true)
         $('#dirBtn').off()
-        let pc = createPeer(stompClient)
-        stompClient.subscribe('/user/queue/onsdp', function (msg) {
-            console.log(msg.body);
-            let desc = JSON.parse(msg.body)
-            if (desc.type == 'offer') {
-                pc.setRemoteDescription(new RTCSessionDescription(desc))
-                    .then(_ => pc.createAnswer())
-                    .then(answer => pc.setLocalDescription(answer))
-                    .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify(pc.localDescription)));
-            }
-        })
-
-        stompClient.subscribe('/user/queue/oncandidate', function (msg) {
-            if (msg.body) {
-                console.log(msg.body);
-                pc.addIceCandidate(new RTCIceCandidate(JSON.parse(msg.body)));
-            }
-        })
-
+        stompClient.subscribe('/user/queue/onsdp', onsdp)
+        stompClient.subscribe('/user/queue/oncandidate', oncandidate)
+        
         showMsg("connect success, your token: " + token)
         document.title = document.title + ' ' + token
     }, _ => {
@@ -45,23 +24,61 @@ function connect(signal) {
     })
 }
 
-const servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
-function createPeer(stompClient) {
+function onsdp(msg) {
+    let dto = JSON.parse(msg.body)
+    console.log(dto)
+    let remote = dto.remote
+    let desc = JSON.parse(dto.value)
+    if (desc.type == 'offer') {
+        let pc = createPeer(remote)
+        pc.setRemoteDescription(new RTCSessionDescription(desc))
+            .then(_ => pc.createAnswer())
+            .then(answer => pc.setLocalDescription(answer))
+            .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify(pc.localDescription)))
+    }
+}
+
+function oncandidate(msg) {
+    console.log(msg.body)
+    let dto = JSON.parse(msg.body)
+    let remote = dto.remote
+    let candidate = dto.value
+    let pc = peerMap.get(remote)
+    if (pc) {
+        pc.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)))
+    }
+}
+
+function createPeer(remote) {
     let pc = new RTCPeerConnection(servers)
     console.log(pc)
     pc.onicecandidate = (event => event.candidate ? stompClient.send("/app/candidate", {}, JSON.stringify(event.candidate)) : console.log("Sent All Ice"))
-    pc.ondatachannel = ({ channel }) => {
+    pc.ondatachannel = async ({ channel }) => {
         console.log("answer data channel created!")
         channel.onmessage = ({ data }) => handler(data)
-        window.electron.sendSync('listFiles', null, (data) => {
-            channel.send(JSON.stringify({ handler: 'listFiles', data: data }))
-        })
+        const files = await window.electron.invoke('listFiles')
+        channel.send(JSON.stringify({ handler: 'listFiles', data: files }))
     }
+    peerMap.set(remote, pc)
     return pc
 }
 
 function handler(data) {
 
+}
+
+function showMsg(msg) {
+    window.electron.send('showMsg', msg)
+}
+
+function makeid(length) {
+    let result = ''
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let charactersLength = characters.length
+    for (var i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    }
+    return result
 }
 
 window.electron.on('app-close', _ => {
@@ -80,7 +97,7 @@ $('#connectBtn').on('click', async _ => {
         showMsg("signal server address can't be null!")
         return
     }
-    let check = await checkDir($('#fileRoot').val())
+    const check = await window.electron.invoke('checkDir', $('#fileRoot').val())
     if (!check) {
         showMsg("wrong file root!")
         return
@@ -90,27 +107,12 @@ $('#connectBtn').on('click', async _ => {
         return
     }
     connect(signalServer)
+
 })
 
-function showMsg(msg) {
-    window.electron.send('showMsg', msg)
-}
-
-async function checkDir(dir) {
-    const result = await new Promise(resolve => {
-        window.electron.sendSync('checkDir', dir, (result) => {
-            resolve(result)
-        })
-    })
-    return result
-}
-
-function makeid(length) {
-    let result = ''
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    let charactersLength = characters.length
-    for (var i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength))
+$('#dirBtn').on('click', async _ => {
+    const path = await window.electron.invoke('dir')
+    if (path) {
+        $('#fileRoot').val(path)
     }
-    return result
-}
+})

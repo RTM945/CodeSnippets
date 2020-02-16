@@ -13,6 +13,15 @@ public class Peer implements Principal {
 
     private final String sessionId;
 
+    @Override
+    public String toString() {
+        return "Peer{" +
+                "token='" + token + '\'' +
+                ", type='" + type + '\'' +
+                ", sessionId='" + sessionId + '\'' +
+                '}';
+    }
+
     public Peer(String token, String type, String sessionId) {
         this.token = token;
         this.type = type;
