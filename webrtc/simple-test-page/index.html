@@ -47,7 +47,7 @@
                         pc.setRemoteDescription(new RTCSessionDescription(desc))
                             .then(_ => pc.createAnswer())
                             .then(answer => pc.setLocalDescription(answer))
-                            .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify(pc.localDescription)));
+                            .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify({ remote: remote, value: JSON.stringify(pc.localDescription) })));
                     } else if (type == 'offer' && desc.type == 'answer') {
                         pc.setRemoteDescription(new RTCSessionDescription(desc));
                     }
@@ -64,7 +64,7 @@
                 if (type == 'offer') {
                     pc.createOffer()
                         .then(offer => pc.setLocalDescription(offer))
-                        .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify(pc.localDescription)));
+                        .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify({ remote: '', value: JSON.stringify(pc.localDescription) })));
                 }
             }, function (frame) {
                 console.log("connect failue");
@@ -76,7 +76,7 @@
             console.log(pc)
             pc.onicecandidate = (event) => {
                 if (event.candidate && !offer) {
-                    stompClient.send("/app/candidate", {}, JSON.stringify(event.candidate))
+                    stompClient.send("/app/candidate", {}, JSON.stringify({ remote: '', value: JSON.stringify(event.candidate) }))
                 } else {
                     console.log("Sent All Ice")
                 }

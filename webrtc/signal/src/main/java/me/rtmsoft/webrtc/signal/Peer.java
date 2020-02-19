@@ -42,6 +42,10 @@ public class Peer implements Principal {
 
     @Override
     public String getName() {
-        return token + "_" + type;
+        if ("answer".equals(type)) {
+            return token + "_" + type;
+        }else{
+            return token + "_" + type + "_" + sessionId;
+        }
     }
 }

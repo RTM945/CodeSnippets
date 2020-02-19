@@ -1,7 +1,5 @@
 package me.rtmsoft.webrtc.signal;
 
-import java.io.Serializable;
-
 public class DTO{
 
     private String remote;

@@ -22,21 +22,23 @@ public class SignalController {
     private SimpMessagingTemplate messagingTemplate;
 
     @MessageMapping("/sdp")
-    public void sdp(@Payload String sdp, Principal principal) {
+    public void sdp(@Payload DTO data, Principal principal) {
         Peer peer = (Peer) principal;
-        Peer pair = peerManager.pair(peer);
+        Peer pair = peerManager.pair(peer, data.getRemote());
+        LOGGER.info("pair:" + peer + ", " + pair);
         if(pair != null) {
-            DTO dto = new DTO(peer.getSessionId(), sdp);
+            DTO dto = new DTO(peer.getSessionId(), data.getValue());
             messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/onsdp", dto);
         }
     }
 
     @MessageMapping("/candidate")
-    public void candidate(@Payload String candidate, Principal principal) {
+    public void candidate(@Payload DTO data, Principal principal) {
         Peer peer = (Peer) principal;
-        Peer pair = peerManager.pair(peer);
+        Peer pair = peerManager.pair(peer, data.getRemote());
+        LOGGER.info("pair:" + peer + ", " + pair);
         if(pair != null) {
-            DTO dto = new DTO(peer.getSessionId(), candidate);
+            DTO dto = new DTO(peer.getSessionId(), data.getValue());
             messagingTemplate.convertAndSendToUser(pair.getName(), "/queue/oncandidate", dto);
         }
     }

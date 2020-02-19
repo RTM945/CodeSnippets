@@ -22,14 +22,13 @@ public class PeerManager {
         peerMap.put(peer.getName(), peer);
     }
 
-    public Peer pair(Peer peer) {
+    public Peer pair(Peer peer, String remote) {
         if ("offer".equals(peer.getType())) {
             return peerMap.get(peer.getToken() + Peer.ANSWER_SUFFIX);
         }else if ("answer".equals(peer.getType())){
-            return peerMap.get(peer.getToken() + Peer.OFFER_SUFFIX);
-        }else{
-            return null;
+            return peerMap.get(peer.getToken() + Peer.OFFER_SUFFIX + "_" + remote);
         }
+        return null;
     }
 
     public void remove(String sessionId) {

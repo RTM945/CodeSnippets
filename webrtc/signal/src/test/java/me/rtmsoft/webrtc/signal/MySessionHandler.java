@@ -24,7 +24,7 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
         this.session = session;
         session.subscribe("/user/queue/onsdp", this);
         if ("offer".equals(type)) {
-            session.send("/app/sdp", "offer's sdp");
+            session.send("/app/sdp", new DTO("", "offer's sdp"));
         }
     }
     @Override
@@ -42,7 +42,7 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
         DTO dto = (DTO) payload;
         LOGGER.info(type + " receive " + dto);
         if(type.equals("answer")){
-            session.send("/app/sdp", "answer's sdp");
+            session.send("/app/sdp", new DTO(dto.getRemote(), "answer's sdp"));
         }
     }
 }
