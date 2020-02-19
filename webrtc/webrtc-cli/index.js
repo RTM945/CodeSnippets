@@ -73,29 +73,29 @@ function createPeer(remote) {
             channel.onmessage = ({ data }) => handler(data, channel, remote)
             const files = await listFiles()
             channel.send(JSON.stringify({ handler: 'listFiles', data: files }))
-            pc.onconnectionstatechange = () => {
-                switch (pc.connectionState) {
-                    case "disconnected":
-                    case "failed":
-                    case "closed":
-                        console.log(`answer data channel ${label} ${pc.connectionState}`)
-                        peerMap.delete(remote)
-                        let channelIds = peer_sendChannel.get(remote)
-                        if (channelIds) {
-                            channelIds.forEach(channelId => {
-                                const channel = sendChannels.get(channelId)
-                                if (channel) {
-                                    channel.close()
-                                }
-                                sendChannels.delete(channelId)
-                            })
-                        }
-                        peer_sendChannel.delete(remote)
-                        break
-                    default:
-                        break
-                }
-            }
+            // pc.onconnectionstatechange = () => {
+            //     switch (pc.connectionState) {
+            //         case "disconnected":
+            //         case "failed":
+            //         case "closed":
+            //             console.log(`answer data channel ${label} ${pc.connectionState}`)
+            //             peerMap.delete(remote)
+            //             let channelIds = peer_sendChannel.get(remote)
+            //             if (channelIds) {
+            //                 channelIds.forEach(channelId => {
+            //                     const channel = sendChannels.get(channelId)
+            //                     if (channel) {
+            //                         channel.close()
+            //                     }
+            //                     sendChannels.delete(channelId)
+            //                 })
+            //             }
+            //             peer_sendChannel.delete(remote)
+            //             break
+            //         default:
+            //             break
+            //     }
+            // }
         }
     }
     return pc
