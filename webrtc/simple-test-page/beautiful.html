@@ -32,13 +32,18 @@
                             <a class="navbar-brand" href="#">WebRTC</a>
                         </div>
                         <div class="collapse navbar-collapse">
-                            <button type="button" class="btn btn-default navbar-btn btn-lg"
-                                onclick="listFilesReq('root')">
-                                <span class="glyphicon glyphicon-home" aria-hidden="true"></span> 返回首页
-                            </button>
-                            <button type="button" class="btn btn-default navbar-btn btn-lg" onclick="showTasks()">
-                                <span class="glyphicon glyphicon-save" aria-hidden="true"></span> 查看下载任务
-                            </button>
+                            <ul class="nav navbar-nav">
+                                <li>
+                                    <a href="javascript:void(0)" onclick="listFilesReq('root')">
+                                        <span class="glyphicon glyphicon-home" aria-hidden="true"></span> 首页
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="javascript:void(0)" onclick="showTasks()">
+                                        <span class="glyphicon glyphicon-save" aria-hidden="true"></span> 查看下载任务
+                                    </a>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </nav>

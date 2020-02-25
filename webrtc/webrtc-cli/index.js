@@ -28,17 +28,17 @@ function connect(signal) {
     })
 }
 
-function onsdp(msg) {
+async function onsdp(msg) {
     let dto = JSON.parse(msg.body)
     console.log(dto)
     let remote = dto.remote
     let desc = JSON.parse(dto.value)
     if (desc.type == 'offer') {
         let pc = createPeer(remote)
+        await pc.setRemoteDescription(new RTCSessionDescription(desc))
+        await pc.setLocalDescription(await pc.createAnswer())
         pc.setRemoteDescription(new RTCSessionDescription(desc))
-            .then(_ => pc.createAnswer())
-            .then(answer => pc.setLocalDescription(answer))
-            .then(_ => stompClient.send("/app/sdp", {}, JSON.stringify({ remote: remote, value: JSON.stringify(pc.localDescription) })))
+        stompClient.send("/app/sdp", {}, JSON.stringify({ remote: remote, value: JSON.stringify(pc.localDescription) }))
     }
 }
 

@@ -81,9 +81,16 @@ ipc.handle('listFiles', (event, dir) => {
     }
     console.log(dir)
     let list = []
-    fs.readdirSync(dir).sort((a, b) => {
-        let aIsDir = fs.statSync(dir + "/" + a).isDirectory(),
-            bIsDir = fs.statSync(dir + "/" + b).isDirectory()
+    fs.readdirSync(dir).filter(file => {
+        try {
+            fs.lstatSync(path.join(dir, file))
+            return true
+        } catch (error) {
+            return false
+        }
+    }).sort((a, b) => {
+        let aIsDir = fs.lstatSync(path.join(dir, a)).isDirectory(),
+            bIsDir = fs.lstatSync(path.join(dir, b)).isDirectory()
 
         if (aIsDir && !bIsDir) {
             return -1
@@ -92,7 +99,6 @@ ipc.handle('listFiles', (event, dir) => {
         if (!aIsDir && bIsDir) {
             return 1
         }
-
         return a.localeCompare(b)
     }).forEach(file => {
         let filePath = path.join(dir, file)
@@ -131,26 +137,4 @@ ipc.on('download', (event, task) => {
         task.received += chunk.length
         win.webContents.send('sendData', task, chunk)
     })
-    // fs.readFile(filepath, (err, data) => {
-    //     console.log(data.length)
-    //     if (err) {
-    //         console.log(err)
-    //         win.webContents.send('readFileErr', task, err)
-    //         throw err
-    //     }
-    //     win.webContents.send('sendData', task, data)
-    // })
 })
-
-// ipc.on('download', (event, remote, filepath) => {
-//     if (filepath.startsWith('root')) {
-//         filepath = filepath.replace('root', root)
-//     }
-//     fs.readFile(filepath, (err, data) => {
-//         if (err) {
-//             win.webContents.send('readFileErr', remote, filepath, err)
-//             throw err
-//         }
-//         win.webContents.send('sendData', remote, filepath, data)
-//     })
-// })

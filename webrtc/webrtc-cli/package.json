@@ -11,10 +11,5 @@
   "devDependencies": {
     "electron": "^7.1.10"
   },
-  "dependencies": {
-    "react": "^16.12.0",
-    "react-native": "^0.61.5",
-    "react-native-webrtc": "^1.75.3",
-    "rtc-everywhere": "^0.0.5"
-  }
+  "dependencies": {}
 }

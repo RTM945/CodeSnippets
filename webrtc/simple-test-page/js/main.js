@@ -11,19 +11,15 @@ function connect(token) {
 
     let type = 'offer'
     let socket = new SockJS('http://localhost:8080/signalling')
-    stompClient = Stomp.over(socket);
+    stompClient = Stomp.over(socket)
     stompClient.connect({
         "token": token,
         "type": type,
     }, async (frame) => {
         console.log('Connected: ' + frame)
         let pc = createPeer()
-        stompClient.subscribe('/user/queue/onsdp', (msg) => {
-            onsdp(msg, pc)
-        })
-        stompClient.subscribe('/user/queue/oncandidate', (msg) => {
-            oncandidate(msg, pc)
-        })
+        stompClient.subscribe('/user/queue/onsdp', msg => onsdp(msg, pc))
+        stompClient.subscribe('/user/queue/oncandidate', msg => oncandidate(msg, pc))
         await pc.setLocalDescription(await pc.createOffer())
         stompClient.send("/app/sdp", {}, JSON.stringify({ remote: '', value: JSON.stringify(pc.localDescription) }))
     }, (frame) => {
@@ -44,9 +40,7 @@ function createPeer() {
     let channel = pc.createDataChannel('protocol')
     protocolDataChannel = channel
     console.log("offer protocol data channel created!")
-    channel.onmessage = (event) => {
-        handle(event.data)
-    }
+    channel.onmessage = event => handle(event.data)
     pc.ondatachannel = ({ channel }) => {
         if (protocolDataChannel != null) {
             recieveData(channel)
@@ -104,15 +98,12 @@ function listFiles(data) {
     breadcrumb.show()
     let parents = data.parent.split('/')
     breadcrumb.html('')
+    breadcrumb.append(`<li><a href="javascript:void(0)" onclick="return listFilesReq('root')">root</a></li>`)
     let traval = 'root'
-    for (let i = 0; i < parents.length; i++) {
-        const parent = parents[i];
-        if (i != parents.length - 1) {
-            breadcrumb.append(`<li><a href="javascript:void(0)" onclick="return listFilesReq('${traval}')">${parent}</a></li>`)
-            traval += '/' + parent
-        } else {
-            breadcrumb.append(`<li class="active">${parent}</li>`)
-        }
+    for (let i = 1; i < parents.length; i++) {
+        const parent = parents[i]
+        traval += '/' + parent
+        breadcrumb.append(`<li><a href="javascript:void(0)" onclick="return listFilesReq('${traval}')">${parent}</a></li>`)
     }
     data.files.forEach(file => {
         tablecontents += '<tr>'
@@ -129,7 +120,7 @@ function listFiles(data) {
     })
     table.html(tablecontents)
     table.off('dblclick', 'td')
-    table.on('dblclick', 'td', function () {
+    table.on('dblclick', 'td', function() {
         let td = $(this)
         let path = data.parent + '/' + td.text().trim()
         if (td.data('dir')) {
