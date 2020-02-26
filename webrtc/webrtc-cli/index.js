@@ -1,7 +1,6 @@
 const peerMap = new Map()
-const sendChannels = new Map()
-const peer_sendChannel = new Map()
-var sendChannelId = 0
+const channels = new Map()
+const peer_channel = new Map()
 
 const servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
 var stompClient = null
@@ -58,7 +57,7 @@ function createPeer(remote) {
     let pc = new RTCPeerConnection(servers)
     console.log(pc)
     peerMap.set(remote, pc)
-    peer_sendChannel.set(remote, new Array())
+    peer_channel.set(remote, new Array())
     pc.onicecandidate = (event) => {
         if (event.candidate) {
             stompClient.send("/app/candidate", {}, JSON.stringify({ remote: remote, value: JSON.stringify(event.candidate) }))
@@ -73,29 +72,23 @@ function createPeer(remote) {
             channel.onmessage = ({ data }) => handler(data, channel, remote)
             const files = await listFiles()
             channel.send(JSON.stringify({ handler: 'listFiles', data: files }))
-            // pc.onconnectionstatechange = () => {
-            //     switch (pc.connectionState) {
-            //         case "disconnected":
-            //         case "failed":
-            //         case "closed":
-            //             console.log(`answer data channel ${label} ${pc.connectionState}`)
-            //             peerMap.delete(remote)
-            //             let channelIds = peer_sendChannel.get(remote)
-            //             if (channelIds) {
-            //                 channelIds.forEach(channelId => {
-            //                     const channel = sendChannels.get(channelId)
-            //                     if (channel) {
-            //                         channel.close()
-            //                     }
-            //                     sendChannels.delete(channelId)
-            //                 })
-            //             }
-            //             peer_sendChannel.delete(remote)
-            //             break
-            //         default:
-            //             break
-            //     }
-            // }
+        }
+    }
+    pc.onconnectionstatechange = (event) => {
+        console.log(`${remote} pc ${pc.connectionState}`)
+        if (pc.connectionState == 'disconnected' || pc.connectionState == 'failed') {
+            peerMap.delete(remote)
+            let channelIds = peer_channel.get(remote)
+            if (channelIds) {
+                channelIds.forEach(channelId => {
+                    const channel = channels.get(channelId)
+                    if (channel) {
+                        channel.close()
+                    }
+                    channels.delete(channelId)
+                })
+            }
+            peer_channel.delete(remote)
         }
     }
     return pc
@@ -128,17 +121,18 @@ async function listFiles(dir) {
 async function download(filepath, size, remote) {
     let pc = peerMap.get(remote)
     if (!pc) {
-        console.log('no peerconnection for ' + remote)
+        console.log(`no peerconnection for ${remote}`)
         return
     }
-    let channel = pc.createDataChannel(filepath)
-    const channelId = sendChannelId++
-    sendChannels.set(channelId, channel)
-    peer_sendChannel.get(remote).push(channelId)
+    let channel = pc.createDataChannel(`download-${filepath}`)
+    const channelId = nextChannelId()
+    console.log(`channelId ${channelId}`)
+    channels.set(channelId, channel)
+    peer_channel.get(remote).push(channelId)
     channel.binaryType = 'arraybuffer'
     channel.onclose = () => {
         console.log(`remote ${remote} channel ${channel.label} close`)
-        sendChannels.delete(channelId)
+        channels.delete(channelId)
     }
     const task = { filepath: filepath, size: size, received: 0, channelId: channelId, timeout: null }
     // tasks.push(task)
@@ -146,7 +140,7 @@ async function download(filepath, size, remote) {
 }
 
 window.electron.on('sendData', (task, data) => {
-    const channel = sendChannels.get(task.channelId)
+    const channel = channels.get(task.channelId)
     if (channel && channel.readyState == 'open') {
         channel.send(data)
         console.log(`${task.received} / ${task.size}`)
@@ -159,7 +153,7 @@ window.electron.on('sendData', (task, data) => {
 
 window.electron.on('readFileErr', (task, err) => {
     console.log(err)
-    const channel = sendChannels.get(task.channelId)
+    const channel = channels.get(task.channelId)
     if (channel && channel.readyState == 'open') {
         channel.send(JSON.stringify({ handler: 'downloaderr', data: err }))
         channel.close()
@@ -179,6 +173,14 @@ function makeid(length) {
     }
     return result
 }
+
+var nextChannelId = function() {
+    let channelId = 0 
+    return function() {
+        channelId++
+        return channelId
+    }
+}()
 
 window.electron.on('app-close', _ => {
     if (stompClient != null) {

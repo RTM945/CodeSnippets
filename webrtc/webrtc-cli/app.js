@@ -102,7 +102,6 @@ ipc.handle('listFiles', (event, dir) => {
         return a.localeCompare(b)
     }).forEach(file => {
         let filePath = path.join(dir, file)
-        console.log(filePath)
         let stat = fs.lstatSync(filePath)
         list.push({
             name: file,

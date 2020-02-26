@@ -1,9 +1,9 @@
-var servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
-var stompClient = null
+const servers = { iceServers: [{ "urls": ["stun:stun.l.google.com:19302"] }] }
+const downloadTasks = new Map()
 
-var modelFaded = false
+var stompClient = null
 var protocolDataChannel = null
-var downloadTasks = new Map()
+
 function connect(token) {
     if (token == '') {
         return
@@ -16,14 +16,14 @@ function connect(token) {
         "token": token,
         "type": type,
     }, async (frame) => {
-        console.log('Connected: ' + frame)
+        console.log(`Connected: ${frame}`)
         let pc = createPeer()
         stompClient.subscribe('/user/queue/onsdp', msg => onsdp(msg, pc))
         stompClient.subscribe('/user/queue/oncandidate', msg => oncandidate(msg, pc))
         await pc.setLocalDescription(await pc.createOffer())
         stompClient.send("/app/sdp", {}, JSON.stringify({ remote: '', value: JSON.stringify(pc.localDescription) }))
     }, (frame) => {
-        console.log("connect failue");
+        console.log(`Connect failue: ${frame}`)
     })
 }
 
@@ -42,7 +42,7 @@ function createPeer() {
     console.log("offer protocol data channel created!")
     channel.onmessage = event => handle(event.data)
     pc.ondatachannel = ({ channel }) => {
-        if (protocolDataChannel != null) {
+        if (channel.label.startsWith('download')) {
             recieveData(channel)
         }
     }
@@ -58,8 +58,8 @@ async function onsdp(msg, pc) {
 }
 
 function oncandidate(msg, pc) {
+    console.log(msg)
     if (msg.body) {
-        console.log(msg.body);
         let dto = JSON.parse(msg.body)
         let candidate = dto.value
         pc.addIceCandidate(new RTCIceCandidate(JSON.parse(candidate)));
@@ -85,14 +85,10 @@ function handle(data) {
 }
 
 function listFiles(data) {
-    if (!modelFaded) {
-        $('#tokenModel').modal('hide')
-        modelFaded = true
-    }
+    $('#tokenModel').modal('hide')
     $('#tasks').hide()
     $('#main').show()
     $('#files').show()
-    let tablecontents = ''
     let table = $('#files > tbody')
     let breadcrumb = $('#breadcrumb')
     breadcrumb.show()
@@ -105,6 +101,7 @@ function listFiles(data) {
         traval += '/' + parent
         breadcrumb.append(`<li><a href="javascript:void(0)" onclick="return listFilesReq('${traval}')">${parent}</a></li>`)
     }
+    let tablecontents = ''
     data.files.forEach(file => {
         tablecontents += '<tr>'
         if (file.dir) {
@@ -120,14 +117,13 @@ function listFiles(data) {
     })
     table.html(tablecontents)
     table.off('dblclick', 'td')
-    table.on('dblclick', 'td', function() {
+    table.on('dblclick', 'td', function () {
         let td = $(this)
         let path = data.parent + '/' + td.text().trim()
         if (td.data('dir')) {
             listFilesReq(path)
         } else {
-            let d = confirm('确认下载' + td.text().trim())
-            if (d) {
+            if (confirm(`确认下载${td.text().trim()}?`)) {
                 download(path)
             }
         }
@@ -149,11 +145,19 @@ function listFilesReq(path) {
 
 function setProgress(task) {
     let table = $('#tasks > tbody')
-    let tr = '<tr>'
-    tr += `<td>${task.name}</td>`
-    tr += `<td><div class="progress"><div id="${task.name}-progress" class="progress-bar" role="progressbar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%"></div></div></td>`
-    tr += `<td><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 取消</td>`
-    tr += '</tr>'
+    let tr =
+        `<tr>
+            <td>${task.name}</td>
+            <td>
+                <div class="progress">
+                    <div id="${task.name}-progress" class="progress-bar" 
+                        role="progressbar" role="progressbar" 
+                        aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                    </div>
+                </div>
+            </td>
+            <td><span class="glyphicon glyphicon-remove" aria-hidden="true"></span> 取消</td>
+        </tr>`
     table.append(tr)
 }
 
@@ -173,7 +177,7 @@ function download(path) {
 }
 
 function recieveData(channel) {
-    let path = channel.label
+    let path = channel.label.split('-')[1]
     let myTask = downloadTasks.get(path)
     if (myTask) {
         channel.binaryType = 'arraybuffer'
@@ -189,9 +193,11 @@ function recieveData(channel) {
             if (myTask.recieved == myTask.size) {
                 const blob = new Blob(myTask.buffer, { type: "application/octet-stream" })
                 saveAs(blob, myTask.name)
-                myTask.buffer = []
-                downloadTasks.delete(myTask.path)
+            } else {
+                console.log(`download failed, ${path} channel closed`)
             }
+            myTask.buffer = []
+            downloadTasks.delete(myTask.path)
         }
     }
 }
