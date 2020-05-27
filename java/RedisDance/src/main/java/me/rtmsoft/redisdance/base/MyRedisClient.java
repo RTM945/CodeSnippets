@@ -1,4 +1,4 @@
-package me.rtmsoft.redisdance;
+package me.rtmsoft.redisdance.base;
 
 import io.lettuce.core.RedisClient;
 import io.lettuce.core.RedisURI;
@@ -19,4 +19,7 @@ public class MyRedisClient {
         return CLIENT.connect(CODEC);
     }
 
+    public static <K, V> StatefulRedisConnection<K, V> getConnection(RedisCodec<K, V> codec) {
+        return CLIENT.connect(codec);
+    }
 }

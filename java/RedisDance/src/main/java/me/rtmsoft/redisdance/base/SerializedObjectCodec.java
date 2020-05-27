@@ -1,4 +1,4 @@
-package me.rtmsoft.redisdance;
+package me.rtmsoft.redisdance.base;
 
 import io.lettuce.core.codec.RedisCodec;
 

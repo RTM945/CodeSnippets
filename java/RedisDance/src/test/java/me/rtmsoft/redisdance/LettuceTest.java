@@ -1,5 +1,6 @@
 package me.rtmsoft.redisdance;
 
+import me.rtmsoft.redisdance.base.RedisOps;
 import org.junit.Assert;
 import org.junit.Test;
 import static org.hamcrest.CoreMatchers.is;
