@@ -59,20 +59,22 @@ public class RedisOps {
         }
     }
 
-    private static final ConcurrentHashMap<String, String> scriptLoaded = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, LuaScript> scriptLoaded = new ConcurrentHashMap<>();
 
-    public static Object evalsha(String script, ScriptOutputType type, String[] keys, String... args) {
+    public static Object evalsha(LuaScript luaScript, ScriptOutputType type, String[] keys, String... args) {
         // must use StringCodec.UTF8 load lua script
-        scriptLoaded.computeIfAbsent(script, s -> {
+        LuaScript cache = scriptLoaded.computeIfAbsent(luaScript.getName(), s -> {
             try (StatefulRedisConnection<String, String> conn = MyRedisClient.getConnection(StringCodec.UTF8)) {
                 RedisCommands<String, String> commands = conn.sync();
-                return commands.scriptLoad(script);
+                String sha1 = commands.scriptLoad(luaScript.getScript());
+                luaScript.setSha1(sha1);
+                return luaScript;
             }
         });
 
         try (StatefulRedisConnection<String, Object> conn = MyRedisClient.getConnection()) {
             RedisCommands<String, Object> commands = conn.sync();
-            return commands.evalsha(scriptLoaded.get(script), type, keys, args);
+            return commands.evalsha(cache.getSha1(), type, keys, args);
         }
     }
 }

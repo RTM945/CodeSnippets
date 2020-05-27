@@ -1,28 +1,17 @@
 package me.rtmsoft.redisdance;
 
-import io.lettuce.core.LettuceStrings;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
 import io.lettuce.core.ScriptOutputType;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.sync.RedisCommands;
-import io.lettuce.core.codec.RedisCodec;
-import io.lettuce.core.output.StatusOutput;
-import io.lettuce.core.protocol.Command;
-import io.lettuce.core.protocol.CommandArgs;
-import io.lettuce.core.protocol.CommandType;
-import io.lettuce.core.protocol.ProtocolKeyword;
+import me.rtmsoft.redisdance.base.LuaScript;
 import me.rtmsoft.redisdance.base.RedisOps;
-import me.rtmsoft.redisdance.base.SerializedObjectCodec;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 public class RedLockTest {
 
-    private final String unlockScript = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+    private final LuaScript unlockScript = new LuaScript("unlock", "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end");
 
     @Test
     public void testScript() throws Exception{
@@ -32,25 +21,32 @@ public class RedLockTest {
         System.out.println(RedisOps.get("xixi"));
     }
 
-    Runnable tryLockTester(String name, List<Integer> list) {
+    Runnable tryLockTester(String name, CountDownLatch count) {
         return () -> {
-            for (int i = 0; i < 5; i++) {
-                RedLock lock = new RedLock("test", 5000);
+            while (true){
+                if(count.getCount() <= 0) break;
+                RedLock lock = new RedLock("test", 100);
                 boolean acquired = false;
                 try {
                     acquired = lock.tryLock(1, TimeUnit.SECONDS);
                     if (acquired) {
                         System.out.println(name + " get lock");
-                        list.add(1);
-                        Thread.sleep(1000);
+                        Thread.sleep(new Random().nextInt(1000));
+                        count.countDown();
                     }
                 }catch (Exception e) {
                     e.printStackTrace();
                 } finally {
                     if(acquired){
-                        lock.unlock();
-                        System.out.println(name + " unlock");
+                        boolean unlock = lock.unlock();
+                        System.out.println(name + " unlock " + unlock);
                     }
+                }
+
+                try {
+                    Thread.sleep(new Random().nextInt(1000));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -58,13 +54,14 @@ public class RedLockTest {
 
     @Test
     public void testConcurrency() throws Exception{
-        List<Integer> list = new ArrayList<>();
-        Runnable a = tryLockTester("a", list);
-        Runnable b = tryLockTester("b", list);
+        RedisOps.del("redlock_test");
+        CountDownLatch count = new CountDownLatch(10);
+        Runnable a = tryLockTester("a", count);
+        Runnable b = tryLockTester("b", count);
         new Thread(a).start();
         new Thread(b).start();
-        Thread.sleep(10000);
-        System.out.println(list.size());
+        count.await();
+        Thread.sleep(1000);
     }
 
 }

@@ -1,6 +1,7 @@
 package me.rtmsoft.redisdance;
 
 import io.lettuce.core.ScriptOutputType;
+import me.rtmsoft.redisdance.base.LuaScript;
 import me.rtmsoft.redisdance.base.RedisOps;
 
 import java.util.UUID;
@@ -12,7 +13,7 @@ public class RedLock {
 
     private static final String KEY_PREFIX = "redlock_";
 
-    private final String unlockScript = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+    private final LuaScript unlockScript = new LuaScript("unlock", "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end");
 
     private String lockKey;
     private long expireAfter;
