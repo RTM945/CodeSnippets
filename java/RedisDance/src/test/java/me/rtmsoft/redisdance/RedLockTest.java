@@ -53,7 +53,7 @@ public class RedLockTest {
     }
 
     @Test
-    public void testConcurrency() throws Exception{
+    public void testTryLock() throws Exception{
         RedisOps.del("redlock_test");
         CountDownLatch count = new CountDownLatch(10);
         Runnable a = tryLockTester("a", count);
@@ -64,4 +64,31 @@ public class RedLockTest {
         Thread.sleep(1000);
     }
 
+    Runnable lockTester(String name, CountDownLatch latch, int[] container) {
+        return () -> {
+            for (int i = 0; i < 50; i++) {
+                RedLock lock = new RedLock("test", 100);
+                lock.lock();
+                System.out.println(name + " get lock");
+                container[0] += 1;
+                lock.unlock();
+                System.out.println(name + " unlock");
+                latch.countDown();
+                Thread.yield();
+            }
+        };
+    }
+
+    @Test
+    public void lockTest() throws Exception{
+        RedisOps.del("redlock_test");
+        CountDownLatch count = new CountDownLatch(100);
+        int[] container = {0};
+        Runnable a = lockTester("a", count, container);
+        Runnable b = lockTester("b", count, container);
+        new Thread(a).start();
+        new Thread(b).start();
+        count.await();
+        System.out.println(container[0]);
+    }
 }

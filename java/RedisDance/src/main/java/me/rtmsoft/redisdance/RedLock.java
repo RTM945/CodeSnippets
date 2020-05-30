@@ -23,6 +23,19 @@ public class RedLock {
         this.expireAfter = expireAfter;
     }
 
+    public void lock() {
+        while (true) {
+            try {
+                while (!obtainLock()) {
+                    Thread.sleep(100);
+                }
+            } catch (InterruptedException ignore) {
+
+            }
+            break;
+        }
+    }
+
     public boolean tryLock(long time, TimeUnit timeUnit) {
         long now = System.currentTimeMillis();
         try {
