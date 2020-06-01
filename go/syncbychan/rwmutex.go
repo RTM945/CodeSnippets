@@ -63,3 +63,25 @@ func (m *RWMutex) RUnlock() {
 		m.r <- rs
 	}
 }
+
+func (m *RWMutex) TryLock() bool {
+	select {
+	case m.w <- struct{}{}:
+		return true
+	default:
+		return false
+	}
+}
+
+func (m *RWMutex) TryRLock() bool {
+	var rs int
+	select {
+	case m.w <- struct{}{}:
+	case rs = <-m.r:
+	default:
+		return false
+	}
+	rs++
+	m.r <- rs
+	return true
+}
