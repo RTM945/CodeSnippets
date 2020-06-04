@@ -71,3 +71,24 @@ func TestTimeoutContext(t *testing.T) {
 	}
 	fmt.Println(time.Since(start))
 }
+
+func TestPingPong(t *testing.T) {
+	type Ball struct {
+		hits int
+	}
+	table := make(chan *Ball)
+	player := func(name string, table chan *Ball) {
+		for {
+			ball := <-table
+			ball.hits++
+			fmt.Println(name, ball.hits)
+			time.Sleep(100 * time.Millisecond)
+			table <- ball
+		}
+	}
+	go player("ping", table)
+	go player("pong", table)
+	table <- new(Ball)
+	time.Sleep(time.Second)
+	<-table
+}
