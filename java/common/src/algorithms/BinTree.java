@@ -84,6 +84,7 @@ public class BinTree<T> {
         preOrderTraversal(node.right, traversal);
     }
 
+
     public void inOrderTraversal(TreeTraversal<T> traversal) {
         inOrderTraversal(root, traversal);
     }
@@ -97,6 +98,20 @@ public class BinTree<T> {
         inOrderTraversal(node.right, traversal);
     }
 
+    private void inOrderTraversalUnRecursively(TreeTraversal<T> traversal) {
+        Stack<TreeNode<T>> stack = new Stack<>();
+        TreeNode<T> node = root;
+        while(node != null || !stack.isEmpty()){
+            while (node != null) {
+                stack.push(node);
+                node = node.left;
+            }
+            node = stack.pop();
+            traversal.apply(node.data);
+            node = node.right;
+        }
+    }
+
     public void postOrderTraversal(TreeTraversal<T> traversal) {
         postOrderTraversal(root, traversal);
     }
@@ -108,6 +123,26 @@ public class BinTree<T> {
         postOrderTraversal(node.left, traversal);
         postOrderTraversal(node.right, traversal);
         traversal.apply(node.data);
+    }
+
+    private void postOrderTraversalUnRecursively(TreeTraversal<T> traversal) {
+        Stack<TreeNode<T>> stack1 = new Stack<>();
+        Stack<TreeNode<T>> stack2 = new Stack<>();
+        stack1.push(root);
+        while (!stack1.isEmpty()) {
+            TreeNode<T> node = stack1.pop();
+            stack2.push(node);
+            if(node.left != null) {
+                stack1.push(node.left);
+            }
+            if(node.right != null) {
+                stack1.push(node.right);
+            }
+        }
+        while (!stack2.isEmpty()) {
+            TreeNode<T> node = stack2.pop();
+            traversal.apply(node.data);
+        }
     }
 
     public void bfs(TreeTraversal<T> traversal) {
@@ -167,20 +202,26 @@ public class BinTree<T> {
         System.out.println("preOrderTraversal");
         tree.preOrderTraversal(System.out::print);
         System.out.println();
+        System.out.println("dfs");
+        tree.dfs(System.out::print);
+        System.out.println();
         System.out.println("inOrderTraversal");
         tree.inOrderTraversal(System.out::print);
+        System.out.println();
+        System.out.println("inOrderTraversalUnRecursively");
+        tree.inOrderTraversalUnRecursively(System.out::print);
         System.out.println();
         System.out.println("postOrderTraversal");
         tree.postOrderTraversal(System.out::print);
         System.out.println();
-        System.out.println("bfsRecursive");
-        tree.bfsRecursively(System.out::print);
+        System.out.println("postOrderTraversalUnRecursively");
+        tree.postOrderTraversalUnRecursively(System.out::print);
         System.out.println();
         System.out.println("bfs");
         tree.bfs(System.out::print);
         System.out.println();
-        System.out.println("dfs");
-        tree.dfs(System.out::print);
+        System.out.println("bfsRecursive");
+        tree.bfsRecursively(System.out::print);
     }
 
 }
