@@ -143,3 +143,28 @@ func TestSearch(t *testing.T) {
 	}
 	time.Sleep(time.Second)
 }
+
+func TestChanWithoutBuffer1(t *testing.T) {
+	// 不带缓冲的chan无论发送与接收都会阻塞当前线程
+	c := make(chan struct{})
+	c <- struct{}{}
+	fmt.Println(<-c)
+}
+
+func TestChanWithoutBuffer2(t *testing.T) {
+	// 不带缓冲的chan无论发送与接收都会阻塞当前线程
+	c := make(chan struct{})
+	// 使用goroutine避免阻塞
+	go func(c chan struct{}) {
+		time.Sleep(time.Second)
+		c <- struct{}{}
+	}(c)
+	fmt.Println(<-c)
+}
+
+func TestChanWithBuffer(t *testing.T) {
+	// 使用带缓冲的chan
+	c := make(chan struct{}, 1)
+	c <- struct{}{}
+	fmt.Println(<-c)
+}
