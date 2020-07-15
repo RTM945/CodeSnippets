@@ -267,8 +267,29 @@ public class Sort {
         }
     }
 
+    static void binaryInsertionSort2(int[] array) {
+        int len = array.length;
+        for (int i = len - 2; i >= 0; i--) {
+            int x = array[i];
+            int left = i + 1;
+            int right = len - 1;
+            while (left <= right) {
+                int mid = left + (right - left) / 2;
+                if(x > array[mid]) {
+                    left = mid + 1;
+                }else{
+                    right = mid - 1;
+                }
+            }
+            for (int j = i; j < left - 1; j++) {
+                array[j] = array[j + 1];
+            }
+            array[left - 1] = x;
+        }
+    }
+
     public static void main(String[] args) {
-        int[] a = {1, 3, 4, 8, 2, 5, 0, 7, 6, 9};
+//        int[] a = {1, 3, 4, 8, 2, 5, 0, 7, 6, 9};
 //        binInsertionSort(a);
 //        shellSort(a);
 //        bubbleSort(a);
@@ -277,8 +298,10 @@ public class Sort {
 //        selectionSort(a);
 //        heapSort(a);
 //        mergeSort(a, new int[a.length], 0, a.length - 1);
-        mergeSort(a, new int[a.length]);
-        System.out.println(Arrays.toString(a));
+//        mergeSort(a, new int[a.length]);
+        int[] b = {5, 4, 3, 2, 1};
+        binaryInsertionSort2(b);
+        System.out.println(Arrays.toString(b));
     }
 
 }
