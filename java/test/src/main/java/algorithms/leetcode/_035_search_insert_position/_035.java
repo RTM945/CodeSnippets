@@ -1,4 +1,4 @@
-package algorithms.leetcode._35_search_insert_position;
+package algorithms.leetcode._035_search_insert_position;
 
 import java.util.*;
 
