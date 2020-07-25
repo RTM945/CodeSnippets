@@ -1,4 +1,4 @@
-package algorithms.leetcode.offer09;
+package algorithms.leetcode.offer009;
 
 import java.util.Stack;
 

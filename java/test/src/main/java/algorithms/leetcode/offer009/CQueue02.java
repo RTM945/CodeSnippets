@@ -1,4 +1,4 @@
-package algorithms.leetcode.offer09;
+package algorithms.leetcode.offer009;
 
 //比较有效率的解法是使用数组自己实现栈操作，操作下标指针，比java的Stack性能好
 //Stack已不被java推荐使用，可以用LinkedList替代
