@@ -1,6 +1,5 @@
 package nio.reactor;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
@@ -15,7 +14,7 @@ public class Reactor {
         this.eventLoopgGroup = eventLoopgGroup;
     }
 
-    public void listen() throws IOException {
+    public void listen() throws Exception {
         ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
         serverSocketChannel.bind(new InetSocketAddress(port));
         while(!Thread.interrupted()) {
