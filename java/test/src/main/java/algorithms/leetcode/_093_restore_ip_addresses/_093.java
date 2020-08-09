@@ -21,9 +21,9 @@ public class _093 {
             }
             StringBuilder ip = new StringBuilder();
             for (int a = 1; a < 4; a++) {
-                for (int b = 1; b < 4; a++) {
-                    for (int c = 1; c < 4; a++) {
-                        for (int d = 1; d < 4; a++) {
+                for (int b = 1; b < 4; b++) {
+                    for (int c = 1; c < 4; c++) {
+                        for (int d = 1; d < 4; d++) {
                             if (a + b + c + d == s.length()) {
                                 int n1 = Integer.parseInt(s.substring(0, a));
                                 int n2 = Integer.parseInt(s.substring(a, a + b));
@@ -44,4 +44,6 @@ public class _093 {
             return list;
         }
     }
+
+    //还有dfs回溯方法，懒狗，跳过了
 }
