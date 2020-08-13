@@ -104,6 +104,19 @@ public class _029 {
         }
     }
 
+    class Solution3 {
+        //更天才的方法
+        //但是慢
+        public boolean isValid(String s) {
+            while(s.contains("[]") || s.contains("()") || s.contains("{}")) {
+                s = s.replace("()", "");
+                s = s.replace("[]", "");
+                s = s.replace("{}", "");
+            }
+            return s.isEmpty();
+        }
+    }
+
     public static void main(String[] args) {
         _029 q = new _029();
         System.out.println(q.new Solution1().isValid("{[]}"));
