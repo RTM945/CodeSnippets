@@ -1,4 +1,4 @@
-package algorithms.leetcode._20_valid_parentheses;
+package algorithms.leetcode._020_valid_parentheses;
 
 import java.util.HashMap;
 import java.util.LinkedList;
