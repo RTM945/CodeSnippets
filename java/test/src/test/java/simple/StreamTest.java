@@ -1,19 +1,25 @@
 package simple;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.collect.SetMultimap;
 
 import org.junit.Test;
 
@@ -117,18 +123,132 @@ public class StreamTest {
         // c -> foo1, foo2, foo3
         // d -> foo2
         // e -> foo3
-        List<String> list = Lists.newArrayList(
-            "foo1, tags=a,b,c",
-            "foo2, tags=c,d",
-            "foo3, tags=a,c,e"
-        );
-        ImmutableMultimap.Builder<String, String> builder = ImmutableMultimap.builder();
+        List<String> list = Lists.newArrayList("foo1, tags=a,b,c", "foo2, tags=c,d", "foo3, tags=a,c,e");
+        Multimap<String, String> multimap = ArrayListMultimap.create();
         list.forEach(item -> {
             String[] arr = item.split(", ");
             String[] tags = arr[1].substring("tags=".length()).split(",");
-            Arrays.stream(tags).forEach(tag -> builder.put(tag, arr[0]));
+            Arrays.stream(tags).forEach(tag -> multimap.put(tag, arr[0]));
         });
-        System.out.println(builder.build());
+        System.out.println(multimap);
     }
-    
+
+    @Test
+    public void testListGroupByTheEleOfNestedCollectionGuava2() {
+        List<String> list = Lists.newArrayList("foo1, tags=a,b,c", "foo2, tags=c,d", "foo3, tags=a,c,e");
+        Multimap<String, String> map = list.stream()
+                .collect(ImmutableMultimap.Builder<String, String>::new, (builder, item) -> {
+                    String[] arr = item.split(", ");
+                    String[] tags = arr[1].substring("tags=".length()).split(",");
+                    Arrays.stream(tags).forEach(tag -> builder.put(tag, arr[0]));
+                }, (builder1, builder2) -> builder1.putAll(builder2.build())).build();
+        System.out.println(map);
+    }
+
+    @Test
+    public void testMultiMapAsMap() {
+        Multimap<String, A> cstr_aMap = cstr_aMap();
+        // 将A中的blist和B中的clist只保留一个元素
+        cstr_aMap = Multimaps.transformEntries(cstr_aMap, (cstr, a) -> {
+            a.blist.stream()
+                .filter(b -> b.getCList().contains(cstr))
+                .findFirst().map(b -> {
+                    C c = new C();
+                    c.str = cstr;
+                    b.clist = Lists.newArrayList(c);
+                    return b;
+                }).ifPresent(b -> a.blist = Lists.newArrayList(b));
+            return a;
+        });
+        System.out.println(cstr_aMap);
+    }
+
+    public Multimap<String, A> cstr_aMap() {
+        List<String> cset = new ArrayList<>();
+        int bsize = 5;
+        int csize = 10;
+        for (int i = 0; i < csize; i++) {
+            cset.add(UUID.randomUUID().toString().substring(0, 5));
+        }
+        Random r = new Random();
+        List<B> blist = new ArrayList<>();
+        for (int i = 0; i < bsize; i++) {
+            B b = new B();
+            b.id = i;
+            b.aid = i / 2;
+            int toIndex = r.nextInt(csize);
+            while (toIndex == 0) {
+                toIndex = r.nextInt(csize);
+            }
+            int fromIndex = r.nextInt(toIndex);
+            List<String> clist = cset.subList(fromIndex, toIndex);
+            while (clist.isEmpty()) {
+                clist = cset.subList(fromIndex, toIndex);
+            }
+            b.clist = clist.stream().map(cstr -> {
+                C c = new C();
+                c.str = cstr;
+                return c;
+            }).collect(Collectors.toList());
+            blist.add(b);
+        }
+
+        Map<Integer, List<B>> map = blist.stream().collect(Collectors.groupingBy(b -> b.aid));
+        // cstr -> aid
+        SetMultimap<String, Integer> cstr_aid = HashMultimap.create();
+        blist.stream().forEach(b -> b.clist.forEach(c -> cstr_aid.put(c.str, b.aid)));
+
+        List<A> alist = map.entrySet().stream().map(entry -> {
+            A a = new A();
+            a.id = entry.getKey();
+            a.blist = entry.getValue();
+            return a;
+        }).collect(Collectors.toList());
+        System.out.println(alist);
+        Map<Integer, A> aMap = Maps.uniqueIndex(alist, a -> a.id);
+
+        return Multimaps.transformValues(cstr_aid, aMap::get);
+    }
+
+    class A {
+        int id;
+        List<B> blist;
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("blist", blist)
+                .toString();
+        }
+    }
+
+    class B {
+        int id;
+        int aid;
+        List<C> clist;
+
+        @Override
+        public String toString() {
+            return MoreObjects.toStringHelper(this)
+                .add("id", id)
+                .add("aid", aid)
+                .add("clist", clist)
+                .toString();
+        }
+
+        public List<String> getCList() {
+            return clist.stream().map(c -> c.str).collect(Collectors.toList());
+        }
+    }
+
+    class C {
+        String str;
+
+        @Override
+        public String toString() {
+            return str;
+        }
+    }
+
 }
