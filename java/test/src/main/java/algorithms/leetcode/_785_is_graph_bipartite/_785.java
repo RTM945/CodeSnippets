@@ -1,8 +1,7 @@
 package algorithms.leetcode._785_is_graph_bipartite;
 
-import algorithms.leetcode._718_maximum_length_of_repeated_subarray._718;
-
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 //https://leetcode-cn.com/problems/is-graph-bipartite/
 //给定一个无向图graph，当这个图为二分图时返回true。

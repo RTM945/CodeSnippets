@@ -1,15 +1,13 @@
 package redis;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.lettuce.core.ScriptOutputType;
 import io.lettuce.core.SetArgs;
 import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.sync.RedisCommands;
 import io.lettuce.core.codec.StringCodec;
 import io.lettuce.core.internal.LettuceAssert;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 public class RedisOps {
 
@@ -61,7 +59,7 @@ public class RedisOps {
 
     private static final ConcurrentHashMap<String, LuaScript> scriptLoaded = new ConcurrentHashMap<>();
 
-    public static Object evalsha(LuaScript luaScript, ScriptOutputType type, String[] keys, String... args) {
+    public static Object evalsha(LuaScript luaScript, ScriptOutputType type, String[] keys, Object... args) {
         // must use StringCodec.UTF8 load lua script
         LuaScript cache = scriptLoaded.computeIfAbsent(luaScript.getName(), s -> {
             try (StatefulRedisConnection<String, String> conn = MyRedisClient.getConnection(StringCodec.UTF8)) {

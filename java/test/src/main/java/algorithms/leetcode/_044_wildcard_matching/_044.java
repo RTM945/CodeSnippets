@@ -1,7 +1,6 @@
 package algorithms.leetcode._044_wildcard_matching;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 //https://leetcode-cn.com/problems/wildcard-matching/

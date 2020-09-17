@@ -1,7 +1,7 @@
 package algorithms.leetcode.interview_16_11_diving_board_lcci;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.TreeSet;
 
 //你正在使用一堆木板建造跳水板。
 //有两种类型的木板，其中长度较短的木板长度为shorter，长度较长的木板长度为longer。
