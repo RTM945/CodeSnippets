@@ -56,6 +56,11 @@ public class StreamTest {
                         }));
 
         System.out.println(map);
+
+        // 也可以直接groupby
+        // 但不能直接改value
+        map = list.stream().collect(Collectors.groupingBy(item -> item.substring(0, 1)));
+        System.out.println(map);
     }
 
     @Test
