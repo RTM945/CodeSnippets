@@ -1,7 +1,6 @@
 package algorithms.leetcode._378_kth_smallest_element_in_a_sorted_matrix;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 

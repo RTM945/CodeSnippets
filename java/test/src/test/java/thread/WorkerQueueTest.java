@@ -2,8 +2,6 @@ package thread;
 
 import org.junit.Test;
 
-import java.util.concurrent.CountDownLatch;
-
 public class WorkerQueueTest {
 
     @Test

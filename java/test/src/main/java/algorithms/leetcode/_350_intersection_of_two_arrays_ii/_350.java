@@ -1,7 +1,10 @@
 package algorithms.leetcode._350_intersection_of_two_arrays_ii;
 
-import java.util.*;
-import java.util.function.BiFunction;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 //https://leetcode-cn.com/problems/intersection-of-two-arrays-ii/
 //输入: nums1 = [4,9,5], nums2 = [9,4,9,8,4]

@@ -1,8 +1,5 @@
 package algorithms.leetcode._097_nterleaving_string;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-
 //https://leetcode-cn.com/problems/interleaving-string/
 //给定三个字符串 s1, s2, s3, 验证 s3 是否是由 s1 和 s2 交错组成的。
 //示例 1:

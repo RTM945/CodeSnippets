@@ -2,7 +2,6 @@ package algorithms.leetcode._120_triangle;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 //https://leetcode-cn.com/problems/triangle/
