@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import com.google.common.base.MoreObjects;
@@ -61,6 +62,10 @@ public class StreamTest {
         // 但不能直接改value
         map = list.stream().collect(Collectors.groupingBy(item -> item.substring(0, 1)));
         System.out.println(map);
+        
+        // partitioningBy
+        Map<Boolean, List<String>> partitioning = list.stream().collect(Collectors.partitioningBy(item -> item.startsWith("A")));
+        System.out.println(partitioning);                
     }
 
     @Test
