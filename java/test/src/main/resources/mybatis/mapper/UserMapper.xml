@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.UserMapper">
+  <resultMap id="UserTag" type="mybatis.dto.UserTag">
+    <id column="tag_id" jdbcType="INTEGER" property="id"/>
+    <result column="tag_user_id" jdbcType="INTEGER" property="userId"/>
+    <result column="tag" jdbcType="VARCHAR" property="tag"/>
+    <result column="tag_created" jdbcType="TIMESTAMP" property="created"/>
+    <result column="tag_updated" jdbcType="TIMESTAMP" property="updated"/>
+  </resultMap>
+
+  <resultMap id="User" type="mybatis.dto.User">
+    <id column="user_id" jdbcType="INTEGER" property="id"/>
+    <result column="user_name" jdbcType="VARCHAR" property="name"/>
+    <result column="user_created" jdbcType="TIMESTAMP" property="created"/>
+    <result column="user_updated" jdbcType="TIMESTAMP" property="updated"/>
+    <collection property="tagList" column="user_id"
+      notNullColumn="tag_user_id"
+      javaType="java.util.ArrayList"
+      ofType="mybatis.dto.UserTag"
+      resultMap="UserTag"/>
+  </resultMap>
+
+  <select id="getUserById" parameterType="hashmap" resultMap="User">
+    select
+    u.id as user_id,
+    u.name as user_name,
+    u.created as user_created,
+    u.updated as user_updated,
+    t.id as tag_id,
+    t.user_id as tag_user_id,
+    t.tag,
+    t.created as tag_created,
+    t.updated as tag_updated
+    from user u
+    left join
+    user_tag t
+    on
+    u.id = t.user_id
+    where u.id = #{userId,jdbcType=INTEGER}
+  </select>
+</mapper>
