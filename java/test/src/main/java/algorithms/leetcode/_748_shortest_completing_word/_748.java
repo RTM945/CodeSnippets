@@ -1,7 +1,5 @@
 package algorithms.leetcode._748_shortest_completing_word;
 
-import java.util.Arrays;
-
 public class _748 {
     // 给你一个字符串 licensePlate 和一个字符串数组 words ，请你找出并返回 words 中的 最短补全词 。
 
