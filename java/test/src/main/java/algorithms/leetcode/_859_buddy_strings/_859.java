@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.checkerframework.checker.units.qual.g;
-
 public class _859 {
     // https://leetcode-cn.com/problems/buddy-strings
     // 给你两个字符串 s 和 goal ，只要我们可以通过交换 s 中的两个字母得到与 goal 相等的结果，就返回 true ；
