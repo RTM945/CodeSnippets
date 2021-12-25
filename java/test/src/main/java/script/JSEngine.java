@@ -1,11 +1,15 @@
 package script;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 
 import com.google.common.base.Objects;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 
 import org.openjdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.openjdk.nashorn.api.scripting.ScriptUtils;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -20,9 +24,16 @@ public class JSEngine {
     public static void main(String[] args) {
         // 不能使用内部类
         Player player = new Player();
-        eval("player.move(dx)", "player, dx", player, 5);
+        // eval("player.move(dx)", "player, dx", player, 5);
         // should be 5
-        System.out.println(player.getX());
+        // System.out.println(player.getX());
+        // ScriptObjectMirror mirror = (ScriptObjectMirror) eval("[1,2,3,4]", "player, dx", null, null);
+        // int[] res = mirror.to(int[].class);
+        // int[] res = (int[]) ScriptUtils.convert(eval("[1,2,3,4]", "player, dx", null, null), int[].class);
+        // System.out.println(Arrays.toString(res));
+        ScriptObjectMirror mirror = (ScriptObjectMirror) eval("[1,2,3].filter(it => ![].include(it))", "player, dx", null, null);
+        int[] res = mirror.to(int[].class);
+        System.out.println(Arrays.toString(res));
     }
 
     public static Object eval(String js, String paramNames, Object... params) {
