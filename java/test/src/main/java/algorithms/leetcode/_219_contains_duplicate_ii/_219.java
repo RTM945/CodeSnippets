@@ -3,8 +3,6 @@ package algorithms.leetcode._219_contains_duplicate_ii;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.checkerframework.checker.units.qual.K;
-
 public class _219 {
     // 给你一个整数数组 nums 和一个整数 k ，
     // 判断数组中是否存在两个 不同的索引 i 和 j ，满足 nums[i] == nums[j] 且 abs(i - j) <= k 。
