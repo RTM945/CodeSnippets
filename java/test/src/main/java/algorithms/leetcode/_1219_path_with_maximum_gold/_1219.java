@@ -19,7 +19,7 @@ public class _1219 {
 
     class Solution {
         // 上下左右
-        static int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
         int[][] grid;
         int m, n;
         int ans = 0;
