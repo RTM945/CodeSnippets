@@ -47,4 +47,35 @@ public class _688 {
             return dp[k][row][column];
         }
     }
+
+    // 记忆化搜索
+    class Solution1 {
+
+        final int[][] dirs = {{1, 2}, {2, 1}, {-1, 2}, {2, -1}, {1, -2}, {-2, 1}, {-1, -2}, {-2, -1}};
+
+        public double knightProbability(int n, int k, int row, int column) {
+            double[][][] memo = new double[n][n][k + 1];
+            return dfs(n, k, row, column, memo);
+        }
+
+        public double dfs(int n, int k, int i, int j, double[][][] memo) {
+            if (i < 0 || j < 0 || i >= n || j >= n) {
+                return 0;
+            }
+            if (k == 0) {
+                return 1;
+            }
+            if (memo[i][j][k] != 0) {
+                return memo[i][j][k];
+            }
+            double ans = 0;
+            for (int[] dir : dirs) {
+                ans += dfs(n, k - 1, i + dir[0], j + dir[1], memo) / 8;
+            }
+
+            memo[i][j][k] = ans;
+
+            return ans;
+        }
+    }
 }
