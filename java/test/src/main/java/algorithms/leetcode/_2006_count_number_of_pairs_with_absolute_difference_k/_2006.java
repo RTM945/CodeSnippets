@@ -1,6 +1,5 @@
 package algorithms.leetcode._2006_count_number_of_pairs_with_absolute_difference_k;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
