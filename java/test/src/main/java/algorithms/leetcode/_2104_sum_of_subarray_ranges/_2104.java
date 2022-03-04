@@ -1,7 +1,5 @@
 package algorithms.leetcode._2104_sum_of_subarray_ranges;
 
-import org.checkerframework.checker.units.qual.min;
-
 public class _2104 {
     // 给你一个整数数组 nums 。nums 中，子数组的 范围 是子数组中最大元素和最小元素的差值。
 
