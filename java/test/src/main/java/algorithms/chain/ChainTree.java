@@ -1,4 +1,4 @@
-package gamealg;
+package algorithms.chain;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class Chain {
+public class ChainTree {
 
     
     static int mapw = 5;
@@ -98,7 +98,7 @@ public class Chain {
         Node node = new Node();
         node.id = n.id;
         visited.add(n.id);
-        List<Unit> targets = getTarget(n, range1);
+        List<Unit> targets = getTarget(n, range2);
         for (Unit target : targets) {
             if (visited.contains(target.id)) {
                 continue;
