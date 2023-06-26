@@ -1,0 +1,1 @@
+gcc mylog.c main.c -o main
