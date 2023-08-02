@@ -1,0 +1,12 @@
+src=mylog.o main.o
+target=app
+
+$(target): $(src)
+	$(CC) $(src) -o $(target)
+
+mylog.o:
+	gcc -c mylog.c -o mylog.o
+
+main.o:
+	gcc -c main.c -o main.o
+	

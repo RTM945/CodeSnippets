@@ -1,0 +1,8 @@
+app: mylog.o main.o
+	gcc mylog.o main.o -o main
+
+mylog.o: mylog.c
+	gcc -c mylog.c -o mylog.o
+
+main.o: main.c
+	gcc -c main.c -o main.o

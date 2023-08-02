@@ -1,0 +1,8 @@
+src=mylog.o main.o
+target=app
+
+$(target):$(src)
+	$(CC) $(src) -o $(target)
+
+%.o:%.c
+	$(CC) -c $< -o $@

@@ -1,0 +1,2 @@
+app: mylog.c main.c
+	gcc mylog.c main.c -o main
