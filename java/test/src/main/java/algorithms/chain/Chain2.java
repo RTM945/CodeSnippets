@@ -89,20 +89,49 @@ public class Chain2 {
     public static void main(String[] args) {
         gengraph(5, 4);
         long now = System.currentTimeMillis();
+        // 需要改为bfs!
+        bfs(1);
+
         // 作死dfs
-        for (int p : graph.get(1)) {
+        //dfs(1);
+        System.out.println("耗时: " + (System.currentTimeMillis() - now));
+        System.out.println(maxPath);
+    }
+
+    static void bfs(int start) {
+        Set<Integer> visit = new HashSet<>();
+        visit.add(start);
+        List<Integer> path = new ArrayList<>();
+        path.add(start);
+        LinkedList<Integer> q = new LinkedList<>();
+        q.push(start);
+        while (!q.isEmpty()) {
+            int u = q.pop();
+            System.out.print(u + "->");
+            int[] ins = graph.get(u);
+            for (int v : ins) {
+                if (!visit.contains(v)) {
+                    q.push(v);
+                    visit.add(v);
+                }
+            }
+        }
+    }
+
+    static void dfs(int start) {
+        for (int p : graph.get(start)) {
             List<Integer> path = new ArrayList<>();
-            path.add(1);
+            path.add(start);
             Set<Integer> visit = new HashSet<>();
-            visit.add(1);
+            visit.add(start);
             boolean goon = dfs(p, path, visit);
             if (!goon) {
                 break;
             }
         }
-        System.out.println("耗时: " + (System.currentTimeMillis() - now));
-        System.out.println(maxPath);
     }
+
+    
 
     private static boolean dfs(int start, List<Integer> path, Set<Integer> visit) {
         path.add(start);
@@ -117,6 +146,7 @@ public class Chain2 {
         if (targets.isEmpty()) {
             if (path.size() > maxPath.size()) {
                 maxPath = new ArrayList<>(path);
+                // 剪枝!
                 if (path.size() == total) {
                     return false;
                 }
