@@ -200,7 +200,13 @@
             <artifactId>luaj-jse</artifactId>
             <version>3.0.1</version>
         </dependency>
-         
+        <!-- https://mvnrepository.com/artifact/javassist/javassist -->
+        <dependency>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.12.1.GA</version>
+        </dependency>
+
     </dependencies>
 
     <build>
