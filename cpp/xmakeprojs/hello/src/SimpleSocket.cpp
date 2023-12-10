@@ -71,7 +71,7 @@ bool RTM::SimpleSocket::accept(SimpleSocket& connector)
     return true;
 }
 
-bool RTM::SimpleSocket::send(std::string msg)
+bool RTM::SimpleSocket::send(const std::string msg)
 {
     int res = ::send(sock, msg.c_str(), msg.size(), 0);
     if (res < 0)
@@ -81,7 +81,7 @@ bool RTM::SimpleSocket::send(std::string msg)
     return true;
 }
 
-std::string RTM::SimpleSocket::recv()
+int RTM::SimpleSocket::recv(std::string& msg)
 {
     char buf[256];
     int res = ::recv(sock, buf, 255, 0);
@@ -96,7 +96,7 @@ std::string RTM::SimpleSocket::recv()
     } 
     else
     {
-        std::string msg(buf);
-        return msg;
+        msg = buf;
+        return res;
     }
 }

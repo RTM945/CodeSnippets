@@ -1,14 +1,27 @@
-#include "SimpleSocket.hpp"
+#include "Acceptor.hpp"
 
-RTM::Acceptor::Acceptor(int port, int backlog) : SimpleSocket()
+RTM::Acceptor::Acceptor(int port, int backlog)
 {
     SimpleSocket::create();
     SimpleSocket::bind(port);
     SimpleSocket::listen(backlog);
 }
 
-bool RTM::Acceptor::accept(Connector& connector)
+RTM::Acceptor::~Acceptor()
 {
-    SimpleSocket& simpleSocket = connector;
-    return SimpleSocket::accept(simpleSocket);
+}
+
+void RTM::Acceptor::accept(SimpleSocket& connector)
+{
+    SimpleSocket::accept(simpleSocket);
+}
+
+void RTM::Acceptor::send(const std::string& msg) 
+{
+    SimpleSocket::send(msg);
+}
+
+std::string RTM::Acceptor::recv() 
+{
+    return SimpleSocket::recv();
 }

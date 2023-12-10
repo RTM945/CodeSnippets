@@ -1,8 +1,17 @@
 add_rules("mode.debug", "mode.release")
 
-target("hello")
-    set_kind("binary")
-    add_files("src/*.cpp")
+for _, file in ipairs(os.files("src/*_main.cpp")) do
+    local name = path.filename(file)
+
+    target(name)
+        set_kind("binary")
+        add_files(file)
+    target_end()
+end
+
+-- target("hello")
+--     set_kind("binary")
+--     add_files("src/*.cpp")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
