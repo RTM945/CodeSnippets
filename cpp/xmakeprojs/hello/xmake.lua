@@ -1,13 +1,27 @@
 add_rules("mode.debug", "mode.release")
 
-for _, file in ipairs(os.files("src/*_main.cpp")) do
+target("client")
+set_kind("binary")
+for _, file in ipairs(os.files("src/*.cpp")) do
     local name = path.filename(file)
-
-    target(name)
-        set_kind("binary")
+    print(name)
+    if name ~= "server_main.cpp" then
         add_files(file)
-    target_end()
+    end
 end
+target_end()
+print("-------------")
+target("server")
+set_kind("binary")
+for _, file in ipairs(os.files("src/*.cpp")) do
+    local name = path.filename(file)
+    print(name)
+    if name ~= "client_main.cpp" then
+        add_files(file)
+    end
+end
+target_end()
+
 
 -- target("hello")
 --     set_kind("binary")

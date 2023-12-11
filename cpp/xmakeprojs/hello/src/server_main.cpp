@@ -7,12 +7,9 @@ int main(int argc, char** argv)
     {
         RTM::SimpleSocket connector;
         acceptor.accept(connector);
-        while (true)
-        {
-            std::string msg;
-            connector.recv(msg);
-            connector.send(msg);
-        }
+        std::string msg;
+        connector.recv(msg);
+        connector.send(msg);
     }
     return 0;
 }

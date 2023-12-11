@@ -12,12 +12,19 @@ RTM::SimpleSocket::~SimpleSocket()
 
 void RTM::SimpleSocket::create()
 {
-    sock = socket(AF_INET, SOCK_STREAM, 0);
+    sock = ::socket(AF_INET, SOCK_STREAM, 0);
     if (sock < 0) 
     {
         perror("failed to create sock");
         exit(EXIT_FAILURE);
     }
+    int on = 1;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (const char*) &on, sizeof(on)) == -1)
+    {
+        perror("failed to setsockopt");
+        exit(EXIT_FAILURE);
+    }
+    
 }
 
 void RTM::SimpleSocket::bind(int port)
@@ -25,7 +32,7 @@ void RTM::SimpleSocket::bind(int port)
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(port);
-    int res = ::bind(sock, (sockaddr*)&addr, sizeof(addr));
+    int res = ::bind(sock, (struct sockaddr*)&addr, sizeof(addr));
     if (res < 0)
     {
         perror("failed to bind port");
@@ -36,6 +43,7 @@ void RTM::SimpleSocket::bind(int port)
 void RTM::SimpleSocket::listen(int backlog)
 {
     int res = ::listen(sock, backlog);
+    if (res < 0)
     {
         perror("failed to listen");
         exit(EXIT_FAILURE);
@@ -63,7 +71,10 @@ void RTM::SimpleSocket::connect(std::string host, int port)
 
 bool RTM::SimpleSocket::accept(SimpleSocket& connector)
 {
-    connector.sock = ::accept(sock, (sockaddr*)&addr, (socklen_t*)sizeof(addr));
+    std::cout<<"my sock=" << sock << std::endl;
+    int addr_length = sizeof(addr);
+    connector.sock = ::accept(sock, (sockaddr*)&addr, (socklen_t*)&addr_length);
+    std::cout<<"new connector sock=" << connector.sock << std::endl;
     if (connector.sock < 0) 
     {
         return false;
@@ -88,15 +99,11 @@ int RTM::SimpleSocket::recv(std::string& msg)
     if (res < 0)
     {
         std::cout << "recv fail from sock"<< sock << "error = " << errno << "\n";
-        return "";
-    } 
-    else if (res == 0) 
-    {
-        return "";
+        
     } 
     else
     {
         msg = buf;
-        return res;
     }
+    return res;
 }

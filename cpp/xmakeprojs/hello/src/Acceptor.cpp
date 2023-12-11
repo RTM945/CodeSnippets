@@ -13,7 +13,7 @@ RTM::Acceptor::~Acceptor()
 
 void RTM::Acceptor::accept(SimpleSocket& connector)
 {
-    SimpleSocket::accept(simpleSocket);
+    SimpleSocket::accept(connector);
 }
 
 void RTM::Acceptor::send(const std::string& msg) 
@@ -21,7 +21,7 @@ void RTM::Acceptor::send(const std::string& msg)
     SimpleSocket::send(msg);
 }
 
-std::string RTM::Acceptor::recv() 
+void RTM::Acceptor::recv(std::string& msg) 
 {
-    return SimpleSocket::recv();
+    SimpleSocket::recv(msg);
 }
