@@ -1,11 +1,16 @@
+set_project("asiotest")
 add_rules("mode.debug", "mode.release")
 
 add_requires("asio")
 
-target("asiotest")
+add_includedirs("include")
+
+target("test")
+    set_default(true)
     set_kind("binary")
-    add_files("src/*.cpp")
+    add_files("src/**.cpp")
     add_packages("asio")
+    set_rundir("$(projectdir)")
 
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
