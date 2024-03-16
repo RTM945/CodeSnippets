@@ -3,12 +3,19 @@ add_rules("mode.debug", "mode.release")
 
 add_requires("asio")
 
+set_languages("c++17")
+
 add_includedirs("include")
 
 target("test")
-    set_default(true)
     set_kind("binary")
     add_files("src/**.cpp")
+    add_packages("asio")
+    set_rundir("$(projectdir)")
+
+target("net_client")
+    set_kind("binary")
+    add_files("NetClient/**.cpp")
     add_packages("asio")
     set_rundir("$(projectdir)")
 
