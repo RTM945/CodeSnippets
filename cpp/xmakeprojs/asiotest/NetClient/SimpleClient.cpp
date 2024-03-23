@@ -1,6 +1,6 @@
 #include "olc_net.h"
 
-enum class CustomMsgType : uint32_t
+enum class CustomMsgTypes : uint32_t
 {
     FireBullet,
     MovePlayer
@@ -8,8 +8,8 @@ enum class CustomMsgType : uint32_t
 
 int main()
 {
-    olc::net::message<CustomMsgType> msg;
-    msg.header.id = CustomMsgType::FireBullet;
+    olc::net::message<CustomMsgTypes> msg;
+    msg.header.id = CustomMsgTypes::FireBullet;
 
     int a = 1;
     bool b = true;

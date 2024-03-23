@@ -1,6 +1,8 @@
 #pragma once
 
 #include "net_common.h"
+#include <memory>
+#include <ostream>
 
 namespace olc
 {
@@ -50,6 +52,23 @@ namespace olc
                 msg.header.size = msg.size();
                 return msg;
             }
+        };
+
+        template <typename T>
+        class connection;
+
+        template <typename T>
+        struct owned_message
+        {
+            std::shared_ptr<connection<T>> remote = nullptr;
+            message<T> msg;
+
+            friend std::ostream& operator<<(std::ostream& os, const owned_message<T>& msg)
+            {
+                os << msg.msg;
+                return os;
+            } 
+
         };
 
 
