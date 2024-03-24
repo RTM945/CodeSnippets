@@ -19,6 +19,12 @@ target("net_client")
     add_packages("asio")
     set_rundir("$(projectdir)")
 
+target("net_server")
+    set_kind("binary")
+    add_files("NetServer/**.cpp")
+    add_packages("asio")
+    set_rundir("$(projectdir)")
+
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
 --
