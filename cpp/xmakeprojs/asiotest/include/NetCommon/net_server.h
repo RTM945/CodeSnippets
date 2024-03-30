@@ -58,23 +58,23 @@ namespace olc
                         {
                             std::cout << "[SERVER] New Connection: " << socket.remote_endpoint() << "\n";
 
-                            // std::shared_ptr<connection<T>> newconn = 
-                            //     std::make_shared<connection<T>>(
-                            //         connection<T>::owner::server, 
-                            //         m_asioContext, std::move(socket), m_qMessageIn
-                            //     );
+                            std::shared_ptr<connection<T>> newconn = 
+                                std::make_shared<connection<T>>(
+                                    connection<T>::owner::server, 
+                                    m_asioContext, std::move(socket), m_qMessageIn
+                                );
                             
-                            // if(OnClientConnect(newconn))
-                            // {
-                            //     m_deqConnections.push_back(std::move(newconn));
-                            //     m_deqConnections.back()->ConnectToClient(nIDCounter++);
+                            if(OnClientConnect(newconn))
+                            {
+                                m_deqConnections.push_back(std::move(newconn));
+                                m_deqConnections.back()->ConnectToClient(nIDCounter++);
                                 
-                            //     std::cout << "[" << m_deqConnections.back()->GetID() << "] Connection Approved\n";
-                            // }
-                            // else
-                            // {
-                            //     std::cout << "[---------] Connection Denied\n";
-                            // }
+                                std::cout << "[" << m_deqConnections.back()->GetID() << "] Connection Approved\n";
+                            }
+                            else
+                            {
+                                std::cout << "[---------] Connection Denied\n";
+                            }
                         }
                         else
                         {
