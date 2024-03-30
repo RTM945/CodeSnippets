@@ -1,4 +1,4 @@
-#include "NetCommon/net_common.h"
+#include "net_common.h"
 
 std::vector<char> vBuffer(1 * 1024);
 

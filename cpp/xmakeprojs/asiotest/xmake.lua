@@ -5,24 +5,29 @@ add_requires("asio")
 
 set_languages("c++17")
 
-add_includedirs("include")
+add_includedirs("NetCommon")
+
+target("net_common")
+    set_kind("headeronly")
+    add_headerfiles("NetCommon/**.h")
+    add_packages("asio",{public = true})
 
 target("test")
     set_kind("binary")
     add_files("src/**.cpp")
-    add_packages("asio")
+    add_deps("net_common")
     set_rundir("$(projectdir)")
 
 target("net_client")
     set_kind("binary")
     add_files("NetClient/**.cpp")
-    add_packages("asio")
+    add_deps("net_common")
     set_rundir("$(projectdir)")
 
 target("net_server")
     set_kind("binary")
     add_files("NetServer/**.cpp")
-    add_packages("asio")
+    add_deps("net_common")
     set_rundir("$(projectdir)")
 
 --
