@@ -1,8 +1,7 @@
 package algorithms.leetcode._042_trapping_rain_water;
 
-import java.util.Math;
 
-public class _043 {
+public class _042 {
 
   class Solution {
     public int trap(int[] height) {
@@ -11,14 +10,14 @@ public class _043 {
       for (int i = 1; i < height.length - 1; i++) {
         // 左边最高的板
         int max_left = 0;
-        for (j = i - 1; j >= 0; j--) {
+        for (int j = i - 1; j >= 0; j--) {
           if (height[j] > max_left) {
             max_left = height[j];
           }
         }
         // 右边最高的板
         int max_right = 0;
-        for (j = i + 1； j < height.length; j++) {
+        for (int j = i + 1; j < height.length; j++) {
           if (height[j] > max_right) {
             max_right = height[j];
           }
