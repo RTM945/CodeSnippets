@@ -23,6 +23,9 @@ func (s *APIServer) Run() error {
 		w.Write([]byte("User ID: " + userID + "\n"))
 	})
 
+	v1 := http.NewServeMux()
+	v1.Handle("/api/v1/", http.StripPrefix("/api/v1", router))
+
 	middlewareChain := MiddlewareChain(
 		RequestLoggerMiddleware,
 		RequestAuthMiddleware,
