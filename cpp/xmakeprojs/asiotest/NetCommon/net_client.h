@@ -1,9 +1,11 @@
 #pragma once
 
+#include "asio/ip/tcp.hpp"
 #include "net_common.h"
 #include "net_tsqueue.h"
 #include "net_message.h"
 #include "net_connection.h"
+#include <thread>
 
 
 namespace olc 
@@ -13,7 +15,7 @@ namespace olc
         template <typename T>
         class client_interface 
         {
-
+        public:
             client_interface() : m_socket(m_context)
             {
 
@@ -28,11 +30,19 @@ namespace olc
             bool Connect(const std::string& host, const uint16_t port)
             {
                 try {
-                    m_connection = std::make_unique<connection<T>>(); //TODO
-
+                    
                     asio::ip::tcp::resolver resolver(m_context);
                     asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(host, std::to_string(port));
+                    
+                    m_connection = std::make_unique<connection<T>>(
+                        connection<T>::owner::client,
+                        m_context,
+                        asio::ip::tcp::socket(m_context), m_qMessagesIn
+                    );
+
                     m_connection->ConnectToServer(endpoints);
+
+                    thrContext = std::thread([this]() { m_context.run(); });
 
                 } catch (std::exception& e) {
                     std::cerr << "Client Exception: " << e.what() << "\n";
