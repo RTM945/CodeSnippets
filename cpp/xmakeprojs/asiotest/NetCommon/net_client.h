@@ -1,12 +1,9 @@
 #pragma once
 
-#include "asio/ip/tcp.hpp"
 #include "net_common.h"
 #include "net_tsqueue.h"
 #include "net_message.h"
 #include "net_connection.h"
-#include <thread>
-
 
 namespace olc 
 {
@@ -53,7 +50,7 @@ namespace olc
 
             void Disconnect()
             {
-                if(isConnected())
+                if(IsConnected())
                 {
                     m_connection->Disconnect();
                 }
@@ -66,7 +63,7 @@ namespace olc
                 m_connection.release();
             }
 
-            bool isConnected()
+            bool IsConnected()
             {
                 if (m_connection)
                 {
@@ -78,6 +75,16 @@ namespace olc
             tsqueue<owned_message<T>>& Incoming()
             {
                 return m_qMessagesIn;
+            }
+
+        public:
+
+            void Send(const message<T>& msg)
+            {
+                if (IsConnected())
+                {
+                    m_connection->Send(msg);
+                }
             }
 
         protected:

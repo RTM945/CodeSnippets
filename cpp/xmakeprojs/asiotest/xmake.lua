@@ -7,6 +7,8 @@ set_languages("c++17")
 
 add_includedirs("NetCommon")
 
+add_syslinks("user32")
+
 target("net_common")
     set_kind("headeronly")
     add_headerfiles("NetCommon/**.h")
