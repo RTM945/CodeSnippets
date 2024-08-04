@@ -1,4 +1,4 @@
-package mongo_entity
+package friend
 
 type UserFriendData struct {
 	UserID         uint64   `bson:"_id"`

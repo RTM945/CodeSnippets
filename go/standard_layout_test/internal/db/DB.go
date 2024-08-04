@@ -1,4 +1,4 @@
-package mongo_service
+package db
 
 import (
 	"context"
