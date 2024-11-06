@@ -1,12 +1,16 @@
 package main
 
 import (
-	"container/list"
 	"fmt"
 )
 
 type coord struct {
 	x, y int
+}
+
+type coordPriority struct {
+	c        coord
+	priority int
 }
 
 var dirs = [][]int{{1, 0}, {0, 1}, {-1, 0}, {0, -1}}
@@ -28,12 +32,16 @@ func neighbors(m [][]int, c coord) []coord {
 	return res
 }
 
+func cost(m [][]int, from, to coord) int {
+	return m[to.y][to.x]
+}
+
 func main() {
 	m := [][]int{
-		{0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-		{0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0},
+		{2, 3, 1, 5, 1, 1, 2, 3, 0, 1, 1},
+		{1, 2, 4, 3, 4, 3, 1, 2, 1, 3, 2},
+		{3, 1, 5, 2, 1, 2, 2, 4, 1, 4, 3},
+		{1, 2, 0, 1, 1, 1, 1, 1, 1, 2, 1},
 	}
 
 	start := coord{
@@ -44,22 +52,33 @@ func main() {
 		x: 8,
 		y: 0,
 	}
-	frontier := list.New()
-	frontier.PushBack(start)
+	frontier := NewPriorityQueue(func(a, b coordPriority) bool {
+		return b.priority > a.priority
+	})
+	frontier.Add(coordPriority{
+		c:        start,
+		priority: 0,
+	})
 	came_from := map[coord]coord{}
 	came_from[start] = coord{-1, -1}
+	cost_so_far := map[coord]int{}
+	cost_so_far[start] = 0
 	for frontier.Len() > 0 {
-		current := frontier.Remove(frontier.Front()).(coord)
-		if current.x == 9 && current.y == 0 {
-			fmt.Print()
-		}
-		if current == goal {
+		current := frontier.Remove()
+		if current.c == goal {
 			break
 		}
-		for _, next := range neighbors(m, current) {
-			if _, ok := came_from[next]; !ok {
-				frontier.PushBack(next)
-				came_from[next] = current
+		for _, next := range neighbors(m, current.c) {
+			new_cost := cost_so_far[current.c] + cost(m, current.c, next)
+			_, ok := cost_so_far[next]
+
+			if !ok || new_cost < cost_so_far[next] {
+				cost_so_far[next] = new_cost
+				frontier.Add(coordPriority{
+					c:        next,
+					priority: new_cost,
+				})
+				came_from[next] = current.c
 			}
 		}
 	}
@@ -75,4 +94,5 @@ func main() {
 	for i := len(path) - 1; i >= 0; i-- {
 		fmt.Print(path[i], "->")
 	}
+
 }
