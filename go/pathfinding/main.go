@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 )
 
 type coord struct {
@@ -17,6 +18,10 @@ var dirs = [][]int{{1, 0}, {0, 1}, {-1, 0}, {0, -1}}
 
 func valid(c *coord, w, h int) bool {
 	return 0 <= c.x && c.x < w && 0 <= c.y && c.y < h
+}
+
+func heuristic(goal, current coord) int {
+	return int(math.Abs(float64(current.x-goal.x)) + math.Abs(float64(current.y-goal.y)))
 }
 
 func neighbors(m [][]int, c coord) []coord {
@@ -73,7 +78,7 @@ func main() {
 			_, ok := cost_so_far[next]
 
 			if !ok || new_cost < cost_so_far[next] {
-				cost_so_far[next] = new_cost
+				cost_so_far[next] = new_cost + heuristic(goal, next)
 				frontier.Add(coordPriority{
 					c:        next,
 					priority: new_cost,
