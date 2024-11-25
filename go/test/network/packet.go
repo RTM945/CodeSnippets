@@ -11,13 +11,6 @@ const HeaderSize = 8 // 4字节消息长度 + 4字节协议号
 var PacketTooShortErr = errors.New("packet is too short")
 var PacketNotCompleteErr = errors.New("packet is not complete")
 
-// Packet 表示一个完整的协议包
-type Packet struct {
-	ProtoID   uint32 // 协议号
-	ProtoData []byte // protobuf序列化后的数据
-	Length    uint32
-}
-
 // Pack 将消息打包
 func Pack(protoID uint32, message proto.Message) ([]byte, error) {
 	// 序列化protobuf消息
@@ -45,22 +38,17 @@ func Pack(protoID uint32, message proto.Message) ([]byte, error) {
 }
 
 // Unpack 解包消息
-func Unpack(data []byte) (*Packet, error) {
+func Unpack(data []byte) (uint32, uint32, []byte, error) {
 	if len(data) < HeaderSize {
-		return nil, PacketTooShortErr
+		return 0, 0, nil, PacketTooShortErr
 	}
 
 	length := binary.BigEndian.Uint32(data[0:4])
 	protoID := binary.BigEndian.Uint32(data[4:8])
 
 	if len(data) < int(HeaderSize+length) {
-		return nil, PacketNotCompleteErr
+		return 0, 0, nil, PacketNotCompleteErr
 	}
 	protoData := data[HeaderSize : HeaderSize+length]
-	packet := &Packet{
-		ProtoID:   protoID,
-		ProtoData: protoData,
-		Length:    length,
-	}
-	return packet, nil
+	return length, protoID, protoData, nil
 }
