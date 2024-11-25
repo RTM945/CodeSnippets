@@ -6,31 +6,48 @@ import (
 	"net"
 )
 
-type Handler func(conn net.Conn, packet *Packet)
+type Server struct {
+	addr     string
+	listener net.Listener
+}
 
-// StartTCPServer 启动TCP服务器
-func StartTCPServer(port string) {
-	// 同时支持 TCP 和 TCP6
-	listener, err := net.Listen("tcp", net.JoinHostPort("", port))
-	if err != nil {
-		log.Fatal(err)
+func NewServer(addr string) *Server {
+	return &Server{
+		addr: addr,
 	}
-	defer listener.Close()
+}
 
-	log.Println("TCP Server is listening at ", port)
+func (s *Server) Start() error {
+	listener, err := net.Listen("tcp", s.addr)
+	if err != nil {
+		return err
+	}
+	s.listener = listener
 
+	go s.accept()
+	return nil
+}
+
+func (s *Server) accept() {
 	for {
-		conn, err := listener.Accept()
+		conn, err := s.listener.Accept()
 		if err != nil {
-			log.Println("accept connect error:", err)
+			log.Printf("Accept error: %v\n", err)
 			continue
 		}
-		go handleConnection(conn)
+
+		go func() {
+			handleConnection(conn)
+		}()
 	}
 }
 
 func handleConnection(conn net.Conn) {
-	defer conn.Close()
+	session := NewSession(conn)
+	defer func() {
+		RemoveSession(session)
+		conn.Close()
+	}()
 	buffer := make([]byte, 1024)
 	messageBuffer := make([]byte, 0)
 	for {
@@ -43,20 +60,27 @@ func handleConnection(conn net.Conn) {
 		messageBuffer = append(messageBuffer, buffer[:n]...)
 
 		for len(messageBuffer) >= HeaderSize {
-			packet, err := Unpack(messageBuffer)
+			length, protoId, protoData, err := Unpack(messageBuffer)
 			if err != nil {
 				if errors.Is(err, PacketNotCompleteErr) {
 					break
 				}
 				log.Println("Unpack error:", err)
-				return
+				messageBuffer = nil
+				break
 			}
 
-			// 处理消息
-			//handleMessage(conn, packet)
+			msg, err := CreateMsg(protoId, protoData)
+			if err != nil {
+				log.Printf("Create msg error protoId=%d err=%v:", protoId, err)
+				messageBuffer = nil
+				break
+			}
+
+			log.Println(msg)
 
 			// 移除已处理的消息
-			messageBuffer = messageBuffer[HeaderSize+packet.Length:]
+			messageBuffer = messageBuffer[HeaderSize+length:]
 		}
 	}
 }
