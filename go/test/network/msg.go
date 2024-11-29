@@ -2,7 +2,6 @@ package network
 
 import (
 	"errors"
-	"reflect"
 )
 
 type Msg interface {
@@ -10,18 +9,16 @@ type Msg interface {
 	Decode(buffer []byte) error
 }
 
-var protoTypes = map[uint32]reflect.Type{
-	1: reflect.TypeOf(&Echo{}),
+var msgCreator = map[uint32]func() Msg{
+	1: func() Msg { return &Echo{} },
 }
 
-type MsgCreator func(protoData []byte) Msg
-
 func CreateMsg(protoId uint32, protoData []byte) (Msg, error) {
-	protoType, exists := protoTypes[protoId]
+	create, exists := msgCreator[protoId]
 	if !exists {
 		return nil, errors.New("protoId not exists")
 	}
-	v := reflect.New(protoType.Elem()).Interface()
+	v := create()
 
 	if msg, ok := v.(Msg); ok {
 		err := msg.Decode(protoData)
