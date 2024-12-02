@@ -1,9 +1,21 @@
 package network
 
 import (
-	"errors"
+	"bufio"
+	"bytes"
+	"encoding/binary"
+	"fmt"
+	"io"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+)
+
+const (
+	maxFrameLength = 1<<31 - 1
+	lengthFieldLen = 4
 )
 
 type Server struct {
@@ -25,6 +37,9 @@ func (s *Server) Start() error {
 	s.listener = listener
 
 	go s.accept()
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
+	<-c
 	return nil
 }
 
@@ -48,39 +63,60 @@ func handleConnection(conn net.Conn) {
 		RemoveSession(session)
 		conn.Close()
 	}()
-	buffer := make([]byte, 1024)
-	messageBuffer := make([]byte, 0)
+
+	reader := bufio.NewReader(conn)
+
 	for {
-		n, err := conn.Read(buffer)
+		buffer, err := decodeFrame(reader)
 		if err != nil {
-			log.Println("Read connection error:", err)
-			return
+			if err == io.EOF {
+				log.Println("Client closed connection")
+				return
+			} else {
+				log.Println("Error decoding frame:", err)
+				return
+			}
+		}
+		msg, err := decodeMsg(session, buffer)
+		if err != nil {
+			log.Println("Error decoding message:", err)
+			break
 		}
 
-		messageBuffer = append(messageBuffer, buffer[:n]...)
+		log.Println(msg)
 
-		for len(messageBuffer) >= HeaderSize {
-			length, protoId, protoData, err := Unpack(messageBuffer)
-			if err != nil {
-				if errors.Is(err, PacketNotCompleteErr) {
-					break
-				}
-				log.Println("Unpack error:", err)
-				messageBuffer = nil
-				break
-			}
-
-			msg, err := CreateMsg(protoId, protoData)
-			if err != nil {
-				log.Printf("Create msg error protoId=%d err=%v:", protoId, err)
-				messageBuffer = nil
-				break
-			}
-
-			log.Println(msg)
-
-			// 移除已处理的消息
-			messageBuffer = messageBuffer[HeaderSize+length:]
-		}
 	}
+}
+
+func decodeFrame(reader *bufio.Reader) ([]byte, error) {
+	lengthField := make([]byte, lengthFieldLen)
+	if _, err := io.ReadFull(reader, lengthField); err != nil {
+		return nil, err
+	}
+
+	messageLength := int32(binary.BigEndian.Uint32(lengthField))
+
+	if messageLength > maxFrameLength {
+		return nil, fmt.Errorf("frame too large: %d", messageLength)
+	}
+	if messageLength < 0 {
+		return nil, fmt.Errorf("invalid frame length: %d", messageLength)
+	}
+
+	message := make([]byte, messageLength)
+	if _, err := io.ReadFull(reader, message); err != nil {
+		return nil, err
+	}
+
+	return message, nil
+}
+
+func decodeMsg(session *Session, data []byte) (Msg, error) {
+	buffer := bytes.NewBuffer(data)
+	header := &MsgHeader{}
+	err := header.Decode(buffer)
+	if err != nil {
+		return nil, err
+	}
+	return CreateMsg(header, session, buffer)
 }
