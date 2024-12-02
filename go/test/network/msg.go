@@ -1,31 +1,75 @@
 package network
 
 import (
-	"errors"
+	"bytes"
+	"context"
+	"encoding/binary"
+	"fmt"
 )
 
 type Msg interface {
-	GetProtoID() uint32
-	Decode(buffer []byte) error
+	Decode(buffer *bytes.Buffer) error
+	Encode() ([]byte, error)
+	Init(header *MsgHeader, session *Session)
 }
 
-var msgCreator = map[uint32]func() Msg{
+type MsgBase struct {
+	session *Session
+	header  *MsgHeader
+	ctx     context.Context
+}
+
+type MsgHeader struct {
+	TypeId int32
+	PvId   int32
+}
+
+func (m *MsgHeader) Decode(buffer *bytes.Buffer) error {
+	err := binary.Read(buffer, binary.BigEndian, &m.TypeId)
+	if err != nil {
+		return err
+	}
+	err = binary.Read(buffer, binary.BigEndian, &m.PvId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *MsgHeader) Encode() ([]byte, error) {
+	buf := new(bytes.Buffer)
+
+	err := binary.Write(buf, binary.BigEndian, m.TypeId)
+	if err != nil {
+		return nil, err
+	}
+
+	err = binary.Write(buf, binary.BigEndian, m.PvId)
+	if err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
+}
+
+var msgCreator = map[int32]func() Msg{
 	1: func() Msg { return &Echo{} },
 }
 
-func CreateMsg(protoId uint32, protoData []byte) (Msg, error) {
-	create, exists := msgCreator[protoId]
+func CreateMsg(header *MsgHeader, session *Session, buffer *bytes.Buffer) (Msg, error) {
+	create, exists := msgCreator[header.TypeId]
 	if !exists {
-		return nil, errors.New("protoId not exists")
+		return nil, fmt.Errorf("typeId %d not exists", header.TypeId)
 	}
 	v := create()
 
 	if msg, ok := v.(Msg); ok {
-		err := msg.Decode(protoData)
+		msg.Init(header, session)
+		err := msg.Decode(buffer)
 		if err != nil {
 			return nil, err
 		}
 		return msg, nil
 	}
-	return nil, errors.New("failed to convert to Msg")
+	return nil, fmt.Errorf("failed to convert to Msg typeId %d", header.TypeId)
 }
