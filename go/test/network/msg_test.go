@@ -1,6 +1,7 @@
 package network
 
 import (
+	"bytes"
 	"github.com/golang/protobuf/proto"
 	"gotest/network/protobuf"
 	"testing"
@@ -9,7 +10,11 @@ import (
 func TestMsg(t *testing.T) {
 	echo := protobuf.Echo{Msg: "test"}
 	data, _ := proto.Marshal(&echo)
-	msg, err := CreateMsg(1, data)
+	header := &MsgHeader{
+		TypeId: 1,
+		PvId:   0,
+	}
+	msg, err := CreateMsg(header, nil, bytes.NewBuffer(data))
 	if err != nil {
 		t.Fatal(err)
 	}
