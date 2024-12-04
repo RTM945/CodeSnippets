@@ -7,13 +7,8 @@ import (
 )
 
 type Echo struct {
-	MsgBase
+	*BaseMsg
 	msg string
-}
-
-func (e *Echo) Init(header *MsgHeader, session *Session) {
-	e.MsgBase.header = header
-	e.MsgBase.session = session
 }
 
 func (e *Echo) Decode(buffer *bytes.Buffer) error {
@@ -29,4 +24,8 @@ func (e *Echo) Decode(buffer *bytes.Buffer) error {
 func (e *Echo) Encode() ([]byte, error) {
 	buffer, err := proto.Marshal(&protobuf.Echo{Msg: e.msg})
 	return buffer, err
+}
+
+func (e *Echo) Process() {
+
 }
