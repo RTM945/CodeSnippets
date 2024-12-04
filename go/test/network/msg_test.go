@@ -20,5 +20,6 @@ func TestMsg(t *testing.T) {
 	}
 	if echo, ok := msg.(*Echo); ok {
 		t.Log("Echo:", echo)
+		echo.Process()
 	}
 }
