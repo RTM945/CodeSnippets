@@ -1,31 +1,41 @@
-package network
+package proto
 
 import (
 	"bytes"
-	"github.com/golang/protobuf/proto"
-	"gotest/network/protobuf"
+	"google.golang.org/protobuf/proto"
+	"reares/internal/io"
+	"reares/protobuf"
 )
 
 type Echo struct {
-	*BaseMsg
-	msg string
+	*io.BaseMsg
+	Msg string
 }
 
-func (e *Echo) Decode(buffer *bytes.Buffer) error {
+func NewEcho() *Echo {
+	header := &io.MsgHeader{}
+	header.TypeId = 1
+	return &Echo{
+		BaseMsg: io.NewBaseMsg(header),
+	}
+}
+
+func (msg *Echo) Decode(src *bytes.Buffer) error {
 	tmp := &protobuf.Echo{}
-	err := proto.Unmarshal(buffer.Bytes(), tmp)
+	err := proto.Unmarshal(src.Bytes(), tmp)
 	if err != nil {
 		return err
 	}
-	e.msg = tmp.Msg
+	msg.Msg = tmp.Msg
 	return nil
 }
 
-func (e *Echo) Encode() ([]byte, error) {
-	buffer, err := proto.Marshal(&protobuf.Echo{Msg: e.msg})
-	return buffer, err
+func (msg *Echo) Encode(dst *bytes.Buffer) error {
+	data, err := proto.Marshal(&protobuf.Echo{Msg: msg.Msg})
+	dst.Write(data)
+	return err
 }
 
-func (e *Echo) Process() {
-
+func (msg *Echo) Process() {
+	panic("implement me")
 }
