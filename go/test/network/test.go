@@ -4,11 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"reares/internal/io"
+	"reares/logic/echo"
 	"reares/proto"
 )
 
 func main() {
 	io.MsgCreator[1] = func() io.Msg { return proto.NewEcho() }
+	io.MsgProcessor[1] = func(msg io.Msg) error { return echo.ProcessEcho(msg.(*proto.Echo)) }
+
 	e := proto.NewEcho()
 	e.Msg = "test"
 	buffer := io.GetBuffer()
@@ -20,5 +23,13 @@ func main() {
 	reader := bufio.NewReader(buffer)
 	data, err := io.DecodeFrame(reader)
 	decodeMsg, err := io.DecodeMsg(nil, data)
+	if err != nil {
+		panic(err)
+	}
 	fmt.Println(decodeMsg)
+	//err = decodeMsg.Process()
+	//if err != nil {
+	//	panic(err)
+	//}
+	decodeMsg.Dispatch()
 }
