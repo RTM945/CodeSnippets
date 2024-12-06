@@ -8,7 +8,7 @@ import (
 )
 
 type Echo struct {
-	*io.BaseMsg
+	*io.MsgBase
 	Msg string
 }
 
@@ -16,26 +16,33 @@ func NewEcho() *Echo {
 	header := &io.MsgHeader{}
 	header.TypeId = 1
 	return &Echo{
-		BaseMsg: io.NewBaseMsg(header),
+		MsgBase: io.NewMsgBase(header),
 	}
 }
 
-func (msg *Echo) Decode(src *bytes.Buffer) error {
+func (echo *Echo) Decode(src *bytes.Buffer) error {
 	tmp := &protobuf.Echo{}
 	err := proto.Unmarshal(src.Bytes(), tmp)
 	if err != nil {
 		return err
 	}
-	msg.Msg = tmp.Msg
+	echo.Msg = tmp.Msg
 	return nil
 }
 
-func (msg *Echo) Encode(dst *bytes.Buffer) error {
-	data, err := proto.Marshal(&protobuf.Echo{Msg: msg.Msg})
-	dst.Write(data)
+func (echo *Echo) Encode(dst *bytes.Buffer) error {
+	data, err := proto.Marshal(&protobuf.Echo{Msg: echo.Msg})
+	if err != nil {
+		return err
+	}
+	_, err = dst.Write(data)
 	return err
 }
 
-func (msg *Echo) Process() {
-	panic("implement me")
+func (echo *Echo) Dispatch() {
+	echo.Process()
+}
+
+func (echo *Echo) Process() error {
+	return io.MsgProcessor[echo.GetHeader().TypeId](echo)
 }
