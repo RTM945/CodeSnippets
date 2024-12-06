@@ -1,4 +1,4 @@
-package network
+package io
 
 import (
 	"bufio"
@@ -18,19 +18,20 @@ const (
 	lengthFieldLen = 4
 )
 
-type Server struct {
-	addr     string
-	listener net.Listener
+type Acceptor struct {
+	host, port string
+	listener   net.Listener
 }
 
-func NewServer(addr string) *Server {
-	return &Server{
-		addr: addr,
+func NewAcceptor(host, port string) *Acceptor {
+	return &Acceptor{
+		host: host,
+		port: port,
 	}
 }
 
-func (s *Server) Start() error {
-	listener, err := net.Listen("tcp", s.addr)
+func (s *Acceptor) Start() error {
+	listener, err := net.Listen("tcp", net.JoinHostPort(s.host, s.port))
 	if err != nil {
 		return err
 	}
@@ -43,7 +44,7 @@ func (s *Server) Start() error {
 	return nil
 }
 
-func (s *Server) accept() {
+func (s *Acceptor) accept() {
 	for {
 		conn, err := s.listener.Accept()
 		if err != nil {
@@ -59,36 +60,39 @@ func (s *Server) accept() {
 
 func handleConnection(conn net.Conn) {
 	session := NewSession(conn)
-	defer func() {
-		RemoveSession(session)
-		conn.Close()
-	}()
 
 	reader := bufio.NewReader(conn)
 
 	for {
-		buffer, err := decodeFrame(reader)
+		buffer, err := DecodeFrame(reader)
 		if err != nil {
 			if err == io.EOF {
 				log.Println("Client closed connection")
-				return
+				RemoveSession(session)
+				break
 			} else {
 				log.Println("Error decoding frame:", err)
-				return
+				RemoveSession(session)
+				break
 			}
 		}
-		msg, err := decodeMsg(session, buffer)
+		msg, err := DecodeMsg(session, buffer)
 		if err != nil {
 			log.Println("Error decoding message:", err)
-			break
+			continue
 		}
+
+		msg.Dispatch()
 
 		log.Println(msg)
 
 	}
+
+	RemoveSession(session)
+	_ = conn.Close()
 }
 
-func decodeFrame(reader *bufio.Reader) ([]byte, error) {
+func DecodeFrame(reader *bufio.Reader) ([]byte, error) {
 	lengthField := make([]byte, lengthFieldLen)
 	if _, err := io.ReadFull(reader, lengthField); err != nil {
 		return nil, err
@@ -111,12 +115,38 @@ func decodeFrame(reader *bufio.Reader) ([]byte, error) {
 	return message, nil
 }
 
-func decodeMsg(session *Session, data []byte) (Msg, error) {
-	buffer := bytes.NewBuffer(data)
+func DecodeMsg(session *Session, data []byte) (Msg, error) {
+	buffer := GetBuffer()
+	buffer.Write(data)
 	header := &MsgHeader{}
 	err := header.Decode(buffer)
 	if err != nil {
 		return nil, err
 	}
-	return CreateMsg(header, session, buffer)
+	msg, err := CreateMsg(header, session, buffer)
+	PutBuffer(buffer)
+	return msg, err
+}
+
+func EncodeMsg(session *Session, buffer *bytes.Buffer, msg Msg) error {
+	err := binary.Write(buffer, binary.BigEndian, uint32(0)) // 占位
+	if err != nil {
+		return err
+	}
+	header := msg.GetHeader()
+	err = header.Encode(buffer)
+	if err != nil {
+		return err
+	}
+	err = msg.Encode(buffer)
+	if err != nil {
+		return err
+	}
+	totalLen := buffer.Len() - lengthFieldLen
+	data := buffer.Bytes()
+
+	binary.BigEndian.PutUint32(data[:4], uint32(totalLen))
+
+	// todo session log
+	return nil
 }
