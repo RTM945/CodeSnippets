@@ -1,0 +1,16 @@
+package main
+
+import (
+	"log"
+	"reares/internal/io"
+	"reares/logic"
+)
+
+func main() {
+	logic.Init()
+	acceptor := io.NewAcceptor("127.0.0.1", "18290")
+	err := acceptor.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
