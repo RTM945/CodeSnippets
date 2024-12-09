@@ -1,7 +1,11 @@
 syntax = "proto3";
 package protobuf;
-option go_package = "reares/protobuf";
+option go_package = "protobuf/";
 
-message Echo {
+message CEcho {
+  string msg = 1;
+}
+
+message SEcho {
   string msg = 1;
 }
