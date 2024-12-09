@@ -33,7 +33,7 @@ func (session *Session) SetConn(conn net.Conn) {
 
 func (session *Session) Send(msg Msg) error {
 	buffer := GetBuffer()
-	err := EncodeMsg(session, buffer, msg)
+	err := EncodeMsg(buffer, msg)
 	if err != nil {
 		PutBuffer(buffer)
 		return err
