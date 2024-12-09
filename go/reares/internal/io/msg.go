@@ -95,10 +95,6 @@ type Msg interface {
 	SetContext(ctx context.Context)
 }
 
-type MsgProcessorFunc[T Msg] func(msg T) error
-
-var MsgProcessor = map[int32]MsgProcessorFunc[Msg]{}
-
 type MsgCreatorFunc[T Msg] func() T
 
 var MsgCreator = map[int32]MsgCreatorFunc[Msg]{}
@@ -118,3 +114,30 @@ func CreateMsg(header *MsgHeader, session *Session, buffer *bytes.Buffer) (Msg, 
 	msg.SetHeader(header)
 	return msg, nil
 }
+
+//var taskQueues = make([]chan Task, 8)
+//
+//func HashExecute(session *network.Session, msg Msg) {
+//	hash := fnv.New32a()
+//	hash.Write([]byte(fmt.Sprintf("%v", session)))
+//	idx := hash.Sum32() & (8 - 1)
+//	taskQueues[idx] <- msg
+//}
+//
+//func StartExecuteTasks() {
+//	for i := 0; i < len(taskQueues); i++ {
+//		queue := taskQueues[i]
+//		go startExecuteTask(queue)
+//	}
+//}
+//
+//func startExecuteTask(ch chan Task) {
+//	for {
+//		select {
+//		case msg := <-ch:
+//			msg.Execute()
+//		default:
+//			continue
+//		}
+//	}
+//}
