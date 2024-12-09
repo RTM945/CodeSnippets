@@ -1,0 +1,58 @@
+package proto
+
+import (
+	"bytes"
+	"google.golang.org/protobuf/proto"
+	"reares/internal/io"
+	"reares/protobuf"
+)
+
+type CEcho struct {
+	*io.MsgBase
+	MsgProcessor
+	Msg string
+}
+
+func NewCEchoWithProcessor(msgProcessor MsgProcessor) *CEcho {
+	header := &io.MsgHeader{}
+	header.TypeId = 1
+	return &CEcho{
+		MsgBase:      io.NewMsgBase(header),
+		MsgProcessor: msgProcessor,
+	}
+}
+
+func NewCEcho() *CEcho {
+	header := &io.MsgHeader{}
+	header.TypeId = 1
+	return &CEcho{
+		MsgBase: io.NewMsgBase(header),
+	}
+}
+
+func (echo *CEcho) Decode(src *bytes.Buffer) error {
+	tmp := &protobuf.Echo{}
+	err := proto.Unmarshal(src.Bytes(), tmp)
+	if err != nil {
+		return err
+	}
+	echo.Msg = tmp.Msg
+	return nil
+}
+
+func (echo *CEcho) Encode(dst *bytes.Buffer) error {
+	data, err := proto.Marshal(&protobuf.Echo{Msg: echo.Msg})
+	if err != nil {
+		return err
+	}
+	_, err = dst.Write(data)
+	return err
+}
+
+func (echo *CEcho) Dispatch() {
+	echo.Process()
+}
+
+func (echo *CEcho) Process() error {
+	return echo.ProcessCEcho(echo)
+}
