@@ -23,6 +23,10 @@ type Acceptor struct {
 	listener   net.Listener
 }
 
+func NewAcceptor(host, port string) *Acceptor {
+	return &Acceptor{host: host, port: port}
+}
+
 func (acceptor *Acceptor) Start() error {
 	listener, err := net.Listen("tcp", net.JoinHostPort(acceptor.host, acceptor.port))
 	if err != nil {
@@ -31,6 +35,7 @@ func (acceptor *Acceptor) Start() error {
 	acceptor.listener = listener
 
 	go acceptor.accept()
+	log.Println("Listening on " + acceptor.listener.Addr().String())
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGTERM, syscall.SIGINT)
 	<-c
@@ -44,18 +49,70 @@ func (acceptor *Acceptor) accept() {
 			log.Printf("Accept error: %v\n", err)
 			continue
 		}
-
+		tcpConn := conn.(*net.TCPConn)
+		onNewTcpConnection(tcpConn)
+		session := NewSession(tcpConn)
+		reader := bufio.NewReader(tcpConn)
 		go func() {
-			handleConnection(conn)
+			onRead(session, reader)
+			RemoveSession(session)
+			_ = tcpConn.Close()
 		}()
 	}
 }
 
-func handleConnection(conn net.Conn) {
-	session := NewSession(conn)
+type Connector struct {
+	*Session
+}
 
-	reader := bufio.NewReader(conn)
+func NewConnector() *Connector {
+	return &Connector{}
+}
 
+func (connector *Connector) Connect(target string) {
+	raddr, err := net.ResolveTCPAddr("tcp", target)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tcpConn, err := net.DialTCP("tcp", nil, raddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	onNewTcpConnection(tcpConn)
+	session := NewSession(tcpConn)
+	reader := bufio.NewReader(tcpConn)
+	connector.Session = session
+	go func() {
+		onRead(session, reader)
+		RemoveSession(session)
+		_ = tcpConn.Close()
+	}()
+}
+
+func (connector *Connector) Send(msg Msg) error {
+	return connector.Session.Send(msg)
+}
+
+func onNewTcpConnection(tcpConn *net.TCPConn) {
+	err := tcpConn.SetReadBuffer(655360)
+	if err != nil {
+		log.Printf("SetReadBuffer error: %v\n", err)
+	}
+	err = tcpConn.SetWriteBuffer(655360)
+	if err != nil {
+		log.Printf("SetWriteBuffer error: %v\n", err)
+	}
+	err = tcpConn.SetNoDelay(true)
+	if err != nil {
+		log.Printf("SetNoDelay error: %v\n", err)
+	}
+	err = tcpConn.SetKeepAlive(true)
+	if err != nil {
+		log.Printf("SetKeepAlive error: %v\n", err)
+	}
+}
+
+func onRead(session *Session, reader *bufio.Reader) {
 	for {
 		buffer, err := DecodeFrame(reader)
 		if err != nil {
@@ -77,12 +134,7 @@ func handleConnection(conn net.Conn) {
 
 		msg.Dispatch()
 
-		log.Println(msg)
-
 	}
-
-	RemoveSession(session)
-	_ = conn.Close()
 }
 
 func DecodeFrame(reader *bufio.Reader) ([]byte, error) {
@@ -118,10 +170,11 @@ func DecodeMsg(session *Session, data []byte) (Msg, error) {
 	}
 	msg, err := CreateMsg(header, session, buffer)
 	PutBuffer(buffer)
+	log.Println("Recv msg:", msg)
 	return msg, err
 }
 
-func EncodeMsg(session *Session, buffer *bytes.Buffer, msg Msg) error {
+func EncodeMsg(buffer *bytes.Buffer, msg Msg) error {
 	err := binary.Write(buffer, binary.BigEndian, uint32(0)) // 占位
 	if err != nil {
 		return err
@@ -139,7 +192,6 @@ func EncodeMsg(session *Session, buffer *bytes.Buffer, msg Msg) error {
 	data := buffer.Bytes()
 
 	binary.BigEndian.PutUint32(data[:4], uint32(totalLen))
-
-	// todo session log
+	log.Println("Send msg:", msg)
 	return nil
 }
