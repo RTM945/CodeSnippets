@@ -9,16 +9,16 @@ import (
 
 type SEcho struct {
 	*io.MsgBase
-	MsgProcessor
+	EchoProcessor
 	Msg string
 }
 
-func NewSEchoWithProcessor(msgProcessor MsgProcessor) *SEcho {
+func NewSEchoWithProcessor(msgProcessor EchoProcessor) *SEcho {
 	header := &io.MsgHeader{}
 	header.TypeId = 2
 	return &SEcho{
-		MsgBase:      io.NewMsgBase(header),
-		MsgProcessor: msgProcessor,
+		MsgBase:       io.NewMsgBase(header),
+		EchoProcessor: msgProcessor,
 	}
 }
 
