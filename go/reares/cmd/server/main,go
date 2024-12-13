@@ -1,16 +1,84 @@
 package main
 
 import (
-	"log"
-	"reares/internal/io"
-	"reares/logic"
+	"crypto/ecdh"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/x509"
+	"fmt"
+	"net"
 )
 
 func main() {
-	logic.Init()
-	acceptor := io.NewAcceptor("127.0.0.1", "18290")
-	err := acceptor.Start()
+	//logic.Init()
+	//acceptor := io.NewAcceptor("127.0.0.1", "18290")
+	//err := acceptor.Start()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error starting server:", err)
+		return
 	}
+	defer listener.Close()
+	fmt.Println("Server is running on port 8080")
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Error accepting connection:", err)
+			continue
+		}
+		go handleConnection(conn)
+	}
+}
+
+func handleConnection(conn net.Conn) {
+	defer conn.Close()
+
+	serverPriv, err := ecdh.P256().GenerateKey(rand.Reader)
+	if err != nil {
+		fmt.Println("Error generating server key:", err)
+		return
+	}
+
+	// Send server's public key to client
+	key, err := x509.MarshalPKIXPublicKey(serverPriv.PublicKey())
+	if err != nil {
+		fmt.Println("Error marshalling server key:", err)
+		return
+	}
+	conn.Write(key)
+
+	// Receive and deserialize client's public key
+	clientPubBytes := make([]byte, 65) // 65 bytes for uncompressed P256 public key
+	if _, err := conn.Read(clientPubBytes); err != nil {
+		fmt.Println("Error receiving client public key:", err)
+		return
+	}
+
+	pub, err := x509.ParsePKIXPublicKey(clientPubBytes)
+	if err != nil {
+		fmt.Println("Error deserializing client public key:", err)
+		return
+	}
+	clientPub, ok := pub.(*ecdh.PublicKey)
+	if !ok {
+		fmt.Println("key is not an ECDH public key")
+		return
+	}
+
+	// Derive shared key
+	sharedSecret, err := serverPriv.ECDH(clientPub)
+	if err != nil {
+		fmt.Println("Error deriving shared key:", err)
+		return
+	}
+	sharedKey := sha256.Sum256(sharedSecret)
+	fmt.Println("Shared key derived on server:", sharedKey)
+
+	// Send acknowledgment
+	conn.Write([]byte("Shared key established!"))
+
 }
