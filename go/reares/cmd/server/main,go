@@ -44,8 +44,14 @@ func handleConnection(conn net.Conn) {
 		println(err)
 		return
 	}
-	_, _ = conn.Write(encoded)
-
+	send := make([]byte, 4+len(encoded))
+	// length
+	binary.BigEndian.PutUint32(send[:4], uint32(len(encoded)))
+	// typeId
+	binary.BigEndian.PutUint32(send[4:8], 1)
+	send = append(send, encoded...)
+	_, _ = conn.Write(send)
+	
 	buffer := new(bytes.Buffer)
 
 	for {
