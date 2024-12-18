@@ -7,7 +7,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"math/big"
 	"net"
 	"reares/pkg/rc4"
 	"reares/pkg/rsa"
@@ -51,7 +50,7 @@ func handleConnection(conn net.Conn) {
 	binary.BigEndian.PutUint32(send[4:8], 1)
 	send = append(send, encoded...)
 	_, _ = conn.Write(send)
-	
+
 	buffer := new(bytes.Buffer)
 
 	for {
@@ -128,14 +127,17 @@ type Session struct {
 }
 
 func randomKey(size int) []byte {
+	//res := make([]byte, size)
+	//str := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	//for i := 0; i < size; i++ {
+	//	n, err := rand.Int(rand.Reader, big.NewInt(int64(len(str))))
+	//	if err != nil {
+	//		return nil
+	//	}
+	//	res[i] = str[n.Int64()]
+	//}
+	//return res
 	res := make([]byte, size)
-	str := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	for i := 0; i < size; i++ {
-		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(str))))
-		if err != nil {
-			return nil
-		}
-		res[i] = str[n.Int64()]
-	}
+	rand.Read(res)
 	return res
 }
