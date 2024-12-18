@@ -1,12 +1,16 @@
 package main
 
 import (
-	"crypto/ecdh"
+	"bytes"
 	"crypto/rand"
-	"crypto/sha256"
-	"crypto/x509"
+	"encoding/base64"
+	"encoding/binary"
 	"fmt"
+	"io"
+	"math/big"
 	"net"
+	"reares/pkg/rc4"
+	"reares/pkg/rsa"
 )
 
 func main() {
@@ -18,11 +22,11 @@ func main() {
 	//}
 	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
-		fmt.Println("Error starting server:", err)
+		panic(err)
 		return
 	}
 	defer listener.Close()
-	fmt.Println("Server is running on port 8080")
+	println("Server is running on port 8080")
 
 	for {
 		conn, err := listener.Accept()
@@ -36,49 +40,100 @@ func main() {
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
-
-	serverPriv, err := ecdh.P256().GenerateKey(rand.Reader)
+	// RSA KEY EXCHANGE
+	session := &Session{
+		rsa: rsa.GetInstance(),
+	}
+	encoded, err := session.rsa.GetPublicKeyEncoded()
 	if err != nil {
-		fmt.Println("Error generating server key:", err)
+		println(err)
 		return
 	}
+	_, _ = conn.Write(encoded)
 
-	// Send server's public key to client
-	key, err := x509.MarshalPKIXPublicKey(serverPriv.PublicKey())
-	if err != nil {
-		fmt.Println("Error marshalling server key:", err)
-		return
+	buffer := new(bytes.Buffer)
+
+	for {
+		n, err := buffer.ReadFrom(conn)
+		if err != nil {
+			if err != io.EOF {
+				println(err)
+			}
+			break
+		}
+		if n == 0 {
+			continue
+		}
+		if session.securityDecoder != nil {
+			// 流加密解密
+			session.securityDecoder.DoUpdate(buffer.Bytes())
+		}
+		if buffer.Len() < 4 {
+			continue
+		}
+		frameLength := binary.BigEndian.Uint32(buffer.Bytes()[:4])
+		if int(frameLength)+4 < buffer.Len() {
+			continue
+		}
+		frame := make([]byte, int(frameLength)+4)
+		buffer.Read(frame)
+		typeId := binary.BigEndian.Uint32(frame[4:8])
+		switch typeId {
+		case 1:
+			// RSA KEY EXCHANGE
+			clientPublicKey := frame[8:]
+			key := randomKey(32)
+			base64.StdEncoding.Encode(key, key)
+			session.securityDecoder = rc4.NewRC4(key)
+			encrypt, err := rsa.Encrypt(clientPublicKey, key)
+			if err != nil {
+				println(err)
+				return
+			}
+			send := make([]byte, 4+len(encrypt))
+			// length
+			binary.BigEndian.PutUint32(send, uint32(len(encrypt)))
+			// typeId
+			binary.BigEndian.PutUint32(send, 2)
+			send = append(send, encrypt...)
+			_, _ = conn.Write(send)
+		case 2:
+			// KEY EXCHANGE
+			encrypt := frame[8:]
+			clientKey, err := rsa.Decrypt(session.rsa.GetPrivateKey(), encrypt)
+			if err != nil {
+				println(err)
+				return
+			}
+			session.securityEncoder = rc4.NewRC4(clientKey)
+			msg := []byte("hello")
+			send := make([]byte, 4+len(msg))
+			// length
+			binary.BigEndian.PutUint32(send, uint32(len(msg)))
+			// typeId
+			binary.BigEndian.PutUint32(send, 3)
+			send = append(send, msg...)
+			session.securityDecoder.DoUpdate(send)
+			_, _ = conn.Write(send)
+		}
 	}
-	conn.Write(key)
+}
 
-	// Receive and deserialize client's public key
-	clientPubBytes := make([]byte, 65) // 65 bytes for uncompressed P256 public key
-	if _, err := conn.Read(clientPubBytes); err != nil {
-		fmt.Println("Error receiving client public key:", err)
-		return
+type Session struct {
+	rsa             *rsa.Key
+	securityDecoder *rc4.RC4
+	securityEncoder *rc4.RC4
+}
+
+func randomKey(size int) []byte {
+	res := make([]byte, size)
+	str := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	for i := 0; i < size; i++ {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(str))))
+		if err != nil {
+			return nil
+		}
+		res[i] = str[n.Int64()]
 	}
-
-	pub, err := x509.ParsePKIXPublicKey(clientPubBytes)
-	if err != nil {
-		fmt.Println("Error deserializing client public key:", err)
-		return
-	}
-	clientPub, ok := pub.(*ecdh.PublicKey)
-	if !ok {
-		fmt.Println("key is not an ECDH public key")
-		return
-	}
-
-	// Derive shared key
-	sharedSecret, err := serverPriv.ECDH(clientPub)
-	if err != nil {
-		fmt.Println("Error deriving shared key:", err)
-		return
-	}
-	sharedKey := sha256.Sum256(sharedSecret)
-	fmt.Println("Shared key derived on server:", sharedKey)
-
-	// Send acknowledgment
-	conn.Write([]byte("Shared key established!"))
-
+	return res
 }
