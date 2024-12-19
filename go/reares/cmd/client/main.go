@@ -1,12 +1,15 @@
 package main
 
 import (
-	"crypto/ecdh"
+	"bytes"
 	"crypto/rand"
-	"crypto/sha256"
-	"crypto/x509"
+	"encoding/base64"
+	"encoding/binary"
 	"fmt"
+	"io"
 	"net"
+	"reares/pkg/rc4"
+	"reares/pkg/rsa"
 )
 
 func main() {
@@ -25,57 +28,104 @@ func main() {
 		return
 	}
 	defer conn.Close()
+	println("connected to server", conn.RemoteAddr().String())
+	session := &Session{}
 
-	// Generate client's ECDH key pair
-	clientPriv, err := ecdh.P256().GenerateKey(rand.Reader)
-	if err != nil {
-		fmt.Println("Error generating client key:", err)
-		return
-	}
+	byteBuf := bytes.NewBuffer(make([]byte, 0, 1024))
+	buffer := make([]byte, 1024)
+	for {
+		n, err := conn.Read(buffer)
+		if err != nil {
+			if err != io.EOF {
+				println(err)
+			}
+			break
+		}
+		if n == 0 {
+			continue
+		}
+		byteBuf.Write(buffer[:n])
+		if session.securityDecoder != nil {
+			// 流加密解密
+			session.securityDecoder.DoUpdate(byteBuf.Bytes())
+			println("decode success:", conn.RemoteAddr().String())
+		}
+		if byteBuf.Len() < 4 {
+			continue
+		}
+		frameLength := binary.BigEndian.Uint32(byteBuf.Bytes()[:4])
+		if byteBuf.Len() < int(frameLength)+4 {
+			continue
+		}
 
-	// Receive and deserialize server's public key
-	serverPubBytes := make([]byte, 65) // 65 bytes for uncompressed P256 public key
-	if _, err := conn.Read(serverPubBytes); err != nil {
-		fmt.Println("Error receiving server public key:", err)
-		return
-	}
-	pub, err := x509.ParsePKIXPublicKey(serverPubBytes)
-	if err != nil {
-		fmt.Println("Error deserializing server public key:", err)
-		return
-	}
-	serverPub, ok := pub.(*ecdh.PublicKey)
-	if !ok {
-		fmt.Println("key is not an ECDH public key")
-		return
-	}
+		frame := byteBuf.Next(int(frameLength) + 8)
+		typeId := binary.BigEndian.Uint32(frame[4:8])
+		switch typeId {
+		case 1:
+			// RSA KEY EXCHANGE
+			session.serverPublicKey = frame[8:]
+			session.rsa = rsa.GetInstance()
+			encoded, err := session.rsa.GetPublicKeyEncoded()
+			if err != nil {
+				println(err)
+				return
+			}
+			println("recv rsa key from:", conn.RemoteAddr().String())
+			send := make([]byte, 8)
+			// length
+			binary.BigEndian.PutUint32(send[:4], uint32(len(encoded)))
+			// typeId
+			binary.BigEndian.PutUint32(send[4:8], 1)
+			send = append(send, encoded...)
+			_, _ = conn.Write(send)
+			println("send rsa key to:", conn.RemoteAddr().String())
+		case 2:
+			// KEY EXCHANGE
+			encrypt := frame[8:]
+			serverKey, err := rsa.Decrypt(session.rsa.GetPrivateKey(), encrypt)
+			if err != nil {
+				println(err)
+				return
+			}
+			fmt.Println("serverKey:", serverKey)
+			session.securityDecoder = rc4.NewRC4(serverKey)
+			println("recv key from:", conn.RemoteAddr().String())
+			key := randomKey(32)
+			encodedKey := make([]byte, base64.StdEncoding.EncodedLen(len(key)))
+			base64.StdEncoding.Encode(encodedKey, key)
+			session.securityEncoder = rc4.NewRC4(encodedKey)
+			fmt.Println("clientKey:", key)
+			encrypt, err = rsa.Encrypt(session.serverPublicKey, encodedKey)
+			if err != nil {
+				println(err)
+				return
+			}
 
-	// Serialize and send client's public key
-	key, err := x509.MarshalPKIXPublicKey(clientPriv.PublicKey())
-	if err != nil {
-		fmt.Println("Error marshalling client key:", err)
-		return
+			send := make([]byte, 8)
+			// length
+			binary.BigEndian.PutUint32(send[:4], uint32(len(encrypt)))
+			// typeId
+			binary.BigEndian.PutUint32(send[4:8], 2)
+			send = append(send, encrypt...)
+			session.securityDecoder.DoUpdate(send)
+			println("encode success:", conn.RemoteAddr().String())
+			_, _ = conn.Write(send)
+			println("send key to:", conn.RemoteAddr().String())
+		case 3:
+			println(string(frame[8:]))
+		}
 	}
-	if _, err := conn.Write(key); err != nil {
-		fmt.Println("Error sending client public key:", err)
-		return
-	}
+}
 
-	// Derive shared key
-	sharedSecret, err := clientPriv.ECDH(serverPub)
-	if err != nil {
-		fmt.Println("Error deriving shared key:", err)
-		return
-	}
-	sharedKey := sha256.Sum256(sharedSecret)
-	fmt.Println("Shared key derived on client:", sharedKey)
+type Session struct {
+	rsa             *rsa.Key
+	securityDecoder *rc4.RC4
+	securityEncoder *rc4.RC4
+	serverPublicKey []byte
+}
 
-	// Read acknowledgment
-	buf := make([]byte, 256)
-	n, err := conn.Read(buf)
-	if err != nil {
-		fmt.Println("Error reading from server:", err)
-		return
-	}
-	fmt.Println("Message from server:", string(buf[:n]))
+func randomKey(size int) []byte {
+	res := make([]byte, size)
+	rand.Read(res)
+	return res
 }
