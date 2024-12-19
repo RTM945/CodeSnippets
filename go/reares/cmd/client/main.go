@@ -32,8 +32,9 @@ func main() {
 	session := &Session{}
 
 	byteBuf := bytes.NewBuffer(make([]byte, 0, 1024))
-	buffer := make([]byte, 1024)
+
 	for {
+		buffer := make([]byte, 1024)
 		n, err := conn.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
@@ -44,12 +45,14 @@ func main() {
 		if n == 0 {
 			continue
 		}
-		byteBuf.Write(buffer[:n])
+		buffer = buffer[:n]
 		if session.securityDecoder != nil {
 			// 流加密解密
-			session.securityDecoder.DoUpdate(byteBuf.Bytes())
+			session.securityDecoder.DoUpdate(buffer)
 			println("decode success:", conn.RemoteAddr().String())
 		}
+		byteBuf.Write(buffer[:n])
+
 		if byteBuf.Len() < 4 {
 			continue
 		}
