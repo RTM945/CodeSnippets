@@ -58,9 +58,9 @@ func handleConnection(conn net.Conn) {
 	_, _ = conn.Write(send)
 	println("send rsa key to ", conn.RemoteAddr().String())
 	byteBuf := bytes.NewBuffer(make([]byte, 0, 1024))
-	buffer := make([]byte, 1024)
 
 	for {
+		buffer := make([]byte, 1024)
 		n, err := conn.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
@@ -71,14 +71,16 @@ func handleConnection(conn net.Conn) {
 		if n == 0 {
 			continue
 		}
+		buffer = buffer[:n]
+		if session.securityDecoder != nil {
+			// 流加密解密
+			session.securityDecoder.DoUpdate(buffer)
+			println("decode success:", conn.RemoteAddr().String())
+		}
 		byteBuf.Write(buffer[:n])
 		println("=============================================")
 		println("recv frame from:", conn.RemoteAddr().String())
-		if session.securityDecoder != nil {
-			// 流加密解密
-			session.securityDecoder.DoUpdate(byteBuf.Bytes())
-			println("decode success:", conn.RemoteAddr().String())
-		}
+
 		if byteBuf.Len() < 4 {
 			continue
 		}
@@ -123,7 +125,7 @@ func handleConnection(conn net.Conn) {
 			fmt.Println("clientKey:", clientKey)
 			session.securityEncoder = rc4.NewRC4(clientKey)
 			println("recv key from:", conn.RemoteAddr().String())
-			msg := []byte("hello")
+			msg := []byte("丢弃 byteBuf 中已读完的数据的时机\n你可以在以下时机安全地丢弃已经读取并处理完的数据：\n\n1. 数据读取和解密之后\n当你通过 frame := make([]byte, int(frameLength)+4) 将数据从 byteBuf 中读取到 frame 中并进行处理（例如解密、解码等）后，数据已经不再需要在 byteBuf 中保留。此时你可以丢弃 byteBuf 中的已处理数据。\n\n具体来说，byteBuf.Read(frame) 将从 byteBuf 中读取数据填充到 frame 中。此时，你已经读取了帧数据并且不再需要这些数据在缓冲区中。为了避免内存膨胀，可以使用 bytes.Buffer 的 Next 或 Read 方法来安全丢弃已读数据。\n\n2. 使用 Next 方法丢弃已处理的数据\nbytes.Buffer 提供了 Next(n int) 方法，它会返回当前缓冲区的前 n 字节，并将这些字节从缓冲区中移除。这是一个非常适合丢弃已读数据的方式。\n\n你可以在处理完当前帧数据后，使用 Next 方法丢弃 byteBuf 中的已处理部分。前面的句号哪去了？")
 			send := make([]byte, 8)
 			// length
 			binary.BigEndian.PutUint32(send[:4], uint32(len(msg)))
