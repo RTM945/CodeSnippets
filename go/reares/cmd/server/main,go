@@ -13,7 +13,12 @@ import (
 )
 
 func main() {
-
+	//logic.Init()
+	//acceptor := io.NewAcceptor("127.0.0.1", "18290")
+	//err := acceptor.Start()
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
 	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		panic(err)
@@ -34,6 +39,7 @@ func main() {
 
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
+	println("recv conn from:", conn.RemoteAddr().String())
 	// RSA KEY EXCHANGE
 	session := &Session{
 		rsa: rsa.GetInstance(),
@@ -43,18 +49,19 @@ func handleConnection(conn net.Conn) {
 		println(err)
 		return
 	}
-	send := make([]byte, 4+len(encoded))
+	send := make([]byte, 8)
 	// length
 	binary.BigEndian.PutUint32(send[:4], uint32(len(encoded)))
 	// typeId
 	binary.BigEndian.PutUint32(send[4:8], 1)
 	send = append(send, encoded...)
 	_, _ = conn.Write(send)
-
-	buffer := new(bytes.Buffer)
+	println("send rsa key to ", conn.RemoteAddr().String())
+	byteBuf := bytes.NewBuffer(make([]byte, 0, 1024))
+	buffer := make([]byte, 1024)
 
 	for {
-		n, err := buffer.ReadFrom(conn)
+		n, err := conn.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
 				println(err)
@@ -64,19 +71,23 @@ func handleConnection(conn net.Conn) {
 		if n == 0 {
 			continue
 		}
+		byteBuf.Write(buffer[:n])
+		println("=============================================")
+		println("recv frame from:", conn.RemoteAddr().String())
 		if session.securityDecoder != nil {
 			// 流加密解密
-			session.securityDecoder.DoUpdate(buffer.Bytes())
+			session.securityDecoder.DoUpdate(byteBuf.Bytes())
+			println("decode success:", conn.RemoteAddr().String())
 		}
-		if buffer.Len() < 4 {
+		if byteBuf.Len() < 4 {
 			continue
 		}
-		frameLength := binary.BigEndian.Uint32(buffer.Bytes()[:4])
-		if buffer.Len() < int(frameLength)+4 {
+		frameLength := binary.BigEndian.Uint32(byteBuf.Bytes()[:4])
+		if byteBuf.Len() < int(frameLength)+4 {
 			continue
 		}
-		frame := make([]byte, int(frameLength)+4)
-		buffer.Read(frame)
+
+		frame := byteBuf.Next(int(frameLength) + 8)
 		typeId := binary.BigEndian.Uint32(frame[4:8])
 		switch typeId {
 		case 1:
@@ -86,18 +97,21 @@ func handleConnection(conn net.Conn) {
 			encodedKey := make([]byte, base64.StdEncoding.EncodedLen(len(key)))
 			base64.StdEncoding.Encode(encodedKey, key)
 			session.securityDecoder = rc4.NewRC4(encodedKey)
+			fmt.Println("serverKey:", key)
+			println("recv rsa key from:", conn.RemoteAddr().String())
 			encrypt, err := rsa.Encrypt(clientPublicKey, encodedKey)
 			if err != nil {
 				println(err)
 				return
 			}
-			send := make([]byte, 4+len(encrypt))
+			send := make([]byte, 8)
 			// length
 			binary.BigEndian.PutUint32(send[:4], uint32(len(encrypt)))
 			// typeId
 			binary.BigEndian.PutUint32(send[4:8], 2)
 			send = append(send, encrypt...)
 			_, _ = conn.Write(send)
+			println("send rsa key to:", conn.RemoteAddr().String())
 		case 2:
 			// KEY EXCHANGE
 			encrypt := frame[8:]
@@ -106,16 +120,20 @@ func handleConnection(conn net.Conn) {
 				println(err)
 				return
 			}
+			fmt.Println("clientKey:", clientKey)
 			session.securityEncoder = rc4.NewRC4(clientKey)
+			println("recv key from:", conn.RemoteAddr().String())
 			msg := []byte("hello")
-			send := make([]byte, 4+len(msg))
+			send := make([]byte, 8)
 			// length
 			binary.BigEndian.PutUint32(send[:4], uint32(len(msg)))
 			// typeId
 			binary.BigEndian.PutUint32(send[4:8], 3)
 			send = append(send, msg...)
 			session.securityDecoder.DoUpdate(send)
+			println("encode success:", conn.RemoteAddr().String())
 			_, _ = conn.Write(send)
+			println("send hello to:", conn.RemoteAddr().String())
 		}
 	}
 }
