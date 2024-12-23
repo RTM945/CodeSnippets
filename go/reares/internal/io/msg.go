@@ -44,7 +44,7 @@ func (msgHeader *MsgHeader) Decode(src *bytes.Buffer) error {
 }
 
 type MsgBase struct {
-	session   *Session
+	session   Session
 	msgHeader *MsgHeader
 	ctx       context.Context
 }
@@ -55,11 +55,11 @@ func NewMsgBase(msgHeader *MsgHeader) *MsgBase {
 	}
 }
 
-func (msgBase *MsgBase) SetSession(session *Session) {
+func (msgBase *MsgBase) SetSession(session Session) {
 	msgBase.session = session
 }
 
-func (msgBase *MsgBase) GetSession() *Session {
+func (msgBase *MsgBase) GetSession() Session {
 	return msgBase.session
 }
 
@@ -87,19 +87,33 @@ type Msg interface {
 	Codec
 	Process() error
 	Dispatch()
-	GetSession() *Session
-	SetSession(session *Session)
+	GetSession() Session
+	SetSession(session Session)
 	GetHeader() *MsgHeader
 	SetHeader(header *MsgHeader)
 	GetContext() context.Context
 	SetContext(ctx context.Context)
 }
 
+type MsgDecoder struct {
+}
+
+func (msgDecoder *MsgDecoder) Decode(ctx *ChannelHandlerContext, in *bytes.Buffer, out []interface{}) error {
+	return nil
+}
+
+type MsgEncoder struct {
+}
+
+func (msgEncoder *MsgEncoder) Encode(ctx *ChannelHandlerContext, obj any, out *bytes.Buffer) error {
+	return nil
+}
+
 type MsgCreatorFunc[T Msg] func() T
 
 var MsgCreator = map[int32]MsgCreatorFunc[Msg]{}
 
-func CreateMsg(header *MsgHeader, session *Session, buffer *bytes.Buffer) (Msg, error) {
+func CreateMsg(header *MsgHeader, session Session, buffer *bytes.Buffer) (Msg, error) {
 	create, exists := MsgCreator[header.TypeId]
 	if !exists {
 		return nil, fmt.Errorf("typeId %d not exists", header.TypeId)
