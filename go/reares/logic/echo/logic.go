@@ -3,21 +3,21 @@ package echo
 import (
 	"fmt"
 	"reares/internal/io"
-	proto "reares/proto/echo"
+	"reares/proto/echo"
 )
 
 type Logic struct {
-	session *io.Session
+	session io.Session
 }
 
-func GetEchoLogic(session *io.Session) *Logic {
+func GetEchoLogic(session io.Session) *Logic {
 	return &Logic{
 		session: session,
 	}
 }
 
 func (logic *Logic) Echo(msg string) error {
-	secho := proto.NewSEcho()
+	secho := echo.NewSEcho()
 	secho.Msg = msg
 	return logic.session.Send(secho)
 }
