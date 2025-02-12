@@ -1,0 +1,18 @@
+syntax = "proto3";
+package protobuf;
+option go_package = "protobuf/";
+
+message Dispatch {
+  int32 clientSid = 1;
+  int32 typeId = 2;
+  int32 pvId = 3;
+  bytes msgData = 4;
+}
+
+message ProvideeInfo {
+  int32 pvId = 1;
+  int32 serverType = 2;
+  int32 serverId = 3;
+  repeated string topics = 4;
+  int32 ip = 5;
+}

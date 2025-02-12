@@ -8,7 +8,7 @@ import (
 )
 
 type CEcho struct {
-	super *shard.Msg
+	*shard.Msg
 	Processor
 	Msg string
 }
@@ -17,7 +17,7 @@ func InitCEcho(msgProcessor Processor) *CEcho {
 	header := &shard.MsgHeader{}
 	header.TypeId = 100
 	return &CEcho{
-		super:     shard.NewMsg(header),
+		Msg:       shard.NewMsg(header),
 		Processor: msgProcessor,
 	}
 }
@@ -26,7 +26,7 @@ func NewCEcho() *CEcho {
 	header := &shard.MsgHeader{}
 	header.TypeId = 100
 	return &CEcho{
-		super: shard.NewMsg(header),
+		Msg: shard.NewMsg(header),
 	}
 }
 

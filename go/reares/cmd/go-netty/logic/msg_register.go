@@ -8,6 +8,6 @@ import (
 
 func Init() {
 	echoProcessor := echoLogic.NewMsgProcessor()
-	shard.MsgCreator[100] = func() shard.Msg { return echoProto.InitCEcho(echoProcessor) }
-	shard.MsgCreator[101] = func() shard.Msg { return echoProto.InitSEcho(echoProcessor) }
+	shard.MsgCreator[100] = func() shard.IMsg { return echoProto.InitCEcho(echoProcessor) }
+	shard.MsgCreator[101] = func() shard.IMsg { return echoProto.InitSEcho(echoProcessor) }
 }

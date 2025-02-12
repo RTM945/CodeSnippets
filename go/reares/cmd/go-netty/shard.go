@@ -2,6 +2,7 @@ package shard
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/binary"
 	"github.com/go-netty/go-netty"
 	"github.com/go-netty/go-netty/codec"
@@ -11,12 +12,71 @@ import (
 	"log"
 	"math"
 	"reares/pkg/rc4"
+	"sync/atomic"
 )
 
 type Session interface {
-	Send(msg Msg) error
+	Send(msg IMsg) error
 	GetSid() int32
 	OnClose()
+	GetChannel() netty.Channel
+}
+
+var GenSessionId int32
+
+type session struct {
+	sid     int32
+	channel netty.Channel
+}
+
+func newSession(channel netty.Channel) *session {
+	return &session{
+		channel: channel,
+		sid:     atomic.AddInt32(&GenSessionId, 1),
+	}
+}
+
+func (s *session) Send(msg IMsg) error {
+	return s.channel.Write(msg)
+}
+
+func (s *session) GetSid() int32 {
+	return s.sid
+}
+
+func (s *session) OnClose() {
+	s.channel.Close(nil)
+}
+
+func (s *session) GetChannel() netty.Channel {
+	return s.channel
+}
+
+type StateSession struct {
+	*session
+	state int32
+}
+
+func NewStateSession(channel netty.Channel) *StateSession {
+	return &StateSession{
+		session: newSession(channel),
+	}
+}
+
+func (s *StateSession) AddState(state int32) {
+	s.state |= state
+}
+
+func (s *StateSession) RemoveState(state int32) {
+	s.state &= ^state
+}
+
+func (s *StateSession) GetState() int32 {
+	return s.state
+}
+
+func (s *StateSession) CheckState(state int32) bool {
+	return s.state&state == state
 }
 
 var LengthFieldBasedFrameDecoder = lengthFieldBasedFrameDecoder{
@@ -39,8 +99,8 @@ type MsgEncoder struct {
 }
 
 func (e MsgEncoder) HandleWrite(ctx netty.OutboundContext, message netty.Message) {
-	msg := message.(Msg)
-	buffer := bytes.NewBuffer(nil)
+	msg := message.(IMsg)
+	buffer := new(bytes.Buffer)
 	var err error
 	err = binary.Write(buffer, binary.BigEndian, uint32(0))
 	if err != nil {
@@ -108,7 +168,7 @@ func (l LogicHandler) HandleActive(ctx netty.ActiveContext) {
 }
 
 func (LogicHandler) HandleRead(ctx netty.InboundContext, message netty.Message) {
-	msg := message.(Msg)
+	msg := message.(IMsg)
 	msg.Dispatch()
 	ctx.HandleRead(message)
 }
@@ -175,4 +235,10 @@ func (sd SecurityDecoder) HandleRead(ctx netty.InboundContext, message netty.Mes
 
 func (sd SecurityDecoder) HandleWrite(ctx netty.OutboundContext, message netty.Message) {
 	ctx.HandleWrite(message)
+}
+
+func RandomKey(size int) []byte {
+	res := make([]byte, size)
+	rand.Read(res)
+	return res
 }

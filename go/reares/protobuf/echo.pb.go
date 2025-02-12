@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.31.0
 // 	protoc        v3.6.1
-// source: protobuf/echo.proto
+// source: protobuf/echo.client-switch
 
 package protobuf
 

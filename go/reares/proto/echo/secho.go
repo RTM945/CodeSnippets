@@ -7,30 +7,30 @@ import (
 	"reares/protobuf"
 )
 
-type CEcho struct {
-	super *shard.Msg
+type SEcho struct {
+	*shard.Msg
 	Processor
 	Msg string
 }
 
-func InitCEcho(msgProcessor Processor) *CEcho {
+func InitSEcho(msgProcessor Processor) *SEcho {
 	header := &shard.MsgHeader{}
-	header.TypeId = 100
-	return &CEcho{
-		super:     shard.NewMsg(header),
+	header.TypeId = 101
+	return &SEcho{
+		Msg:       shard.NewMsg(header),
 		Processor: msgProcessor,
 	}
 }
 
-func NewCEcho() *CEcho {
+func NewSEcho() *SEcho {
 	header := &shard.MsgHeader{}
-	header.TypeId = 100
-	return &CEcho{
-		super: shard.NewMsg(header),
+	header.TypeId = 101
+	return &SEcho{
+		Msg: shard.NewMsg(header),
 	}
 }
 
-func (echo *CEcho) Decode(src *bytes.Buffer) error {
+func (echo *SEcho) Decode(src *bytes.Buffer) error {
 	tmp := &protobuf.Echo{}
 	err := proto.Unmarshal(src.Bytes(), tmp)
 	if err != nil {
@@ -40,7 +40,7 @@ func (echo *CEcho) Decode(src *bytes.Buffer) error {
 	return nil
 }
 
-func (echo *CEcho) Encode(dst *bytes.Buffer) error {
+func (echo *SEcho) Encode(dst *bytes.Buffer) error {
 	data, err := proto.Marshal(&protobuf.Echo{Msg: echo.Msg})
 	if err != nil {
 		return err
@@ -49,10 +49,10 @@ func (echo *CEcho) Encode(dst *bytes.Buffer) error {
 	return err
 }
 
-func (echo *CEcho) Dispatch() {
+func (echo *SEcho) Dispatch() {
 	echo.Process()
 }
 
-func (echo *CEcho) Process() error {
-	return echo.ProcessCEcho(echo)
+func (echo *SEcho) Process() error {
+	return echo.ProcessSEcho(echo)
 }

@@ -3,30 +3,30 @@ package client_switch
 import (
 	"bytes"
 	"google.golang.org/protobuf/proto"
-	shard "reares/cmd/go-netty"
+	"reares/internal/io"
 	"reares/protobuf"
 )
 
 type RSAKeyExchange struct {
-	*shard.Msg
+	*io.MsgBase
 	Processor
 	Key []byte
 }
 
 func InitRSAKeyExchange(msgProcessor Processor) *RSAKeyExchange {
-	header := &shard.MsgHeader{}
+	header := &io.MsgHeader{}
 	header.TypeId = 1
 	return &RSAKeyExchange{
-		Msg:       shard.NewMsg(header),
+		MsgBase:   io.NewMsgBase(header),
 		Processor: msgProcessor,
 	}
 }
 
 func NewRSAKeyExchange() *RSAKeyExchange {
-	header := &shard.MsgHeader{}
+	header := &io.MsgHeader{}
 	header.TypeId = 1
 	return &RSAKeyExchange{
-		Msg: shard.NewMsg(header),
+		MsgBase: io.NewMsgBase(header),
 	}
 }
 

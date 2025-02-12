@@ -43,47 +43,7 @@ func (msgHeader *MsgHeader) Decode(src *bytes.Buffer) error {
 	return nil
 }
 
-type MsgBase struct {
-	session   Session
-	msgHeader *MsgHeader
-	ctx       context.Context
-}
-
-func NewMsgBase(msgHeader *MsgHeader) *MsgBase {
-	return &MsgBase{
-		msgHeader: msgHeader,
-	}
-}
-
-func (msgBase *MsgBase) SetSession(session Session) {
-	msgBase.session = session
-}
-
-func (msgBase *MsgBase) GetSession() Session {
-	return msgBase.session
-}
-
-func (msgBase *MsgBase) SetContext(ctx context.Context) {
-	msgBase.ctx = ctx
-}
-
-func (msgBase *MsgBase) GetContext() context.Context {
-	return msgBase.ctx
-}
-
-func (msgBase *MsgBase) GetHeader() *MsgHeader {
-	return msgBase.msgHeader
-}
-
-func (msgBase *MsgBase) SetHeader(msgHeader *MsgHeader) {
-	msgBase.msgHeader = msgHeader
-}
-
-func (msgBase *MsgBase) Dispatch() {
-
-}
-
-type Msg interface {
+type IMsg interface {
 	Codec
 	Process() error
 	Dispatch()
@@ -95,11 +55,63 @@ type Msg interface {
 	SetContext(ctx context.Context)
 }
 
-type MsgCreatorFunc[T Msg] func() T
+type Msg struct {
+	session   Session
+	msgHeader *MsgHeader
+	ctx       context.Context
+}
 
-var MsgCreator = map[int32]MsgCreatorFunc[Msg]{}
+func NewMsg(msgHeader *MsgHeader) *Msg {
+	return &Msg{
+		msgHeader: msgHeader,
+	}
+}
 
-func CreateMsg(header *MsgHeader, session Session, buffer *bytes.Buffer) (Msg, error) {
+func (msg *Msg) SetSession(session Session) {
+	msg.session = session
+}
+
+func (msg *Msg) GetSession() Session {
+	return msg.session
+}
+
+func (msg *Msg) SetContext(ctx context.Context) {
+	msg.ctx = ctx
+}
+
+func (msg *Msg) GetContext() context.Context {
+	return msg.ctx
+}
+
+func (msg *Msg) GetHeader() *MsgHeader {
+	return msg.msgHeader
+}
+
+func (msg *Msg) SetHeader(msgHeader *MsgHeader) {
+	msg.msgHeader = msgHeader
+}
+
+func (msg *Msg) Dispatch() {
+
+}
+
+func (msg *Msg) Process() error {
+	return nil
+}
+
+func (msg *Msg) Decode(*bytes.Buffer) error {
+	return nil
+}
+
+func (msg *Msg) Encode(*bytes.Buffer) error {
+	return nil
+}
+
+type MsgCreatorFunc[T IMsg] func() T
+
+var MsgCreator = map[int32]MsgCreatorFunc[IMsg]{}
+
+func CreateMsg(header *MsgHeader, session Session, buffer *bytes.Buffer) (IMsg, error) {
 	create, exists := MsgCreator[header.TypeId]
 	if !exists {
 		return nil, fmt.Errorf("typeId %d not exists", header.TypeId)
@@ -114,3 +126,30 @@ func CreateMsg(header *MsgHeader, session Session, buffer *bytes.Buffer) (Msg, e
 	msg.SetHeader(header)
 	return msg, nil
 }
+
+//var taskQueues = make([]chan Task, 8)
+//
+//func HashExecute(session *network.Session, msg IMsg) {
+//	hash := fnv.New32a()
+//	hash.Write([]byte(fmt.Sprintf("%v", session)))
+//	idx := hash.Sum32() & (8 - 1)
+//	taskQueues[idx] <- msg
+//}
+//
+//func StartExecuteTasks() {
+//	for i := 0; i < len(taskQueues); i++ {
+//		queue := taskQueues[i]
+//		go startExecuteTask(queue)
+//	}
+//}
+//
+//func startExecuteTask(ch chan Task) {
+//	for {
+//		select {
+//		case msg := <-ch:
+//			msg.Execute()
+//		default:
+//			continue
+//		}
+//	}
+//}

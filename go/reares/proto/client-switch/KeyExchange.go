@@ -3,30 +3,30 @@ package client_switch
 import (
 	"bytes"
 	"google.golang.org/protobuf/proto"
-	shard "reares/cmd/go-netty"
+	"reares/internal/io"
 	"reares/protobuf"
 )
 
 type KeyExchange struct {
-	*shard.Msg
+	*io.MsgBase
 	Processor
 	Key []byte
 }
 
 func InitKeyExchange(msgProcessor Processor) *KeyExchange {
-	header := &shard.MsgHeader{}
+	header := &io.MsgHeader{}
 	header.TypeId = 2
 	return &KeyExchange{
-		Msg:       shard.NewMsg(header),
+		MsgBase:   io.NewMsgBase(header),
 		Processor: msgProcessor,
 	}
 }
 
 func NewKeyExchange() *KeyExchange {
-	header := &shard.MsgHeader{}
+	header := &io.MsgHeader{}
 	header.TypeId = 2
 	return &KeyExchange{
-		Msg: shard.NewMsg(header),
+		MsgBase: io.NewMsgBase(header),
 	}
 }
 

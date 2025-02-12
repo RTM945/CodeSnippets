@@ -15,10 +15,10 @@ func Init() {
 
 func (MsgProcessor) ProcessRSAKeyExchange(msg *client_switch.RSAKeyExchange) error {
 	session := msg.GetSession().(*Session)
-	return session.SendRSAKeyExchange(msg.Key)
+	return session.SendKeyExchange(msg.Key)
 }
 
 func (MsgProcessor) ProcessKeyExchange(msg *client_switch.KeyExchange) error {
 	session := msg.GetSession().(*Session)
-	return session.SetServerKey(msg.Key)
+	return session.SetClientKey(msg.Key)
 }

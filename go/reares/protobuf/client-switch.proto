@@ -1,0 +1,11 @@
+syntax = "proto3";
+package protobuf;
+option go_package = "protobuf/";
+
+message RSAKeyExchange {
+  bytes key = 1;
+}
+
+message KeyExchange {
+  bytes key = 1;
+}

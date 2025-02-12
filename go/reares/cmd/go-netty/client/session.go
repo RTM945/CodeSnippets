@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
 	"encoding/base64"
 	"github.com/go-netty/go-netty"
 	shard "reares/cmd/go-netty"
@@ -15,7 +14,7 @@ type NodeFactory struct {
 
 func (NodeFactory) CreateSession(channel netty.Channel) shard.Session {
 	session := Session{
-		channel: channel,
+		StateSession: shard.NewStateSession(channel),
 	}
 	return &session
 }
@@ -27,21 +26,9 @@ func (factory NodeFactory) OnRemoveSession(session shard.Session) {
 }
 
 type Session struct {
+	*shard.StateSession
 	rsa             *rsa.Key
-	channel         netty.Channel
 	serverPublicKey []byte
-}
-
-func (s *Session) Send(msg shard.Msg) error {
-	return s.channel.Write(msg)
-}
-
-func (s *Session) GetSid() int32 {
-	return 0
-}
-
-func (s *Session) OnClose() {
-
 }
 
 func (s *Session) SetServerPublicKey(publicKey []byte) {
@@ -68,18 +55,18 @@ func (s *Session) SetServerKey(serverKey []byte) error {
 	securityEncoder := shard.SecurityEncoder{
 		RC4: rc4.NewRC4(serverKey),
 	}
-	s.channel.Pipeline().AddFirst(securityEncoder)
+	s.GetChannel().Pipeline().AddFirst(securityEncoder)
 	return s.SendKeyExchange()
 }
 
 func (s *Session) SendKeyExchange() error {
-	key := randomKey(32)
+	key := shard.RandomKey(32)
 	encodedKey := make([]byte, base64.StdEncoding.EncodedLen(len(key)))
 	base64.StdEncoding.Encode(encodedKey, key)
 	securityDecoder := shard.SecurityDecoder{
 		RC4: rc4.NewRC4(encodedKey),
 	}
-	s.channel.Pipeline().AddFirst(securityDecoder)
+	s.GetChannel().Pipeline().AddFirst(securityDecoder)
 	encrypt, err := rsa.Encrypt(s.serverPublicKey, encodedKey)
 	if err != nil {
 		return err
@@ -87,10 +74,4 @@ func (s *Session) SendKeyExchange() error {
 	exchange := client_switch.NewKeyExchange()
 	exchange.Key = encrypt
 	return s.Send(exchange)
-}
-
-func randomKey(size int) []byte {
-	res := make([]byte, size)
-	rand.Read(res)
-	return res
 }

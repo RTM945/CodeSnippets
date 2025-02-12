@@ -4,10 +4,9 @@ import (
 	"github.com/go-netty/go-netty"
 	shard "reares/cmd/go-netty"
 	"reares/cmd/go-netty/logic"
-	"time"
 )
 
-const Service = "Client"
+const Service = "Linker"
 
 func main() {
 	Init()
@@ -21,14 +20,9 @@ func main() {
 				NodeFactory: NodeFactory{},
 			})
 	}
-	_, err := netty.NewBootstrap(
-		netty.WithClientInitializer(childInitializer),
-	).Connect("127.0.0.1:9527")
+	err := netty.NewBootstrap(netty.WithChildInitializer(childInitializer)).
+		Listen(":9527").Sync()
 	if err != nil {
 		return
 	}
-	//echo := echo.NewCEcho()
-	//echo.IMsg = "test"
-	//client.Write(echo)
-	time.Sleep(time.Second * 100)
 }
