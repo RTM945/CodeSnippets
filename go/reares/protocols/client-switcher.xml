@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<package name="client_switch">
+    <msg name="RsaKeyExchange" type="1" maxsize="1024">
+        <var name="key" type="binary"/>
+    </msg>
+    <msg name="KeyExchange" type="2" maxsize="1024">
+        <var name="key" type="binary"/>
+    </msg>
+</package>
