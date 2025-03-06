@@ -174,9 +174,9 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": 80.99999237060547,
-            "y": 152.0,
-            "width": 140.00006103515626,
+            "x": 64.00001525878906,
+            "y": 140.0,
+            "width": 139.9999542236328,
             "height": 34.00001525878906
         }
     },
@@ -209,10 +209,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -58.0000114440918,
-            "y": -149.0,
-            "width": 279.0000305175781,
-            "height": 94.0
+            "x": -28.99999237060547,
+            "y": -133.99996948242188,
+            "width": 278.99993896484377,
+            "height": 93.99998474121094
         }
     },
     "m_Slots": [
@@ -228,7 +228,7 @@
         "HLSL"
     ],
     "m_Precision": 0,
-    "m_PreviewExpanded": false,
+    "m_PreviewExpanded": true,
     "m_PreviewMode": 0,
     "m_CustomColors": {
         "m_SerializableColors": []
@@ -251,10 +251,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -543.0,
-            "y": -307.9999694824219,
-            "width": 205.99996948242188,
-            "height": 131.0
+            "x": -388.0000305175781,
+            "y": -386.0,
+            "width": 207.99998474121095,
+            "height": 315.0
         }
     },
     "m_Slots": [
@@ -266,7 +266,7 @@
         "location"
     ],
     "m_Precision": 1,
-    "m_PreviewExpanded": false,
+    "m_PreviewExpanded": true,
     "m_PreviewMode": 2,
     "m_CustomColors": {
         "m_SerializableColors": []
@@ -615,10 +615,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -306.0000305175781,
-            "y": -242.99998474121095,
-            "width": 236.00003051757813,
-            "height": 94.00001525878906
+            "x": -221.99998474121095,
+            "y": -254.99996948242188,
+            "width": 235.99996948242188,
+            "height": 93.99998474121094
         }
     },
     "m_Slots": [
@@ -642,7 +642,7 @@
     "m_SourceType": 1,
     "m_FunctionName": "InjectPragmas",
     "m_FunctionSource": "",
-    "m_FunctionBody": "#pragma instancing_options assumeuniformscaling procedural:ConfigureProcedural\r\n#pragma editor_sync_compilation\r\n\r\nOut = In;"
+    "m_FunctionBody": "#pragma instancing_options assumeuniformscaling procedural:ConfigureProcedural\n#pragma editor_sync_compilation\n\nOut = In;"
 }
 
 {
