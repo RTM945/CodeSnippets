@@ -1,3 +1,5 @@
+// USE groupcache/lru INSTEAD
+
 package cache
 
 import "container/list"
