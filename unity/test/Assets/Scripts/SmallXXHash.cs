@@ -77,6 +77,9 @@ public readonly struct SmallXXHash {
             return avalanche;
         }
         
+        public static SmallXXHash4 operator + (SmallXXHash4 h, int v) =>
+            h.accumulator + (uint)v;
+        
         public uint4 BytesA => (uint4)this & 255;
 
         public uint4 BytesB => ((uint4)this >> 8) & 255;

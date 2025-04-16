@@ -10,28 +10,53 @@ public class NoiseVisualization : Visualization {
     static int noiseId = Shader.PropertyToID("_Noise");
 	
     [SerializeField]
-    int seed;
+    Settings noiseSettings = Settings.Default;
 
     [SerializeField]
     SpaceTRS domain = new SpaceTRS {
         scale = 8f
     };
     
-    public enum NoiseType { Perlin, Value }
+    public enum NoiseType { Perlin, PerlinTurbulence, Value, ValueTurbulence }
 
     [SerializeField]
     NoiseType type;
     
+    [SerializeField]
+    bool tiling;
+    
     static ScheduleDelegate[,] noiseJobs = {
         {
-            Job<Lattice1D<Perlin>>.ScheduleParallel,
-            Job<Lattice2D<Perlin>>.ScheduleParallel,
-            Job<Lattice3D<Perlin>>.ScheduleParallel
+            Job<Lattice1D<LatticeNormal, Perlin>>.ScheduleParallel,
+            Job<Lattice1D<LatticeTiling, Perlin>>.ScheduleParallel,
+            Job<Lattice2D<LatticeNormal, Perlin>>.ScheduleParallel,
+            Job<Lattice2D<LatticeTiling, Perlin>>.ScheduleParallel,
+            Job<Lattice3D<LatticeNormal, Perlin>>.ScheduleParallel,
+            Job<Lattice3D<LatticeTiling, Perlin>>.ScheduleParallel
         },
         {
-            Job<Lattice1D<Value>>.ScheduleParallel,
-            Job<Lattice2D<Value>>.ScheduleParallel,
-            Job<Lattice3D<Value>>.ScheduleParallel
+            Job<Lattice1D<LatticeNormal, Turbulence<Perlin>>>.ScheduleParallel,
+            Job<Lattice1D<LatticeTiling, Turbulence<Perlin>>>.ScheduleParallel,
+            Job<Lattice2D<LatticeNormal, Turbulence<Perlin>>>.ScheduleParallel,
+            Job<Lattice2D<LatticeTiling, Turbulence<Perlin>>>.ScheduleParallel,
+            Job<Lattice3D<LatticeNormal, Turbulence<Perlin>>>.ScheduleParallel,
+            Job<Lattice3D<LatticeTiling, Turbulence<Perlin>>>.ScheduleParallel,
+        },
+        {
+            Job<Lattice1D<LatticeNormal, Value>>.ScheduleParallel,
+            Job<Lattice1D<LatticeTiling, Value>>.ScheduleParallel,
+            Job<Lattice2D<LatticeNormal, Value>>.ScheduleParallel,
+            Job<Lattice2D<LatticeTiling, Value>>.ScheduleParallel,
+            Job<Lattice3D<LatticeNormal, Value>>.ScheduleParallel,
+            Job<Lattice3D<LatticeTiling, Value>>.ScheduleParallel,
+        },
+        {
+            Job<Lattice1D<LatticeNormal, Turbulence<Value>>>.ScheduleParallel,
+            Job<Lattice1D<LatticeTiling, Turbulence<Value>>>.ScheduleParallel,
+            Job<Lattice2D<LatticeNormal, Turbulence<Value>>>.ScheduleParallel,
+            Job<Lattice2D<LatticeTiling, Turbulence<Value>>>.ScheduleParallel,
+            Job<Lattice3D<LatticeNormal, Turbulence<Value>>>.ScheduleParallel,
+            Job<Lattice3D<LatticeTiling, Turbulence<Value>>>.ScheduleParallel
         }
     };
     
@@ -59,8 +84,8 @@ public class NoiseVisualization : Visualization {
     protected override void UpdateVisualization (
         NativeArray<float3x4> positions, int resolution, JobHandle handle
     ) {
-        noiseJobs[(int)type, dimensions - 1](
-            positions, noise, seed, domain, resolution, handle
+        noiseJobs[(int)type, 2 * dimensions - (tiling ? 1 : 2)](
+            positions, noise, noiseSettings, domain, resolution, handle
         ).Complete();
         noiseBuffer.SetData(noise);
     }
