@@ -355,7 +355,7 @@ MonoBehaviour:
   meshType: 5
   resolution: 8
   gizmos: 3
-  material: 0
+  material: 3
   materials:
   - {fileID: 2100000, guid: 2f13902ffa4e5e941bcc09e9d5cf285f, type: 2}
   - {fileID: 2100000, guid: b0d276097061d864fb4901e7063e078b, type: 2}
