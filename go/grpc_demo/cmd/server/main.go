@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	chatpb "grpc_demo/proto/gen/chat/v1"
 	hellopb "grpc_demo/proto/gen/hello/v1"
 	"io"
@@ -51,13 +53,25 @@ func (s *server) ChatStream(stream chatpb.ChatService_ChatStreamServer) error {
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))) // AddSource代码路径
+
+	serverCert, err := tls.LoadX509KeyPair("certs/server.pem", "certs/server-key.pem")
+	if err != nil {
+		slog.Error("Server load cert/key err:", err)
+		return
+	}
+
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{serverCert},
+		ClientAuth:   tls.NoClientCert, // 单向认证
+	}
+
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		slog.Error("failed to listen", "error", err)
 	}
 
 	// 强制用vtprotobuf插件
-	s := grpc.NewServer(grpc.ForceServerCodec(vtcodec.Codec{}))
+	s := grpc.NewServer(grpc.ForceServerCodec(vtcodec.Codec{}), grpc.Creds(credentials.NewTLS(tlsConfig)))
 
 	server := &server{}
 

@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/credentials"
 	chatpb "grpc_demo/proto/gen/chat/v1"
 	hellopb "grpc_demo/proto/gen/hello/v1"
 	"io"
@@ -16,9 +18,23 @@ import (
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))) // AddSource代码路径
+
+	caCert, err := os.ReadFile("certs/ca.pem")
+	if err != nil {
+		slog.Error("Error reading CA certificate", err)
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(caCert) {
+		slog.Error("Error appending CA certificate")
+	}
+
+	tlsConfig := &tls.Config{
+		RootCAs: certPool,
+	}
+
 	conn, err := grpc.NewClient(
 		"localhost:50051",
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		// 强制用vtprotobuf插件
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(vtcodec.Codec{})),
 	)
