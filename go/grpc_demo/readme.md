@@ -17,3 +17,9 @@ openssl x509 -req -in certs/server.csr -days 365 -CA certs/ca.pem \
   -CAkey certs/ca-key.pem -CAcreateserial -out certs/server.pem \
   -extfile <(echo "subjectAltName=DNS:localhost")
 ```
+
+#### nginx
+```
+nginx -p nginx -c nginx.conf
+nginx -p nginx -c nginx.conf -s stop
+```

@@ -39,7 +39,7 @@ func (s *server) ChatStream(stream chatpb.ChatService_ChatStreamServer) error {
 			slog.Error("Server recv error:", err)
 			return err
 		}
-		slog.Info("Server recv msg:", msg.String())
+		slog.Info("Server recv msg:", stream.Context(), msg.String())
 		reply := &chatpb.ChatMessage{
 			User:    msg.User,
 			Content: fmt.Sprintf("Echo: %s", msg.Content),

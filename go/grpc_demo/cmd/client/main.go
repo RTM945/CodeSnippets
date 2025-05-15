@@ -33,7 +33,7 @@ func main() {
 	}
 
 	conn, err := grpc.NewClient(
-		"localhost:50051",
+		"localhost:443",
 		grpc.WithTransportCredentials(credentials.NewTLS(tlsConfig)),
 		// 强制用vtprotobuf插件
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(vtcodec.Codec{})),
@@ -104,6 +104,6 @@ func main() {
 		slog.Warn("Send timeout")
 		_ = stream.CloseSend()
 	}
-
+	time.Sleep(time.Second * 10)
 	<-done
 }
