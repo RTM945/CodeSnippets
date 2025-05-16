@@ -39,7 +39,7 @@ func main() {
 		grpc.WithDefaultCallOptions(grpc.ForceCodec(vtcodec.Codec{})),
 	)
 	if err != nil {
-		slog.Error("Failed to connect to server", "error", err)
+		slog.Error("Failed to connect to gateway", "error", err)
 		return
 	}
 	defer conn.Close()

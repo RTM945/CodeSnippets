@@ -118,9 +118,7 @@ const file_hello_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"&\n" +
 	"\n" +
 	"HelloReply\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2H\n" +
-	"\fHelloService\x128\n" +
-	"\bSayHello\x12\x16.hello.v1.HelloRequest\x1a\x14.hello.v1.HelloReplyB\x16Z\x14gen/hello/v1;hellopbb\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB\x16Z\x14gen/hello/v1;hellopbb\x06proto3"
 
 var (
 	file_hello_proto_rawDescOnce sync.Once
@@ -140,10 +138,8 @@ var file_hello_proto_goTypes = []any{
 	(*HelloReply)(nil),   // 1: hello.v1.HelloReply
 }
 var file_hello_proto_depIdxs = []int32{
-	0, // 0: hello.v1.HelloService.SayHello:input_type -> hello.v1.HelloRequest
-	1, // 1: hello.v1.HelloService.SayHello:output_type -> hello.v1.HelloReply
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for method output_type
+	0, // [0:0] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -162,7 +158,7 @@ func file_hello_proto_init() {
 			NumEnums:      0,
 			NumMessages:   2,
 			NumExtensions: 0,
-			NumServices:   1,
+			NumServices:   0,
 		},
 		GoTypes:           file_hello_proto_goTypes,
 		DependencyIndexes: file_hello_proto_depIdxs,

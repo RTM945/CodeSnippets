@@ -47,7 +47,7 @@ func (c *helloServiceClient) SayHello(ctx context.Context, in *HelloRequest, opt
 	return out, nil
 }
 
-// HelloServiceServer is the server API for HelloService service.
+// HelloServiceServer is the gateway API for HelloService service.
 // All implementations must embed UnimplementedHelloServiceServer
 // for forward compatibility.
 type HelloServiceServer interface {

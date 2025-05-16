@@ -1,13 +1,14 @@
 package main
 
 import (
-	"context"
 	"crypto/tls"
 	"fmt"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"grpc_demo/common"
 	chatpb "grpc_demo/proto/gen/chat/v1"
+	gatewaypb "grpc_demo/proto/gen/gateway/v1"
 	hellopb "grpc_demo/proto/gen/hello/v1"
 	"io"
 	"log/slog"
@@ -18,14 +19,47 @@ import (
 type server struct {
 	hellopb.UnimplementedHelloServiceServer
 	chatpb.UnimplementedChatServiceServer
+	gatewaypb.UnimplementedGatewayServer
 }
 
-func (s *server) SayHello(ctx context.Context, req *hellopb.HelloRequest) (*hellopb.HelloReply, error) {
-	reply := &hellopb.HelloReply{
-		Message: "Hello, " + req.Name,
-	}
-
-	return reply, nil
+func (s *server) Route(stream gatewaypb.Gateway_RouteServer) {
+	msgChan := make(chan *gatewaypb.Envelope)
+	go func() {
+		for {
+			msg, err := stream.Recv()
+			if err == io.EOF {
+				slog.Info("Client closed stream")
+				return
+			}
+			if err != nil {
+				slog.Error("Server Recv error:", err)
+				return
+			}
+			slog.Info("Server Recv msg:", stream.Context(), msg.String())
+			msgChan <- msg
+		}
+	}()
+	go func() {
+		for {
+			select {
+			case msg := <-msgChan:
+				if msgCreator, ok := common.MsgCreator[msg.Type]; ok {
+					if processor, ok := common.MsgProcessor[msg.Type]; ok {
+						newMsg := msgCreator()
+						err := newMsg.Unmarshal(msg.Payload)
+						if err != nil {
+							slog.Error("Unmarshal error:", err)
+							continue
+						}
+						err = processor.Process(newMsg)
+						if err != nil {
+							slog.Error("Process error:", err)
+						}
+					}
+				}
+			}
+		}
+	}()
 }
 
 func (s *server) ChatStream(stream chatpb.ChatService_ChatStreamServer) error {
@@ -54,7 +88,7 @@ func (s *server) ChatStream(stream chatpb.ChatService_ChatStreamServer) error {
 func main() {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))) // AddSource代码路径
 
-	serverCert, err := tls.LoadX509KeyPair("certs/server.pem", "certs/server-key.pem")
+	serverCert, err := tls.LoadX509KeyPair("certs/gateway.pem", "certs/gateway-key.pem")
 	if err != nil {
 		slog.Error("Server load cert/key err:", err)
 		return
@@ -75,8 +109,9 @@ func main() {
 
 	server := &server{}
 
-	hellopb.RegisterHelloServiceServer(s, server)
-	chatpb.RegisterChatServiceServer(s, server)
+	//hellopb.RegisterHelloServiceServer(s, gateway)
+	//chatpb.RegisterChatServiceServer(s, gateway)
+	gatewaypb.RegisterGatewayServer(s, server)
 
 	if err := s.Serve(lis); err != nil {
 		slog.Error("failed to serve", "error", err)
