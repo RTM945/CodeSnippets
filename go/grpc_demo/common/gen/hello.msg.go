@@ -6,6 +6,12 @@ import (
 	hellopb "grpc_demo/proto/gen/hello/v1"
 )
 
+var ProcessHelloRequest func(msg *HelloRequest) error
+
+func init() {
+	ProcessHelloRequest = func(m *HelloRequest) error { panic("unimplemented") }
+}
+
 type HelloRequest struct {
 	pb     *hellopb.HelloRequest
 	typeId uint32
@@ -18,6 +24,14 @@ func NewHelloRequest() *HelloRequest {
 		typeId: 1,
 		pb:     &hellopb.HelloRequest{},
 	}
+}
+
+func (msg *HelloRequest) SetSession() {
+
+}
+
+func (msg *HelloRequest) GetSession() {
+
 }
 
 func (msg *HelloRequest) Marshal() ([]byte, error) {
@@ -43,6 +57,9 @@ func (msg *HelloRequest) TypedPB() *hellopb.HelloRequest {
 }
 
 func (msg *HelloRequest) Process() error {
-	// ProcessRegister[msg.typeId].Process(msg)
+	return ProcessHelloRequest(msg)
+}
+
+func (msg *HelloRequest) Dispatch() error {
 	return nil
 }

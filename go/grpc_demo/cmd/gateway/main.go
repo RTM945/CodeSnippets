@@ -1,96 +1,124 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"grpc_demo/common"
+	"grpc_demo/common/logger"
 	chatpb "grpc_demo/proto/gen/chat/v1"
 	gatewaypb "grpc_demo/proto/gen/gateway/v1"
-	hellopb "grpc_demo/proto/gen/hello/v1"
 	"io"
-	"log/slog"
 	"net"
-	"os"
 )
 
+var LOGGER = logger.GetLogger("IO")
+
 type server struct {
-	hellopb.UnimplementedHelloServiceServer
-	chatpb.UnimplementedChatServiceServer
 	gatewaypb.UnimplementedGatewayServer
 }
 
-func (s *server) Route(stream gatewaypb.Gateway_RouteServer) {
-	msgChan := make(chan *gatewaypb.Envelope)
-	go func() {
+// Route handles a bidirectional streaming RPC by reading incoming messages,
+// processing them via registered handlers, and cleanly shutting down when done.
+func (s *server) Route(stream gatewaypb.Gateway_RouteServer) error {
+	ctx := stream.Context()
+	// Use errgroup to coordinate reader and processor
+	eg, ctx := errgroup.WithContext(ctx)
+
+	// Channel for pipelining messages; buffered to smooth bursts
+	envelopeChan := make(chan *gatewaypb.Envelope, 100)
+
+	// Reader: receive from stream and push into channel
+	eg.Go(func() error {
+		defer close(envelopeChan)
 		for {
-			msg, err := stream.Recv()
-			if err == io.EOF {
-				slog.Info("Client closed stream")
-				return
-			}
+			envelope, err := stream.Recv()
 			if err != nil {
-				slog.Error("Server Recv error:", err)
-				return
-			}
-			slog.Info("Server Recv msg:", stream.Context(), msg.String())
-			msgChan <- msg
-		}
-	}()
-	go func() {
-		for {
-			select {
-			case msg := <-msgChan:
-				if msgCreator, ok := common.MsgCreator[msg.Type]; ok {
-					if processor, ok := common.MsgProcessor[msg.Type]; ok {
-						newMsg := msgCreator()
-						err := newMsg.Unmarshal(msg.Payload)
-						if err != nil {
-							slog.Error("Unmarshal error:", err)
-							continue
-						}
-						err = processor.Process(newMsg)
-						if err != nil {
-							slog.Error("Process error:", err)
-						}
-					}
+				if err == io.EOF {
+					LOGGER.Info("client closed stream")
+					return nil
 				}
+				return fmt.Errorf("recv error: %w", err)
+			}
+
+			select {
+			case envelopeChan <- envelope:
+				// enqueued
+			case <-ctx.Done():
+				return ctx.Err()
 			}
 		}
-	}()
+	})
+
+	// Processor: consume from channel and handle payloads
+	eg.Go(func() error {
+		for envelope := range envelopeChan {
+			creator, ok := common.MsgCreator[envelope.Type]
+			if !ok {
+				LOGGER.Warn("no MsgCreator for type", "type", envelope.Type)
+				continue
+			}
+
+			msg := creator()
+			if err := msg.Unmarshal(envelope.Payload); err != nil {
+				LOGGER.Error("unmarshal payload", err)
+				continue
+			}
+			err := msg.Dispatch()
+			if err != nil {
+				LOGGER.Error("dispatch payload", err)
+				continue
+			}
+
+			// Respect cancellation between messages
+			select {
+			case <-ctx.Done():
+				return ctx.Err()
+			default:
+			}
+		}
+		return nil
+	})
+
+	// Wait for both goroutines to finish
+	if err := eg.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+		return err
+	}
+	return nil
 }
 
 func (s *server) ChatStream(stream chatpb.ChatService_ChatStreamServer) error {
 	for {
 		msg, err := stream.Recv()
 		if err == io.EOF {
-			slog.Info("Client closed stream")
+			LOGGER.Info("Client closed stream")
 			return nil
 		}
 		if err != nil {
-			slog.Error("Server recv error:", err)
+			LOGGER.Error("Server recv error:", err)
 			return err
 		}
-		slog.Info("Server recv msg:", stream.Context(), msg.String())
+		LOGGER.Info("Server recv msg:", stream.Context(), msg.String())
 		reply := &chatpb.ChatMessage{
 			User:    msg.User,
 			Content: fmt.Sprintf("Echo: %s", msg.Content),
 		}
 		if err := stream.Send(reply); err != nil {
-			slog.Error("Server send error:", err)
+			LOGGER.Error("Server send error:", err)
 			return err
 		}
 	}
 }
 
 func main() {
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{AddSource: true}))) // AddSource代码路径
-
 	serverCert, err := tls.LoadX509KeyPair("certs/gateway.pem", "certs/gateway-key.pem")
 	if err != nil {
-		slog.Error("Server load cert/key err:", err)
+		LOGGER.Error("Server load cert/key err:", err)
 		return
 	}
 
@@ -101,7 +129,8 @@ func main() {
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		slog.Error("failed to listen", "error", err)
+		LOGGER.Error("failed to listen", "error", err)
+		return
 	}
 
 	// 强制用vtprotobuf插件
@@ -109,11 +138,9 @@ func main() {
 
 	server := &server{}
 
-	//hellopb.RegisterHelloServiceServer(s, gateway)
-	//chatpb.RegisterChatServiceServer(s, gateway)
 	gatewaypb.RegisterGatewayServer(s, server)
 
 	if err := s.Serve(lis); err != nil {
-		slog.Error("failed to serve", "error", err)
+		LOGGER.Error("failed to serve", "error", err)
 	}
 }
