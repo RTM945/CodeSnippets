@@ -1,17 +1,13 @@
 syntax = "proto3";
 
-package hello.v1;
+package hello;
 
-option go_package = "gen/hello/v1;hellopb";
+option go_package = "gen/hello;hellopb";
 
-message HelloRequest {
+message CHello {
   string name = 1;
 }
 
-message HelloReply {
+message SHello {
   string message = 1;
-}
-
-service HelloService {
-  rpc SayHello(HelloRequest) returns (HelloReply);
 }

@@ -1,7 +1,6 @@
-package common
+package io
 
 import (
-	"context"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -9,9 +8,11 @@ type Msg interface {
 	Marshal() ([]byte, error)
 	Unmarshal([]byte) error
 	GetPB() proto.Message
-	GetType() uint32
+	GetType() string
 	GetPvId() uint32
-	GetContext() context.Context
+	GetContext() any
 	Dispatch() error
 	Process() error
+	SetSession(session Session)
+	GetSession() Session
 }

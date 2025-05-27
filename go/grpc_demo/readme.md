@@ -20,6 +20,6 @@ openssl x509 -req -in certs/server.csr -days 365 -CA certs/ca.pem \
 
 #### nginx
 ```
-nginx -p nginx -c nginx.conf
-nginx -p nginx -c nginx.conf -s stop
+nginx -c conf/nginx.conf
+nginx -c conf/nginx.conf -s stop
 ```

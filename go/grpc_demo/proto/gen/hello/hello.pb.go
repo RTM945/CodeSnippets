@@ -21,27 +21,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type HelloRequest struct {
+type CHello struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *HelloRequest) Reset() {
-	*x = HelloRequest{}
+func (x *CHello) Reset() {
+	*x = CHello{}
 	mi := &file_hello_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *HelloRequest) String() string {
+func (x *CHello) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HelloRequest) ProtoMessage() {}
+func (*CHello) ProtoMessage() {}
 
-func (x *HelloRequest) ProtoReflect() protoreflect.Message {
+func (x *CHello) ProtoReflect() protoreflect.Message {
 	mi := &file_hello_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -53,39 +53,39 @@ func (x *HelloRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HelloRequest.ProtoReflect.Descriptor instead.
-func (*HelloRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use CHello.ProtoReflect.Descriptor instead.
+func (*CHello) Descriptor() ([]byte, []int) {
 	return file_hello_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *HelloRequest) GetName() string {
+func (x *CHello) GetName() string {
 	if x != nil {
 		return x.Name
 	}
 	return ""
 }
 
-type HelloReply struct {
+type SHello struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *HelloReply) Reset() {
-	*x = HelloReply{}
+func (x *SHello) Reset() {
+	*x = SHello{}
 	mi := &file_hello_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *HelloReply) String() string {
+func (x *SHello) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*HelloReply) ProtoMessage() {}
+func (*SHello) ProtoMessage() {}
 
-func (x *HelloReply) ProtoReflect() protoreflect.Message {
+func (x *SHello) ProtoReflect() protoreflect.Message {
 	mi := &file_hello_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -97,12 +97,12 @@ func (x *HelloReply) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use HelloReply.ProtoReflect.Descriptor instead.
-func (*HelloReply) Descriptor() ([]byte, []int) {
+// Deprecated: Use SHello.ProtoReflect.Descriptor instead.
+func (*SHello) Descriptor() ([]byte, []int) {
 	return file_hello_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *HelloReply) GetMessage() string {
+func (x *SHello) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
@@ -113,12 +113,11 @@ var File_hello_proto protoreflect.FileDescriptor
 
 const file_hello_proto_rawDesc = "" +
 	"\n" +
-	"\vhello.proto\x12\bhello.v1\"\"\n" +
-	"\fHelloRequest\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\"&\n" +
-	"\n" +
-	"HelloReply\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessageB\x16Z\x14gen/hello/v1;hellopbb\x06proto3"
+	"\vhello.proto\x12\x05hello\"\x1c\n" +
+	"\x06CHello\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\"\"\n" +
+	"\x06SHello\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessageB\x13Z\x11gen/hello;hellopbb\x06proto3"
 
 var (
 	file_hello_proto_rawDescOnce sync.Once
@@ -134,8 +133,8 @@ func file_hello_proto_rawDescGZIP() []byte {
 
 var file_hello_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_hello_proto_goTypes = []any{
-	(*HelloRequest)(nil), // 0: hello.v1.HelloRequest
-	(*HelloReply)(nil),   // 1: hello.v1.HelloReply
+	(*CHello)(nil), // 0: hello.CHello
+	(*SHello)(nil), // 1: hello.SHello
 }
 var file_hello_proto_depIdxs = []int32{
 	0, // [0:0] is the sub-list for method output_type
