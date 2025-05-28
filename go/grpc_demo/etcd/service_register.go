@@ -1,10 +1,9 @@
 package etcd
 
 import (
+	"ares/logger"
 	"context"
-	"go.etcd.io/etcd/clientv3"
-	"grpc_demo/common/logger"
-	"log/slog"
+	clientv3 "go.etcd.io/etcd/client/v3"
 	"time"
 )
 
@@ -65,16 +64,16 @@ func (s *ServiceRegister) putKeyWithLease(lease int64) error {
 	}
 	s.leaseID = resp.ID
 	s.keepAliveChan = leaseRespChan
-	slog.Info("etcd Put success!", "key", s.key, "val", s.val, "leaseId", s.leaseID)
+	LOGGER.Info("etcd Put success!", "key", s.key, "val", s.val, "leaseId", s.leaseID)
 	return nil
 }
 
 // ListenLeaseRespChan 监听 续租情况
 func (s *ServiceRegister) ListenLeaseRespChan() {
 	for leaseKeepResp := range s.keepAliveChan {
-		slog.Info("renew lease: ", leaseKeepResp)
+		LOGGER.Info("renew lease: ", leaseKeepResp)
 	}
-	slog.Info("close lease: ", s.leaseID)
+	LOGGER.Info("close lease: ", s.leaseID)
 }
 
 // Close 注销服务
@@ -83,6 +82,6 @@ func (s *ServiceRegister) Close() error {
 	if _, err := s.cli.Revoke(context.Background(), s.leaseID); err != nil {
 		return err
 	}
-	slog.Info("revoke lease: ", s.leaseID)
+	LOGGER.Info("revoke lease: ", s.leaseID)
 	return s.cli.Close()
 }
