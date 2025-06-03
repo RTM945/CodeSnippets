@@ -1,6 +1,5 @@
 service:
-  pvid: 301
-  name: phantom
+  name: switcher
   host: "0.0.0.0"
   port: 8080
 discovery:

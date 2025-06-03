@@ -29,6 +29,7 @@ type Service struct {
 	Name string `yaml:"name"`
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
+	Pvid int    `yaml:"pvid"`
 }
 
 type Discovery struct {

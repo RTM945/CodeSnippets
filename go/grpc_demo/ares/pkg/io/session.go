@@ -1,7 +1,8 @@
 package io
 
 type Session interface {
-	GetSid() string
+	GetSid() uint32
 	Send(Msg) error
-	GetExecutor()
+	Process(Msg)
+	OnClose()
 }

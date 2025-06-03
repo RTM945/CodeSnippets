@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package switcher;
+option go_package = "/switcher;linkerpb";
+
+message Envelope  {
+ string typeUrl = 1;
+ uint32 pvId = 2;
+ bytes payload = 3;
+}
+
+service Switcher {
+ rpc Route(stream Envelope) returns (stream Envelope);
+}
+
+message Ping {
+ int32 serial = 1;
+}
+
+message Pong {
+ int32 serial = 1;
+}
+

@@ -11,7 +11,7 @@ type Msg interface {
 	GetType() string
 	GetPvId() uint32
 	GetContext() any
-	Dispatch() error
+	Dispatch()
 	Process() error
 	SetSession(session Session)
 	GetSession() Session
