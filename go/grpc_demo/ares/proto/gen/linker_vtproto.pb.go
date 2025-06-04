@@ -2,7 +2,7 @@
 // protoc-gen-go-vtproto version: v0.6.0
 // source: linker.proto
 
-package linkerpb
+package pb
 
 import (
 	fmt "fmt"
@@ -60,12 +60,10 @@ func (m *Envelope) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x10
 	}
-	if len(m.TypeUrl) > 0 {
-		i -= len(m.TypeUrl)
-		copy(dAtA[i:], m.TypeUrl)
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(len(m.TypeUrl)))
+	if m.TypeId != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.TypeId))
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -141,7 +139,7 @@ func (m *Pong) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.Serial != 0 {
 		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.Serial))
 		i--
-		dAtA[i] = 0x10
+		dAtA[i] = 0x8
 	}
 	return len(dAtA) - i, nil
 }
@@ -152,9 +150,8 @@ func (m *Envelope) SizeVT() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.TypeUrl)
-	if l > 0 {
-		n += 1 + l + protohelpers.SizeOfVarint(uint64(l))
+	if m.TypeId != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.TypeId))
 	}
 	if m.PvId != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.PvId))
@@ -223,10 +220,10 @@ func (m *Envelope) UnmarshalVT(dAtA []byte) error {
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field TypeUrl", wireType)
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field TypeId", wireType)
 			}
-			var stringLen uint64
+			m.TypeId = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return protohelpers.ErrIntOverflow
@@ -236,24 +233,11 @@ func (m *Envelope) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
+				m.TypeId |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return protohelpers.ErrInvalidLength
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return protohelpers.ErrInvalidLength
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.TypeUrl = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		case 2:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field PvId", wireType)
@@ -428,7 +412,7 @@ func (m *Pong) UnmarshalVT(dAtA []byte) error {
 			return fmt.Errorf("proto: Pong: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
-		case 2:
+		case 1:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Serial", wireType)
 			}

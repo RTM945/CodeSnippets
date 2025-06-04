@@ -2,13 +2,13 @@ package msg
 
 import (
 	"ares/pkg/io"
-	linkerpb "ares/proto/switcher"
+	pb "ares/proto/gen"
 	"google.golang.org/protobuf/proto"
 )
 
 type Pong struct {
-	pb      *linkerpb.Pong
-	url     string
+	pb      *pb.Pong
+	typeId  uint32
 	pvId    uint32
 	session io.Session
 	ctx     any
@@ -16,9 +16,8 @@ type Pong struct {
 
 func NewPong() *Pong {
 	return &Pong{
-		pb:   &linkerpb.Pong{},
-		url:  "type.googleapis.com/switcher.Pong",
-		pvId: 1,
+		pb:     &pb.Pong{},
+		typeId: 8,
 	}
 }
 
@@ -38,17 +37,23 @@ func (msg *Pong) Unmarshal(bytes []byte) error {
 	return msg.pb.UnmarshalVT(bytes)
 }
 
-func (msg *Pong) GetType() string { return msg.url }
+func (msg *Pong) GetType() uint32 { return msg.typeId }
 
 func (msg *Pong) GetPvId() uint32 { return msg.pvId }
 
+func (msg *Pong) SetPvId(pvId uint32) {
+	msg.pvId = pvId
+}
+
 func (msg *Pong) GetContext() any { return msg.ctx }
+
+func (msg *Pong) SetContext(ctx any) { msg.ctx = ctx }
 
 func (msg *Pong) GetPB() proto.Message {
 	return msg.pb
 }
 
-func (msg *Pong) TypedPB() *linkerpb.Pong {
+func (msg *Pong) TypedPB() *pb.Pong {
 	return msg.pb
 }
 

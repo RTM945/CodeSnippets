@@ -1,10 +1,12 @@
 syntax = "proto3";
 
-package switcher;
-option go_package = "/switcher;linkerpb";
+package proto;
+option go_package = "./pb";
+
+import "type_id.proto";
 
 message Envelope  {
- string typeUrl = 1;
+ uint32 typeId = 1;
  uint32 pvId = 2;
  bytes payload = 3;
 }
@@ -14,10 +16,12 @@ service Switcher {
 }
 
 message Ping {
+ option (proto.type_id) = 4;
  int32 serial = 1;
 }
 
 message Pong {
+ option (proto.type_id) = 8;
  int32 serial = 1;
 }
 

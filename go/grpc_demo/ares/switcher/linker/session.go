@@ -3,7 +3,7 @@ package linker
 import (
 	"ares/logger"
 	ares "ares/pkg/io"
-	linkerpb "ares/proto/switcher"
+	pb "ares/proto/gen"
 	"ares/switcher/msg"
 	"io"
 	"sync/atomic"
@@ -12,9 +12,9 @@ import (
 var LOGGER = logger.GetLogger("linker")
 
 type Session struct {
-	stream      linkerpb.Switcher_RouteServer
+	stream      pb.Switcher_RouteServer
 	sid         uint32
-	sendChan    chan *linkerpb.Envelope
+	sendChan    chan *pb.Envelope
 	processChan chan ares.Msg
 }
 
@@ -22,9 +22,9 @@ var genSessionId int32
 
 var chanSize = 64
 
-func NewLinkerSession(stream linkerpb.Switcher_RouteServer) *Session {
+func NewLinkerSession(stream pb.Switcher_RouteServer) *Session {
 	return &Session{
-		sendChan:    make(chan *linkerpb.Envelope, chanSize),
+		sendChan:    make(chan *pb.Envelope, chanSize),
 		processChan: make(chan ares.Msg, chanSize),
 		stream:      stream,
 		sid:         uint32(atomic.AddInt32(&genSessionId, 1)),
@@ -64,16 +64,15 @@ func (s *Session) Recv() error {
 				return nil
 			}
 		}
-		creator, ok := msg.Creator[envelope.TypeUrl]
+		creator, ok := msg.Creator[envelope.TypeId]
 		if ok {
 			// 自己处理
-			m := creator()
-			m.SetSession(s)
-			err := m.Unmarshal(envelope.Payload)
+			m, err := creator(s, envelope)
 			if err != nil {
 				LOGGER.Errorf("session[%d] unmarshal err: %v", s.sid, err)
 				continue
 			}
+			m.Dispatch()
 		} else {
 			if envelope.PvId != 0 {
 				// 通过PvId获取对应的服务器进行转发
@@ -88,8 +87,8 @@ func (s *Session) Send(msg ares.Msg) error {
 	if err != nil {
 		return err
 	}
-	envelope := &linkerpb.Envelope{
-		TypeUrl: msg.GetType(),
+	envelope := &pb.Envelope{
+		TypeId:  msg.GetType(),
 		PvId:    msg.GetPvId(),
 		Payload: payload,
 	}

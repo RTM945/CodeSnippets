@@ -1,7 +1,12 @@
 package msg
 
-import "ares/pkg/io"
+import (
+	"ares/pkg/io"
+	pb "ares/proto/gen"
+)
 
-var Creator = map[string]func() io.Msg{
-	"type.googleapis.com/switcher.Ping": func() io.Msg { return NewPing() },
+type CreatorFunc func(session io.Session, envelope *pb.Envelope) (io.Msg, error)
+
+var Creator = map[uint32]CreatorFunc{
+	4: PingCreator,
 }
