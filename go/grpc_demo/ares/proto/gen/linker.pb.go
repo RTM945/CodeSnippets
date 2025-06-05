@@ -21,66 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Envelope struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	TypeId        uint32                 `protobuf:"varint,1,opt,name=typeId,proto3" json:"typeId,omitempty"`
-	PvId          uint32                 `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
-	Payload       []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Envelope) Reset() {
-	*x = Envelope{}
-	mi := &file_linker_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Envelope) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Envelope) ProtoMessage() {}
-
-func (x *Envelope) ProtoReflect() protoreflect.Message {
-	mi := &file_linker_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Envelope.ProtoReflect.Descriptor instead.
-func (*Envelope) Descriptor() ([]byte, []int) {
-	return file_linker_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *Envelope) GetTypeId() uint32 {
-	if x != nil {
-		return x.TypeId
-	}
-	return 0
-}
-
-func (x *Envelope) GetPvId() uint32 {
-	if x != nil {
-		return x.PvId
-	}
-	return 0
-}
-
-func (x *Envelope) GetPayload() []byte {
-	if x != nil {
-		return x.Payload
-	}
-	return nil
-}
-
 type Ping struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Serial        int32                  `protobuf:"varint,1,opt,name=serial,proto3" json:"serial,omitempty"`
@@ -90,7 +30,7 @@ type Ping struct {
 
 func (x *Ping) Reset() {
 	*x = Ping{}
-	mi := &file_linker_proto_msgTypes[1]
+	mi := &file_linker_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -102,7 +42,7 @@ func (x *Ping) String() string {
 func (*Ping) ProtoMessage() {}
 
 func (x *Ping) ProtoReflect() protoreflect.Message {
-	mi := &file_linker_proto_msgTypes[1]
+	mi := &file_linker_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -115,7 +55,7 @@ func (x *Ping) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Ping.ProtoReflect.Descriptor instead.
 func (*Ping) Descriptor() ([]byte, []int) {
-	return file_linker_proto_rawDescGZIP(), []int{1}
+	return file_linker_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Ping) GetSerial() int32 {
@@ -134,7 +74,7 @@ type Pong struct {
 
 func (x *Pong) Reset() {
 	*x = Pong{}
-	mi := &file_linker_proto_msgTypes[2]
+	mi := &file_linker_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -146,7 +86,7 @@ func (x *Pong) String() string {
 func (*Pong) ProtoMessage() {}
 
 func (x *Pong) ProtoReflect() protoreflect.Message {
-	mi := &file_linker_proto_msgTypes[2]
+	mi := &file_linker_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -159,7 +99,7 @@ func (x *Pong) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pong.ProtoReflect.Descriptor instead.
 func (*Pong) Descriptor() ([]byte, []int) {
-	return file_linker_proto_rawDescGZIP(), []int{2}
+	return file_linker_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Pong) GetSerial() int32 {
@@ -173,17 +113,13 @@ var File_linker_proto protoreflect.FileDescriptor
 
 const file_linker_proto_rawDesc = "" +
 	"\n" +
-	"\flinker.proto\x12\x05proto\x1a\rtype_id.proto\"P\n" +
-	"\bEnvelope\x12\x16\n" +
-	"\x06typeId\x18\x01 \x01(\rR\x06typeId\x12\x12\n" +
-	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x18\n" +
-	"\apayload\x18\x03 \x01(\fR\apayload\"%\n" +
+	"\flinker.proto\x12\x05proto\x1a\fcommon.proto\"%\n" +
 	"\x04Ping\x12\x16\n" +
 	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\x04\"%\n" +
 	"\x04Pong\x12\x16\n" +
-	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\b29\n" +
-	"\bSwitcher\x12-\n" +
-	"\x05Route\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B\x06Z\x04./pbb\x06proto3"
+	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\b27\n" +
+	"\x06Linker\x12-\n" +
+	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_linker_proto_rawDescOnce sync.Once
@@ -197,15 +133,15 @@ func file_linker_proto_rawDescGZIP() []byte {
 	return file_linker_proto_rawDescData
 }
 
-var file_linker_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_linker_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_linker_proto_goTypes = []any{
-	(*Envelope)(nil), // 0: proto.Envelope
-	(*Ping)(nil),     // 1: proto.Ping
-	(*Pong)(nil),     // 2: proto.Pong
+	(*Ping)(nil),     // 0: proto.Ping
+	(*Pong)(nil),     // 1: proto.Pong
+	(*Envelope)(nil), // 2: proto.Envelope
 }
 var file_linker_proto_depIdxs = []int32{
-	0, // 0: proto.Switcher.Route:input_type -> proto.Envelope
-	0, // 1: proto.Switcher.Route:output_type -> proto.Envelope
+	2, // 0: proto.Linker.Serve:input_type -> proto.Envelope
+	2, // 1: proto.Linker.Serve:output_type -> proto.Envelope
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -218,14 +154,14 @@ func file_linker_proto_init() {
 	if File_linker_proto != nil {
 		return
 	}
-	file_type_id_proto_init()
+	file_common_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_linker_proto_rawDesc), len(file_linker_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

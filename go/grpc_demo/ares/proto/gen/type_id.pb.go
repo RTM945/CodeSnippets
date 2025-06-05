@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.6
 // 	protoc        v6.31.1
-// source: type_id.proto
+// source: common.proto
 
 package pb
 
@@ -28,7 +28,7 @@ var file_type_id_proto_extTypes = []protoimpl.ExtensionInfo{
 		Field:         999999,
 		Name:          "proto.type_id",
 		Tag:           "varint,999999,opt,name=type_id",
-		Filename:      "type_id.proto",
+		Filename:      "common.proto",
 	},
 }
 
@@ -42,7 +42,7 @@ var File_type_id_proto protoreflect.FileDescriptor
 
 const file_type_id_proto_rawDesc = "" +
 	"\n" +
-	"\rtype_id.proto\x12\x05proto\x1a google/protobuf/descriptor.proto::\n" +
+	"\rcommon.proto\x12\x05proto\x1a google/protobuf/descriptor.proto::\n" +
 	"\atype_id\x12\x1f.google.protobuf.MessageOptions\x18\xbf\x84= \x01(\rR\x06typeIdB\x06Z\x04./pbb\x06proto3"
 
 var file_type_id_proto_goTypes = []any{

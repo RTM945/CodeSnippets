@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v6.31.1
-// source: linker.proto
+// source: provider.proto
 
 package pb
 
@@ -19,27 +19,27 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Linker_Serve_FullMethodName = "/proto.Linker/Serve"
+	Provider_Serve_FullMethodName = "/proto.Provider/Serve"
 )
 
-// LinkerClient is the client API for Linker service.
+// ProviderClient is the client API for Provider service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LinkerClient interface {
+type ProviderClient interface {
 	Serve(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error)
 }
 
-type linkerClient struct {
+type providerClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewLinkerClient(cc grpc.ClientConnInterface) LinkerClient {
-	return &linkerClient{cc}
+func NewProviderClient(cc grpc.ClientConnInterface) ProviderClient {
+	return &providerClient{cc}
 }
 
-func (c *linkerClient) Serve(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error) {
+func (c *providerClient) Serve(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Linker_ServiceDesc.Streams[0], Linker_Serve_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Provider_ServiceDesc.Streams[0], Provider_Serve_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,68 +48,68 @@ func (c *linkerClient) Serve(ctx context.Context, opts ...grpc.CallOption) (grpc
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Linker_ServeClient = grpc.BidiStreamingClient[Envelope, Envelope]
+type Provider_ServeClient = grpc.BidiStreamingClient[Envelope, Envelope]
 
-// LinkerServer is the server API for Linker service.
-// All implementations must embed UnimplementedLinkerServer
+// ProviderServer is the server API for Provider service.
+// All implementations must embed UnimplementedProviderServer
 // for forward compatibility.
-type LinkerServer interface {
+type ProviderServer interface {
 	Serve(grpc.BidiStreamingServer[Envelope, Envelope]) error
-	mustEmbedUnimplementedLinkerServer()
+	mustEmbedUnimplementedProviderServer()
 }
 
-// UnimplementedLinkerServer must be embedded to have
+// UnimplementedProviderServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedLinkerServer struct{}
+type UnimplementedProviderServer struct{}
 
-func (UnimplementedLinkerServer) Serve(grpc.BidiStreamingServer[Envelope, Envelope]) error {
+func (UnimplementedProviderServer) Serve(grpc.BidiStreamingServer[Envelope, Envelope]) error {
 	return status.Errorf(codes.Unimplemented, "method Serve not implemented")
 }
-func (UnimplementedLinkerServer) mustEmbedUnimplementedLinkerServer() {}
-func (UnimplementedLinkerServer) testEmbeddedByValue()                {}
+func (UnimplementedProviderServer) mustEmbedUnimplementedProviderServer() {}
+func (UnimplementedProviderServer) testEmbeddedByValue()                  {}
 
-// UnsafeLinkerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LinkerServer will
+// UnsafeProviderServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ProviderServer will
 // result in compilation errors.
-type UnsafeLinkerServer interface {
-	mustEmbedUnimplementedLinkerServer()
+type UnsafeProviderServer interface {
+	mustEmbedUnimplementedProviderServer()
 }
 
-func RegisterLinkerServer(s grpc.ServiceRegistrar, srv LinkerServer) {
-	// If the following call pancis, it indicates UnimplementedLinkerServer was
+func RegisterProviderServer(s grpc.ServiceRegistrar, srv ProviderServer) {
+	// If the following call pancis, it indicates UnimplementedProviderServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&Linker_ServiceDesc, srv)
+	s.RegisterService(&Provider_ServiceDesc, srv)
 }
 
-func _Linker_Serve_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(LinkerServer).Serve(&grpc.GenericServerStream[Envelope, Envelope]{ServerStream: stream})
+func _Provider_Serve_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ProviderServer).Serve(&grpc.GenericServerStream[Envelope, Envelope]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Linker_ServeServer = grpc.BidiStreamingServer[Envelope, Envelope]
+type Provider_ServeServer = grpc.BidiStreamingServer[Envelope, Envelope]
 
-// Linker_ServiceDesc is the grpc.ServiceDesc for Linker service.
+// Provider_ServiceDesc is the grpc.ServiceDesc for Provider service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Linker_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.Linker",
-	HandlerType: (*LinkerServer)(nil),
+var Provider_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.Provider",
+	HandlerType: (*ProviderServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Serve",
-			Handler:       _Linker_Serve_Handler,
+			Handler:       _Provider_Serve_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},
-	Metadata: "linker.proto",
+	Metadata: "provider.proto",
 }

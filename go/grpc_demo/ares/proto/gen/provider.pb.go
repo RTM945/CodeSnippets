@@ -89,16 +89,91 @@ func (x *Dispatch) GetPayload() []byte {
 	return nil
 }
 
+type SendToClient struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientSid     uint32                 `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
+	PvId          uint32                 `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	TypeId        uint32                 `protobuf:"varint,3,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SendToClient) Reset() {
+	*x = SendToClient{}
+	mi := &file_provider_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SendToClient) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SendToClient) ProtoMessage() {}
+
+func (x *SendToClient) ProtoReflect() protoreflect.Message {
+	mi := &file_provider_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SendToClient.ProtoReflect.Descriptor instead.
+func (*SendToClient) Descriptor() ([]byte, []int) {
+	return file_provider_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SendToClient) GetClientSid() uint32 {
+	if x != nil {
+		return x.ClientSid
+	}
+	return 0
+}
+
+func (x *SendToClient) GetPvId() uint32 {
+	if x != nil {
+		return x.PvId
+	}
+	return 0
+}
+
+func (x *SendToClient) GetTypeId() uint32 {
+	if x != nil {
+		return x.TypeId
+	}
+	return 0
+}
+
+func (x *SendToClient) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
 var File_provider_proto protoreflect.FileDescriptor
 
 const file_provider_proto_rawDesc = "" +
 	"\n" +
-	"\x0eprovider.proto\x12\x05proto\x1a\rtype_id.proto\"u\n" +
+	"\x0eprovider.proto\x12\x05proto\x1a\fcommon.proto\"u\n" +
 	"\bDispatch\x12\x1c\n" +
 	"\tclientSid\x18\x01 \x01(\rR\tclientSid\x12\x12\n" +
 	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x16\n" +
 	"\x06typeId\x18\x03 \x01(\rR\x06typeId\x12\x18\n" +
-	"\apayload\x18\x04 \x01(\fR\apayload:\x05\xf8\xa3\xe8\x033B\x06Z\x04./pbb\x06proto3"
+	"\apayload\x18\x04 \x01(\fR\apayload:\x05\xf8\xa3\xe8\x033\"y\n" +
+	"\fSendToClient\x12\x1c\n" +
+	"\tclientSid\x18\x01 \x01(\rR\tclientSid\x12\x12\n" +
+	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x16\n" +
+	"\x06typeId\x18\x03 \x01(\rR\x06typeId\x12\x18\n" +
+	"\apayload\x18\x04 \x01(\fR\apayload:\x05\xf8\xa3\xe8\x03I29\n" +
+	"\bProvider\x12-\n" +
+	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_provider_proto_rawDescOnce sync.Once
@@ -112,13 +187,17 @@ func file_provider_proto_rawDescGZIP() []byte {
 	return file_provider_proto_rawDescData
 }
 
-var file_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_provider_proto_goTypes = []any{
-	(*Dispatch)(nil), // 0: proto.Dispatch
+	(*Dispatch)(nil),     // 0: proto.Dispatch
+	(*SendToClient)(nil), // 1: proto.SendToClient
+	(*Envelope)(nil),     // 2: proto.Envelope
 }
 var file_provider_proto_depIdxs = []int32{
-	0, // [0:0] is the sub-list for method output_type
-	0, // [0:0] is the sub-list for method input_type
+	2, // 0: proto.Provider.Serve:input_type -> proto.Envelope
+	2, // 1: proto.Provider.Serve:output_type -> proto.Envelope
+	1, // [1:2] is the sub-list for method output_type
+	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -129,16 +208,16 @@ func file_provider_proto_init() {
 	if File_provider_proto != nil {
 		return
 	}
-	file_type_id_proto_init()
+	file_common_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_provider_proto_rawDesc), len(file_provider_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   1,
+			NumMessages:   2,
 			NumExtensions: 0,
-			NumServices:   0,
+			NumServices:   1,
 		},
 		GoTypes:           file_provider_proto_goTypes,
 		DependencyIndexes: file_provider_proto_depIdxs,

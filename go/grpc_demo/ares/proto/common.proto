@@ -8,3 +8,9 @@ option go_package = "./pb";
 extend google.protobuf.MessageOptions {
   uint32 type_id = 999999;
 }
+
+message Envelope  {
+  uint32 typeId = 1;
+  uint32 pvId = 2;
+  bytes payload = 3;
+}

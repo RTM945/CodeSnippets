@@ -3,7 +3,7 @@ syntax = "proto3";
 package proto;
 option go_package = "./pb";
 
-import "type_id.proto";
+import "common.proto";
 
 message Dispatch  {
   option (proto.type_id) = 51;
@@ -11,6 +11,18 @@ message Dispatch  {
   uint32 pvId = 2;
   uint32 typeId = 3;
   bytes payload = 4;
+}
+
+message SendToClient {
+  option (proto.type_id) = 73;
+  uint32 clientSid = 1;
+  uint32 pvId = 2;
+  uint32 typeId = 3;
+  bytes payload = 4;
+}
+
+service Provider {
+  rpc Serve(stream Envelope) returns (stream Envelope);
 }
 
 

@@ -1,33 +1,30 @@
 package linker
 
 import (
-	"ares/logger"
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
-	"ares/switcher/msg"
 	"io"
 	"sync/atomic"
 )
 
-var LOGGER = logger.GetLogger("linker")
-
+// Session client<->linker
 type Session struct {
-	stream      pb.Switcher_RouteServer
+	stream      pb.Linker_ServeServer
 	sid         uint32
 	sendChan    chan *pb.Envelope
 	processChan chan ares.Msg
 }
 
-var genSessionId int32
+var genSessionId uint32
 
 var chanSize = 64
 
-func NewLinkerSession(stream pb.Switcher_RouteServer) *Session {
+func NewLinkerSession(stream pb.Linker_ServeServer) *Session {
 	return &Session{
 		sendChan:    make(chan *pb.Envelope, chanSize),
 		processChan: make(chan ares.Msg, chanSize),
 		stream:      stream,
-		sid:         uint32(atomic.AddInt32(&genSessionId, 1)),
+		sid:         atomic.AddUint32(&genSessionId, 1),
 	}
 }
 
@@ -64,7 +61,7 @@ func (s *Session) Recv() error {
 				return nil
 			}
 		}
-		creator, ok := msg.Creator[envelope.TypeId]
+		creator, ok := MsgCreator[envelope.TypeId]
 		if ok {
 			// 自己处理
 			m, err := creator(s, envelope)
@@ -76,6 +73,7 @@ func (s *Session) Recv() error {
 		} else {
 			if envelope.PvId != 0 {
 				// 通过PvId获取对应的服务器进行转发
+				// 网关把客户端请求转发给具体的业务服处理
 			}
 		}
 	}
