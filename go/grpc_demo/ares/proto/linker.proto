@@ -6,7 +6,7 @@ option go_package = "./pb";
 import "common.proto";
 
 service Linker {
-  rpc Serve(stream Envelope) returns (stream Envelope);
+  rpc Process(stream Envelope) returns (stream Envelope);
 }
 
 message Ping {

@@ -2,7 +2,9 @@ package linker
 
 import (
 	"ares/logger"
+	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"context"
 	"crypto/tls"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"google.golang.org/grpc"
@@ -84,9 +86,44 @@ func (l *Linker) Start() error {
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 		// 保活设置 业务心跳给业务层写
 		grpc.KeepaliveParams(kaParams),
+		grpc.ChainStreamInterceptor(),
 	)
 
 	pb.RegisterLinkerServer(l.grpcServer, l)
 
 	return l.grpcServer.Serve(lis)
+}
+
+func (l *Linker) Serve(stream pb.Linker_ServeServer) error {
+
+	return nil
+}
+
+func (l *Linker) realIPInterceptor() grpc.StreamServerInterceptor {
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		return nil
+	}
+}
+
+func (l *Linker) sessionInterceptor() grpc.StreamServerInterceptor {
+	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		LOGGER.Infof("[Interceptor] New stream incoming: %s", info.FullMethod)
+
+		session := NewLinkerSession(ss)
+
+		newCtx := context.WithValue(ss.Context(), ares.SessionKey, session)
+
+		go func() {
+			<-newCtx.Done()
+			LOGGER.Infof("[Interceptor] Stream for session %d finished. Reason: %v", session.GetSid(), newCtx.Err())
+			l.sessions.RemoveSession(session.GetSid())
+		}()
+
+		err := handler(srv, ss)
+
+		if err != nil {
+			LOGGER.Errorf("[Interceptor] Error handling session %d: %v", session.GetSid(), err)
+		}
+		return err
+	}
 }

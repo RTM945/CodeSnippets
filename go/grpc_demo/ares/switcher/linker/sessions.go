@@ -18,6 +18,14 @@ func NewSessions() *Sessions {
 	}
 }
 
+func (s *Sessions) OnAddSession(session *Session) {
+
+}
+
+func (s *Sessions) OnRemoveSession(session *Session) {
+
+}
+
 func (s *Sessions) AddSession(session *Session) {
 	s.Lock()
 	defer s.Unlock()
@@ -35,7 +43,11 @@ func (s *Sessions) RemoveSession(sid uint32) {
 	s.Lock()
 	defer s.Unlock()
 	atomic.AddUint32(&sessionCNT, -1)
-	delete(s.sessions, sid)
+	session, ok := s.sessions[sid]
+	if ok {
+		delete(s.sessions, sid)
+		session.OnClose()
+	}
 }
 
 func (s *Sessions) Sessions() []*Session {
@@ -46,4 +58,13 @@ func (s *Sessions) Sessions() []*Session {
 		res = append(res, v)
 	}
 	return res
+}
+
+func (s *Sessions) Stop() {
+	s.Lock()
+	defer s.Unlock()
+	for _, v := range s.sessions {
+		v.Close()
+	}
+	clear(s.sessions)
 }

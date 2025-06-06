@@ -19,14 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Linker_Serve_FullMethodName = "/proto.Linker/Serve"
+	Linker_Process_FullMethodName = "/proto.Linker/Process"
 )
 
 // LinkerClient is the client API for Linker service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type LinkerClient interface {
-	Serve(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error)
+	Process(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error)
 }
 
 type linkerClient struct {
@@ -37,9 +37,9 @@ func NewLinkerClient(cc grpc.ClientConnInterface) LinkerClient {
 	return &linkerClient{cc}
 }
 
-func (c *linkerClient) Serve(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error) {
+func (c *linkerClient) Process(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Linker_ServiceDesc.Streams[0], Linker_Serve_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Linker_ServiceDesc.Streams[0], Linker_Process_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +48,13 @@ func (c *linkerClient) Serve(ctx context.Context, opts ...grpc.CallOption) (grpc
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Linker_ServeClient = grpc.BidiStreamingClient[Envelope, Envelope]
+type Linker_ProcessClient = grpc.BidiStreamingClient[Envelope, Envelope]
 
 // LinkerServer is the server API for Linker service.
 // All implementations must embed UnimplementedLinkerServer
 // for forward compatibility.
 type LinkerServer interface {
-	Serve(grpc.BidiStreamingServer[Envelope, Envelope]) error
+	Process(grpc.BidiStreamingServer[Envelope, Envelope]) error
 	mustEmbedUnimplementedLinkerServer()
 }
 
@@ -65,8 +65,8 @@ type LinkerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedLinkerServer struct{}
 
-func (UnimplementedLinkerServer) Serve(grpc.BidiStreamingServer[Envelope, Envelope]) error {
-	return status.Errorf(codes.Unimplemented, "method Serve not implemented")
+func (UnimplementedLinkerServer) Process(grpc.BidiStreamingServer[Envelope, Envelope]) error {
+	return status.Errorf(codes.Unimplemented, "method Process not implemented")
 }
 func (UnimplementedLinkerServer) mustEmbedUnimplementedLinkerServer() {}
 func (UnimplementedLinkerServer) testEmbeddedByValue()                {}
@@ -89,12 +89,12 @@ func RegisterLinkerServer(s grpc.ServiceRegistrar, srv LinkerServer) {
 	s.RegisterService(&Linker_ServiceDesc, srv)
 }
 
-func _Linker_Serve_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(LinkerServer).Serve(&grpc.GenericServerStream[Envelope, Envelope]{ServerStream: stream})
+func _Linker_Process_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(LinkerServer).Process(&grpc.GenericServerStream[Envelope, Envelope]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Linker_ServeServer = grpc.BidiStreamingServer[Envelope, Envelope]
+type Linker_ProcessServer = grpc.BidiStreamingServer[Envelope, Envelope]
 
 // Linker_ServiceDesc is the grpc.ServiceDesc for Linker service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -105,8 +105,8 @@ var Linker_ServiceDesc = grpc.ServiceDesc{
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "Serve",
-			Handler:       _Linker_Serve_Handler,
+			StreamName:    "Process",
+			Handler:       _Linker_Process_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
 		},

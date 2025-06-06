@@ -9,10 +9,12 @@ import (
 
 // Session linker<->provider
 type Session struct {
+	ares.State
 	stream      pb.Provider_ServeServer
 	sid         uint32
 	sendChan    chan *pb.Envelope
 	processChan chan ares.Msg
+	closeChan   chan struct{}
 }
 
 var genSessionId uint32
@@ -23,6 +25,7 @@ func NewProviderSession(stream pb.Provider_ServeServer) *Session {
 	return &Session{
 		sendChan:    make(chan *pb.Envelope, chanSize),
 		processChan: make(chan ares.Msg, chanSize),
+		closeChan:   make(chan struct{}),
 		stream:      stream,
 		sid:         atomic.AddUint32(&genSessionId, 1),
 	}
@@ -102,6 +105,10 @@ func (s *Session) StartSend() {
 		}
 	}
 	LOGGER.Infof("session[%d] stop send", s.sid)
+}
+
+func (s *Session) Close() {
+	close(s.closeChan)
 }
 
 func (s *Session) OnClose() {
