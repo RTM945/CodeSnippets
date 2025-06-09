@@ -117,9 +117,9 @@ const file_linker_proto_rawDesc = "" +
 	"\x04Ping\x12\x16\n" +
 	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\x04\"%\n" +
 	"\x04Pong\x12\x16\n" +
-	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\b29\n" +
-	"\x06Linker\x12/\n" +
-	"\aProcess\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B\x06Z\x04./pbb\x06proto3"
+	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\b27\n" +
+	"\x06Linker\x12-\n" +
+	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_linker_proto_rawDescOnce sync.Once
@@ -140,8 +140,8 @@ var file_linker_proto_goTypes = []any{
 	(*Envelope)(nil), // 2: proto.Envelope
 }
 var file_linker_proto_depIdxs = []int32{
-	2, // 0: proto.Linker.Process:input_type -> proto.Envelope
-	2, // 1: proto.Linker.Process:output_type -> proto.Envelope
+	2, // 0: proto.Linker.Serve:input_type -> proto.Envelope
+	2, // 1: proto.Linker.Serve:output_type -> proto.Envelope
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

@@ -1,10 +1,10 @@
 package main
 
 import (
+	"ares/pkg/io"
 	pb "ares/proto/gen"
 	"crypto/tls"
 	"fmt"
-	"github.com/pires/go-proxyproto"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -23,7 +23,7 @@ type server struct {
 	pb.UnimplementedLinkerServer
 }
 
-func (s *server) Process(stream pb.Linker_ProcessServer) error {
+func (s *server) Process(stream pb.Linker_ServeServer) error {
 
 	return nil
 }
@@ -77,7 +77,7 @@ func main() {
 		panic(err)
 	}
 
-	proxyLis := &proxyproto.Listener{Listener: lis}
+	proxyLis := io.NewPROXYListener(lis)
 
 	// 强制用vtprotobuf插件
 	s := grpc.NewServer(
@@ -109,14 +109,6 @@ func Interceptor() grpc.StreamServerInterceptor {
 			}
 		}
 
-		//if md, ok := metadata.FromIncomingContext(ss.Context()); ok {
-		//	if xff := md.Get("x-forwarded-for"); len(xff) > 0 {
-		//		clientIP := strings.TrimSpace(strings.Split(xff[0], ",")[0])
-		//		fmt.Println("Stream RPC 真实客户端 IP (X-Forwarded-For) =", clientIP)
-		//	} else if xri := md.Get("x-real-ip"); len(xri) > 0 {
-		//		fmt.Println("Stream RPC 真实客户端 IP (X-Real-IP) =", xri[0])
-		//	}
-		//}
 		return nil
 	}
 }

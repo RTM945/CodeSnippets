@@ -9,6 +9,13 @@ type Session interface {
 	Close()
 	OnClose()
 }
+
+type SessionHandler interface {
+	OnAddSession(Session)
+	OnRemoveSession(Session)
+	Stop()
+}
+
 type sessionKeyType struct{}
 
 var SessionKey = sessionKeyType{}

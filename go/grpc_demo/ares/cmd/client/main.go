@@ -33,7 +33,7 @@ func main() {
 	defer conn.Close()
 	client := pb.NewLinkerClient(conn)
 
-	stream, err := client.Process(context.TODO())
+	stream, err := client.Serve(context.TODO())
 	if err != nil {
 		panic(err)
 	}
