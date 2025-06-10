@@ -4,13 +4,12 @@ import (
 	"ares/logger"
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
-	"context"
 	"crypto/tls"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/keepalive"
-	"google.golang.org/grpc/peer"
+	"io"
 	"net"
 	"time"
 )
@@ -91,9 +90,6 @@ func (l *Linker) Start() error {
 		grpc.Creds(credentials.NewTLS(tlsConfig)),
 		// 保活设置 业务心跳给业务层写
 		grpc.KeepaliveParams(kaParams),
-		grpc.ChainStreamInterceptor(
-			l.sessionInterceptor(),
-		),
 	)
 
 	pb.RegisterLinkerServer(l.grpcServer, l)
@@ -102,35 +98,28 @@ func (l *Linker) Start() error {
 }
 
 func (l *Linker) Serve(stream pb.Linker_ServeServer) error {
-	// 无事可干了
-	return nil
-}
+	session := NewLinkerSession(stream)
+	l.sessionHandler.OnAddSession(session)
+	defer l.sessionHandler.OnRemoveSession(session)
 
-type streamWrapper struct {
-	grpc.ServerStream
-	ctx context.Context
-}
+	go session.startSend()
+	go session.startProcess()
 
-func (w *streamWrapper) Context() context.Context {
-	return w.ctx
-}
+	for {
+		select {
+		case <-session.Context().Done():
+			// session close 后就不收了
+			return nil
+		default:
+			envelope, err := stream.Recv()
+			if err != nil {
+				if err == io.EOF {
+					return nil // 客户端正常关闭
+				}
+				return err
+			}
 
-func (l *Linker) sessionInterceptor() grpc.StreamServerInterceptor {
-	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		ctx, cancel := context.WithCancel(ss.Context())
-		session := NewLinkerSession(ss)
-		session.SetCancel(cancel)
-		newCtx := context.WithValue(ctx, ares.SessionKey, session)
-		if p, ok := peer.FromContext(ss.Context()); ok {
-			session.SetRemoteAddr(p.Addr)
+			session.HandleEnvelope(envelope)
 		}
-		l.sessionHandler.OnAddSession(session)
-		defer l.sessionHandler.OnRemoveSession(session)
-		LOGGER.Infof("[SessionInterceptor] New session incoming: %v", session)
-		wrapper := &streamWrapper{ss, newCtx}
-
-		go session.Start(newCtx)
-
-		return handler(srv, wrapper)
 	}
 }
