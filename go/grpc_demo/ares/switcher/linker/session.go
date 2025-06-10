@@ -95,7 +95,6 @@ func (s *Session) startProcess() {
 			if err != nil {
 				LOGGER.Errorf("session[%v] process %v err: %v", s, m, err)
 			}
-		default:
 		}
 	}
 }
