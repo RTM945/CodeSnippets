@@ -102,8 +102,8 @@ func (l *Linker) Serve(stream pb.Linker_ServeServer) error {
 	l.sessionHandler.OnAddSession(session)
 	defer l.sessionHandler.OnRemoveSession(session)
 
-	go session.startSend()
-	go session.startProcess()
+	go session.StartSend()
+	go session.StartProcess()
 
 	for {
 		select {

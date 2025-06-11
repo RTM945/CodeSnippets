@@ -14,13 +14,13 @@ func NewSessionHandler(linker *Linker) *SessionHandler {
 	}
 }
 
-func (sh *SessionHandler) OnAddSession(session ares.Session) {
+func (sh *SessionHandler) OnAddSession(session ares.ISession) {
 	linkerSession := session.(*Session)
 
 	sh.linker.sessions.AddSession(linkerSession)
 }
 
-func (sh *SessionHandler) OnRemoveSession(session ares.Session) {
+func (sh *SessionHandler) OnRemoveSession(session ares.ISession) {
 	linkerSession := session.(*Session)
 	linkerSession.OnClose()
 	sh.linker.sessions.RemoveSession(linkerSession)
