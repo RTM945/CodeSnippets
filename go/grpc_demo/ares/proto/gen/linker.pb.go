@@ -21,6 +21,69 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type SessionError_Code int32
+
+const (
+	SessionError_NONE SessionError_Code = 0
+	// 白名单开启
+	SessionError_OPEN_WHITE_IP SessionError_Code = 8001
+	// 黑名单开启
+	SessionError_OPEN_BLACK_IP SessionError_Code = 8002
+	// 连接数上限
+	SessionError_OVER_MAX_SESSIONS SessionError_Code = 8005
+	// 频率过快
+	SessionError_RATE_LIMIT SessionError_Code = 8006
+	// 当前状态不能发送协议到后端服务
+	SessionError_CANT_DISPATCH SessionError_Code = 8007
+)
+
+// Enum value maps for SessionError_Code.
+var (
+	SessionError_Code_name = map[int32]string{
+		0:    "NONE",
+		8001: "OPEN_WHITE_IP",
+		8002: "OPEN_BLACK_IP",
+		8005: "OVER_MAX_SESSIONS",
+		8006: "RATE_LIMIT",
+		8007: "CANT_DISPATCH",
+	}
+	SessionError_Code_value = map[string]int32{
+		"NONE":              0,
+		"OPEN_WHITE_IP":     8001,
+		"OPEN_BLACK_IP":     8002,
+		"OVER_MAX_SESSIONS": 8005,
+		"RATE_LIMIT":        8006,
+		"CANT_DISPATCH":     8007,
+	}
+)
+
+func (x SessionError_Code) Enum() *SessionError_Code {
+	p := new(SessionError_Code)
+	*p = x
+	return p
+}
+
+func (x SessionError_Code) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (SessionError_Code) Descriptor() protoreflect.EnumDescriptor {
+	return file_linker_proto_enumTypes[0].Descriptor()
+}
+
+func (SessionError_Code) Type() protoreflect.EnumType {
+	return &file_linker_proto_enumTypes[0]
+}
+
+func (x SessionError_Code) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use SessionError_Code.Descriptor instead.
+func (SessionError_Code) EnumDescriptor() ([]byte, []int) {
+	return file_linker_proto_rawDescGZIP(), []int{1, 0}
+}
+
 type Ping struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Serial        int32                  `protobuf:"varint,1,opt,name=serial,proto3" json:"serial,omitempty"`
@@ -65,6 +128,50 @@ func (x *Ping) GetSerial() int32 {
 	return 0
 }
 
+type SessionError struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          SessionError_Code      `protobuf:"varint,1,opt,name=code,proto3,enum=proto.SessionError_Code" json:"code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SessionError) Reset() {
+	*x = SessionError{}
+	mi := &file_linker_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SessionError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SessionError) ProtoMessage() {}
+
+func (x *SessionError) ProtoReflect() protoreflect.Message {
+	mi := &file_linker_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SessionError.ProtoReflect.Descriptor instead.
+func (*SessionError) Descriptor() ([]byte, []int) {
+	return file_linker_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *SessionError) GetCode() SessionError_Code {
+	if x != nil {
+		return x.Code
+	}
+	return SessionError_NONE
+}
+
 type Pong struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Serial        int32                  `protobuf:"varint,1,opt,name=serial,proto3" json:"serial,omitempty"`
@@ -74,7 +181,7 @@ type Pong struct {
 
 func (x *Pong) Reset() {
 	*x = Pong{}
-	mi := &file_linker_proto_msgTypes[1]
+	mi := &file_linker_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -86,7 +193,7 @@ func (x *Pong) String() string {
 func (*Pong) ProtoMessage() {}
 
 func (x *Pong) ProtoReflect() protoreflect.Message {
-	mi := &file_linker_proto_msgTypes[1]
+	mi := &file_linker_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -99,7 +206,7 @@ func (x *Pong) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pong.ProtoReflect.Descriptor instead.
 func (*Pong) Descriptor() ([]byte, []int) {
-	return file_linker_proto_rawDescGZIP(), []int{1}
+	return file_linker_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Pong) GetSerial() int32 {
@@ -115,7 +222,17 @@ const file_linker_proto_rawDesc = "" +
 	"\n" +
 	"\flinker.proto\x12\x05proto\x1a\fcommon.proto\"%\n" +
 	"\x04Ping\x12\x16\n" +
-	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\x04\"%\n" +
+	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\x04\"\xba\x01\n" +
+	"\fSessionError\x12,\n" +
+	"\x04code\x18\x01 \x01(\x0e2\x18.proto.SessionError.CodeR\x04code\"u\n" +
+	"\x04Code\x12\b\n" +
+	"\x04NONE\x10\x00\x12\x12\n" +
+	"\rOPEN_WHITE_IP\x10\xc1>\x12\x12\n" +
+	"\rOPEN_BLACK_IP\x10\xc2>\x12\x16\n" +
+	"\x11OVER_MAX_SESSIONS\x10\xc5>\x12\x0f\n" +
+	"\n" +
+	"RATE_LIMIT\x10\xc6>\x12\x12\n" +
+	"\rCANT_DISPATCH\x10\xc7>:\x05\xf8\xa3\xe8\x03\x06\"%\n" +
 	"\x04Pong\x12\x16\n" +
 	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\b27\n" +
 	"\x06Linker\x12-\n" +
@@ -133,20 +250,24 @@ func file_linker_proto_rawDescGZIP() []byte {
 	return file_linker_proto_rawDescData
 }
 
-var file_linker_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_linker_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_linker_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_linker_proto_goTypes = []any{
-	(*Ping)(nil),     // 0: proto.Ping
-	(*Pong)(nil),     // 1: proto.Pong
-	(*Envelope)(nil), // 2: proto.Envelope
+	(SessionError_Code)(0), // 0: proto.SessionError.Code
+	(*Ping)(nil),           // 1: proto.Ping
+	(*SessionError)(nil),   // 2: proto.SessionError
+	(*Pong)(nil),           // 3: proto.Pong
+	(*Envelope)(nil),       // 4: proto.Envelope
 }
 var file_linker_proto_depIdxs = []int32{
-	2, // 0: proto.Linker.Serve:input_type -> proto.Envelope
-	2, // 1: proto.Linker.Serve:output_type -> proto.Envelope
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: proto.SessionError.code:type_name -> proto.SessionError.Code
+	4, // 1: proto.Linker.Serve:input_type -> proto.Envelope
+	4, // 2: proto.Linker.Serve:output_type -> proto.Envelope
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_linker_proto_init() }
@@ -160,13 +281,14 @@ func file_linker_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_linker_proto_rawDesc), len(file_linker_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   2,
+			NumEnums:      1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_linker_proto_goTypes,
 		DependencyIndexes: file_linker_proto_depIdxs,
+		EnumInfos:         file_linker_proto_enumTypes,
 		MessageInfos:      file_linker_proto_msgTypes,
 	}.Build()
 	File_linker_proto = out.File

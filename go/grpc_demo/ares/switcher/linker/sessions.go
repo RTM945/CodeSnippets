@@ -56,3 +56,7 @@ func (s *Sessions) Stop() {
 	}
 	clear(s.sessions)
 }
+
+func (s *Sessions) Size() uint32 {
+	return sessionCNT
+}

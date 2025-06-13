@@ -2,6 +2,7 @@ package linker
 
 import (
 	ares "ares/pkg/io"
+	pb "ares/proto/gen"
 )
 
 type SessionHandler struct {
@@ -16,7 +17,10 @@ func NewSessionHandler(linker *Linker) *SessionHandler {
 
 func (sh *SessionHandler) OnAddSession(session ares.ISession) {
 	linkerSession := session.(*Session)
-
+	if !sh.linker.CanAddSession() {
+		sh.linker.CloseSession(linkerSession, pb.SessionError_OVER_MAX_SESSIONS)
+		return
+	}
 	sh.linker.sessions.AddSession(linkerSession)
 }
 

@@ -14,6 +14,24 @@ message Ping {
   int32 serial = 1;
 }
 
+message SessionError {
+  option (proto.type_id) = 6;
+  enum Code {
+    NONE = 0;
+    // 白名单开启
+    OPEN_WHITE_IP = 8001;
+    // 黑名单开启
+    OPEN_BLACK_IP = 8002;
+    // 连接数上限
+    OVER_MAX_SESSIONS = 8005;
+    // 频率过快
+    RATE_LIMIT = 8006;
+    // 当前状态不能发送协议到后端服务
+    CANT_DISPATCH = 8007;
+  }
+  Code code = 1;
+}
+
 message Pong {
   option (proto.type_id) = 8;
   int32 serial = 1;

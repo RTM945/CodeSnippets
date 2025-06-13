@@ -4,6 +4,7 @@ import (
 	"ares/logger"
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"ares/switcher/msg"
 	"crypto/tls"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"google.golang.org/grpc"
@@ -23,6 +24,9 @@ type Linker struct {
 	address                  string
 	sessions                 *Sessions
 	sessionHandler           *SessionHandler
+
+	maxSession uint32
+
 	pb.UnimplementedLinkerServer
 }
 
@@ -122,4 +126,15 @@ func (l *Linker) Serve(stream pb.Linker_ServeServer) error {
 			session.HandleEnvelope(envelope)
 		}
 	}
+}
+
+func (l *Linker) CanAddSession() bool {
+	return l.sessions.Size() < l.maxSession
+}
+
+func (l *Linker) CloseSession(session *Session, code pb.SessionError_Code) {
+	sessionError := msg.NewSessionError()
+	sessionError.TypedPB().Code = code
+	_ = session.Send(sessionError)
+	session.Close()
 }
