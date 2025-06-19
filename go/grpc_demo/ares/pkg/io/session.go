@@ -19,6 +19,13 @@ type ISession interface {
 	Close()
 }
 
+type ISessions interface {
+	OnAddSession(ISession)
+	OnRemoveSession(ISession)
+	GetSession(uint32) ISession
+	Sessions() []ISession
+}
+
 type Session struct {
 	State
 	sid         uint32
@@ -72,6 +79,20 @@ func (s *Session) Send(msg IMsg) error {
 	return nil
 }
 
+func (s *Session) Send0(msg IMsg) error {
+	payload, err := msg.Marshal()
+	if err != nil {
+		return err
+	}
+
+	envelope := &pb.Envelope{
+		TypeId:  msg.GetType(),
+		PvId:    msg.GetPvId(),
+		Payload: payload,
+	}
+	return s.stream.SendMsg(envelope)
+}
+
 func (s *Session) StartProcess() {
 	defer Logger.Infof("session[%v] process goroutine stopped", s)
 	processFunc := func(msg IMsg) {
@@ -103,23 +124,15 @@ func (s *Session) StartProcess() {
 func (s *Session) StartSend() {
 	defer Logger.Infof("session[%v] send goroutine stopped", s)
 	for {
+		if err := s.Context().Err(); err != nil {
+			// session close 后就不发了
+			return
+		}
 		select {
 		case envelope := <-s.sendChan:
 			if err := s.stream.SendMsg(envelope); err != nil {
-				Logger.Errorf("session[%v] send [%v] err: %v", s, envelope, err)
+				Logger.Errorf("session[%v] send err: %v", s, err)
 				return
-			}
-		case <-s.ctx.Done():
-			for {
-				select {
-				case envelope := <-s.sendChan:
-					if err := s.stream.SendMsg(envelope); err != nil {
-						Logger.Errorf("session[%v] send err: %v", s, err)
-						return
-					}
-				default:
-					return
-				}
 			}
 		}
 	}

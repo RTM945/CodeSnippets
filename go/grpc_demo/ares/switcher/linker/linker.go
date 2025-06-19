@@ -3,6 +3,7 @@ package linker
 import (
 	"ares/logger"
 	ares "ares/pkg/io"
+	"ares/pkg/switcher"
 	pb "ares/proto/gen"
 	"ares/switcher/msg"
 	"crypto/tls"
@@ -23,9 +24,9 @@ type Linker struct {
 	kaCheckPeriod, kaTimeout time.Duration
 	address                  string
 	sessions                 *Sessions
-	sessionHandler           *SessionHandler
 
 	maxSession uint32
+	provider   switcher.IProvider
 
 	pb.UnimplementedLinkerServer
 }
@@ -35,8 +36,7 @@ func New(options ...func(*Linker)) *Linker {
 	for _, o := range options {
 		o(linker)
 	}
-	linker.sessions = NewSessions()
-	linker.sessionHandler = NewSessionHandler(linker)
+	linker.sessions = NewSessions(linker)
 	return linker
 }
 
@@ -102,9 +102,9 @@ func (l *Linker) Start() error {
 }
 
 func (l *Linker) Serve(stream pb.Linker_ServeServer) error {
-	session := NewLinkerSession(stream)
-	l.sessionHandler.OnAddSession(session)
-	defer l.sessionHandler.OnRemoveSession(session)
+	session := NewLinkerSession(stream, l)
+	l.sessions.OnAddSession(session)
+	defer l.sessions.OnRemoveSession(session)
 
 	go session.StartSend()
 	go session.StartProcess()
@@ -135,6 +135,10 @@ func (l *Linker) CanAddSession() bool {
 func (l *Linker) CloseSession(session *Session, code pb.SessionError_Code) {
 	sessionError := msg.NewSessionError()
 	sessionError.TypedPB().Code = code
-	_ = session.Send(sessionError)
+	_ = session.Send0(sessionError)
 	session.Close()
+}
+
+func (l *Linker) GetSessions() ares.ISessions {
+	return l.sessions
 }

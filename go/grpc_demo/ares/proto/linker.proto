@@ -28,7 +28,19 @@ message SessionError {
     RATE_LIMIT = 8006;
     // 当前状态不能发送协议到后端服务
     CANT_DISPATCH = 8007;
+
   }
+  Code code = 1;
+}
+
+message ServerError {
+  option (proto.type_id) = 11;
+  enum Code {
+    NONE = 0;
+    //目标服务器不可达
+    SERVER_NOT_ACCESSIBLE = 9001;
+  }
+  uint32 pvId = 2;
   Code code = 1;
 }
 
