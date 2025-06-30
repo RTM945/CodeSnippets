@@ -3,22 +3,21 @@ package switcher
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"time"
 )
 
 type LinkerSessions struct {
 	*ares.Sessions
-	node ares.INode
 }
 
-func NewLinkerSessions(node ares.INode) *LinkerSessions {
+func NewLinkerSessions() *LinkerSessions {
 	return &LinkerSessions{
 		Sessions: ares.NewSessions(),
-		node:     node,
 	}
 }
 
 func (ls *LinkerSessions) OnAddSession(session ares.ISession) {
-	linker := ls.node.(*Linker)
+	linker := linker.(*Linker)
 	if ls.Size() >= linker.maxSession {
 		linkerSession := session.(*LinkerSession)
 		linkerSession.CloseBySessionError(pb.SessionError_OVER_MAX_SESSIONS)
@@ -30,4 +29,23 @@ func (ls *LinkerSessions) OnAddSession(session ares.ISession) {
 func (ls *LinkerSessions) OnRemoveSession(session ares.ISession) {
 	linkerSession := session.(*LinkerSession)
 	linkerSession.OnClose()
+	ls.Sessions.OnRemoveSession(session)
+}
+
+func (ls *LinkerSessions) StartCheck() {
+	go func() {
+		ticker := time.NewTicker(time.Minute)
+		defer ticker.Stop()
+		for range ticker.C {
+			ls.RLock()
+			toClose := make([]ares.ISession, 0, ls.Size())
+			for _, s := range ls.Sessions.Sessions() {
+				toClose = append(toClose, s)
+			}
+			ls.RUnlock()
+			for _, session := range toClose {
+				session.Close()
+			}
+		}
+	}()
 }

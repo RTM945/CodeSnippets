@@ -7,13 +7,11 @@ import (
 )
 
 type LinkerMsgCreator struct {
-	node     ares.INode
 	registry map[uint32]ares.MsgCreatorFunc
 }
 
-func NewLinkerMsgCreator(node ares.INode) *LinkerMsgCreator {
+func NewLinkerMsgCreator() *LinkerMsgCreator {
 	msgCreator := &LinkerMsgCreator{
-		node:     node,
 		registry: linkerMsgRegistry,
 	}
 	return msgCreator

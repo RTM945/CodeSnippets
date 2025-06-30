@@ -6,22 +6,23 @@ import (
 	"ares/switcher/msg"
 	"golang.org/x/time/rate"
 	"net"
+	"time"
 )
 
 // LinkerSession client<->linker
 type LinkerSession struct {
 	*ares.Session
-	node           ares.INode
 	minRateLimiter *rate.Limiter
 	maxRateLimiter *rate.Limiter
+	aliveTime      int64
 }
 
-func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *LinkerSession {
+func NewLinkerSession(stream pb.Linker_ServeServer) *LinkerSession {
 	session := &LinkerSession{
-		Session: ares.NewSession(stream),
-		node:    node,
+		Session:   ares.NewSession(stream),
+		aliveTime: time.Now().Unix(),
 	}
-	linker := node.(*Linker)
+	linker := linker.(*Linker)
 	if linker.rateMin > 0 {
 		session.minRateLimiter = rate.NewLimiter(rate.Limit(linker.rateMin), 1)
 	}
@@ -32,7 +33,8 @@ func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *LinkerSess
 }
 
 func (s *LinkerSession) HandleEnvelope(envelope *pb.Envelope) {
-	m, err := s.node.MsgCreator().Create(s, envelope)
+	linker := linker.(*Linker)
+	m, err := linker.MsgCreator().Create(s, envelope)
 	if err != nil {
 		LOGGER.Errorf("session[%v] create err: %v", s, err)
 		return
@@ -43,6 +45,7 @@ func (s *LinkerSession) HandleEnvelope(envelope *pb.Envelope) {
 }
 
 func (s *LinkerSession) receiveUnknown(typeId uint32) {
+	s.ResetAlive()
 	if s.maxRateLimiter != nil && !s.maxRateLimiter.Allow() {
 		s.CloseBySessionError(pb.SessionError_RATE_LIMIT)
 		return
@@ -65,7 +68,7 @@ func (s *LinkerSession) WhiteFilterByProvider(ps *ProviderSession) bool {
 	}
 	host, _, err := net.SplitHostPort(ps.RemoteAddr().String())
 	if err == nil {
-		linker := s.node.(*Linker)
+		linker := linker.(*Linker)
 		for ip := range linker.GetWhiteIps() {
 			if host == ip {
 				return false
@@ -83,7 +86,7 @@ func (s *LinkerSession) BlackFilterByProvider(ps *ProviderSession) bool {
 	}
 	host, _, err := net.SplitHostPort(s.RemoteAddr().String())
 	if err == nil {
-		linker := s.node.(*Linker)
+		linker := linker.(*Linker)
 		for ip := range linker.GetBlackIps() {
 			if host == ip {
 				return false
@@ -93,4 +96,13 @@ func (s *LinkerSession) BlackFilterByProvider(ps *ProviderSession) bool {
 		LOGGER.Errorf("client ip: %v, err: %v", s.RemoteAddr(), err)
 	}
 	return true
+}
+
+func (s *LinkerSession) Alive() bool {
+	linker := linker.(*Linker)
+	return time.Now().Unix()-s.aliveTime < linker.sessionTimeout
+}
+
+func (s *LinkerSession) ResetAlive() {
+	s.aliveTime = time.Now().Unix()
 }

@@ -20,10 +20,9 @@ type Linker struct {
 	address                  string
 	sessions                 ares.ISessions
 	maxSession               uint32
-	whiteIps                 []string
-	blackIps                 []string
-	rateMin                  int
-	rateMax                  int
+	sessionTimeout           int64
+	whiteIps, blackIps       []string
+	rateMin, rateMax         int
 	msgCreator               ares.IMsgCreator
 
 	pb.UnimplementedLinkerServer
@@ -42,8 +41,8 @@ func New(options ...func(*Linker)) *Linker {
 	for _, o := range options {
 		o(linker)
 	}
-	linker.sessions = NewLinkerSessions(linker)
-	linker.msgCreator = NewLinkerMsgCreator(linker)
+	linker.sessions = NewLinkerSessions()
+	linker.msgCreator = NewLinkerMsgCreator()
 	return linker
 }
 
@@ -88,6 +87,12 @@ func WithBlackIps(blackIps []string) func(*Linker) {
 	}
 }
 
+func WithSessionTimeout(timeout int64) func(*Linker) {
+	return func(l *Linker) {
+		l.sessionTimeout = timeout
+	}
+}
+
 func (l *Linker) Start() error {
 	serverCert, err := tls.LoadX509KeyPair(l.certFile, l.keyFile)
 	if err != nil {
@@ -128,7 +133,7 @@ func (l *Linker) Start() error {
 }
 
 func (l *Linker) Serve(stream pb.Linker_ServeServer) error {
-	session := NewLinkerSession(stream, l)
+	session := NewLinkerSession(stream)
 	l.sessions.OnAddSession(session)
 	defer l.sessions.OnRemoveSession(session)
 
