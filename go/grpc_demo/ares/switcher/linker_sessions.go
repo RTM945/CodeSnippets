@@ -40,7 +40,10 @@ func (ls *LinkerSessions) StartCheck() {
 			ls.RLock()
 			toClose := make([]ares.ISession, 0, ls.Size())
 			for _, s := range ls.Sessions.Sessions() {
-				toClose = append(toClose, s)
+				linkerSession := s.(*LinkerSession)
+				if !linkerSession.Alive() {
+					toClose = append(toClose, linkerSession)
+				}
 			}
 			ls.RUnlock()
 			for _, session := range toClose {

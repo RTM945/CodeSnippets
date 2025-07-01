@@ -34,7 +34,7 @@ message SessionError {
     CANT_DISPATCH = 8007;
 
   }
-  Code code = 1;
+  uint32 code = 1;
 }
 
 message ServerError {

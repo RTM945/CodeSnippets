@@ -10,9 +10,9 @@ type ProviderSession struct {
 	checkToProvidee bool
 }
 
-func NewProviderSession(stream pb.Provider_ServeServer) *ProviderSession {
+func NewProviderSession(stream pb.Provider_ServeServer, node ares.INode) *ProviderSession {
 	return &ProviderSession{
-		Session: ares.NewSession(stream),
+		Session: ares.NewSession(stream, node),
 	}
 }
 

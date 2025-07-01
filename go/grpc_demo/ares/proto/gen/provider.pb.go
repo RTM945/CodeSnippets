@@ -810,6 +810,66 @@ func (x *SendToClient) GetPayload() []byte {
 	return nil
 }
 
+type PDispatch struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PvId          uint32                 `protobuf:"varint,1,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	TypeId        uint32                 `protobuf:"varint,2,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	Payload       []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PDispatch) Reset() {
+	*x = PDispatch{}
+	mi := &file_provider_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PDispatch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PDispatch) ProtoMessage() {}
+
+func (x *PDispatch) ProtoReflect() protoreflect.Message {
+	mi := &file_provider_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PDispatch.ProtoReflect.Descriptor instead.
+func (*PDispatch) Descriptor() ([]byte, []int) {
+	return file_provider_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *PDispatch) GetPvId() uint32 {
+	if x != nil {
+		return x.PvId
+	}
+	return 0
+}
+
+func (x *PDispatch) GetTypeId() uint32 {
+	if x != nil {
+		return x.TypeId
+	}
+	return 0
+}
+
+func (x *PDispatch) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
 var File_provider_proto protoreflect.FileDescriptor
 
 const file_provider_proto_rawDesc = "" +
@@ -878,9 +938,13 @@ const file_provider_proto_rawDesc = "" +
 	"\tclientSid\x18\x01 \x01(\rR\tclientSid\x12\x12\n" +
 	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x16\n" +
 	"\x06typeId\x18\x03 \x01(\rR\x06typeId\x12\x18\n" +
-	"\apayload\x18\x04 \x01(\fR\apayload:\x03\xc0>I29\n" +
+	"\apayload\x18\x04 \x01(\fR\apayload:\x03\xc0>I\"V\n" +
+	"\tPDispatch\x12\x12\n" +
+	"\x04pvId\x18\x01 \x01(\rR\x04pvId\x12\x16\n" +
+	"\x06typeId\x18\x02 \x01(\rR\x06typeId\x12\x18\n" +
+	"\apayload\x18\x03 \x01(\fR\apayload:\x03\xc0>M29\n" +
 	"\bProvider\x12-\n" +
-	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B9\xca>\fswitcher/msg\xd2>!switcher/msg/provider_msg_init.goZ\x04./pbb\x06proto3"
+	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B=\xca>\fswitcher/msg\xd2>%switcher/msg/provider_msg_registry.goZ\x04./pbb\x06proto3"
 
 var (
 	file_provider_proto_rawDescOnce sync.Once
@@ -895,7 +959,7 @@ func file_provider_proto_rawDescGZIP() []byte {
 }
 
 var file_provider_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_provider_proto_goTypes = []any{
 	(ProvideeKick_Reason)(0), // 0: proto.ProvideeKick.Reason
 	(ClientState_State)(0),   // 1: proto.ClientState.State
@@ -911,7 +975,8 @@ var file_provider_proto_goTypes = []any{
 	(*ProvideeBind)(nil),     // 11: proto.ProvideeBind
 	(*ProvideeState)(nil),    // 12: proto.ProvideeState
 	(*SendToClient)(nil),     // 13: proto.SendToClient
-	(*Envelope)(nil),         // 14: proto.Envelope
+	(*PDispatch)(nil),        // 14: proto.PDispatch
+	(*Envelope)(nil),         // 15: proto.Envelope
 }
 var file_provider_proto_depIdxs = []int32{
 	0,  // 0: proto.ProvideeKick.reason:type_name -> proto.ProvideeKick.Reason
@@ -921,8 +986,8 @@ var file_provider_proto_depIdxs = []int32{
 	9,  // 4: proto.ProvideeBind.providee:type_name -> proto.ProvideeInfo
 	4,  // 5: proto.ProvideeState.op:type_name -> proto.ProvideeState.Op
 	3,  // 6: proto.ProvideeState.state:type_name -> proto.ProvideeState.State
-	14, // 7: proto.Provider.Serve:input_type -> proto.Envelope
-	14, // 8: proto.Provider.Serve:output_type -> proto.Envelope
+	15, // 7: proto.Provider.Serve:input_type -> proto.Envelope
+	15, // 8: proto.Provider.Serve:output_type -> proto.Envelope
 	8,  // [8:9] is the sub-list for method output_type
 	7,  // [7:8] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
@@ -942,7 +1007,7 @@ func file_provider_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_provider_proto_rawDesc), len(file_provider_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

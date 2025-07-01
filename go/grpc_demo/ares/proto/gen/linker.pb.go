@@ -177,7 +177,7 @@ func (x *Ping) GetSerial() int32 {
 
 type SessionError struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          SessionError_Code      `protobuf:"varint,1,opt,name=code,proto3,enum=proto.SessionError_Code" json:"code,omitempty"`
+	Code          uint32                 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -212,11 +212,11 @@ func (*SessionError) Descriptor() ([]byte, []int) {
 	return file_linker_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SessionError) GetCode() SessionError_Code {
+func (x *SessionError) GetCode() uint32 {
 	if x != nil {
 		return x.Code
 	}
-	return SessionError_NONE
+	return 0
 }
 
 type ServerError struct {
@@ -321,9 +321,9 @@ const file_linker_proto_rawDesc = "" +
 	"\n" +
 	"\flinker.proto\x12\x05proto\x1a\fcommon.proto\"#\n" +
 	"\x04Ping\x12\x16\n" +
-	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\x04\"\xb8\x01\n" +
-	"\fSessionError\x12,\n" +
-	"\x04code\x18\x01 \x01(\x0e2\x18.proto.SessionError.CodeR\x04code\"u\n" +
+	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\x04\"\x9e\x01\n" +
+	"\fSessionError\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\rR\x04code\"u\n" +
 	"\x04Code\x12\b\n" +
 	"\x04NONE\x10\x00\x12\x12\n" +
 	"\rOPEN_WHITE_IP\x10\xc1>\x12\x12\n" +
@@ -341,7 +341,7 @@ const file_linker_proto_rawDesc = "" +
 	"\x04Pong\x12\x16\n" +
 	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\b27\n" +
 	"\x06Linker\x12-\n" +
-	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B7\xca>\fswitcher/msg\xd2>\x1fswitcher/msg/linker_msg_init.goZ\x04./pbb\x06proto3"
+	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B;\xca>\fswitcher/msg\xd2>#switcher/msg/linker_msg_registry.goZ\x04./pbb\x06proto3"
 
 var (
 	file_linker_proto_rawDescOnce sync.Once
@@ -367,15 +367,14 @@ var file_linker_proto_goTypes = []any{
 	(*Envelope)(nil),       // 6: proto.Envelope
 }
 var file_linker_proto_depIdxs = []int32{
-	0, // 0: proto.SessionError.code:type_name -> proto.SessionError.Code
-	1, // 1: proto.ServerError.code:type_name -> proto.ServerError.Code
-	6, // 2: proto.Linker.Serve:input_type -> proto.Envelope
-	6, // 3: proto.Linker.Serve:output_type -> proto.Envelope
-	3, // [3:4] is the sub-list for method output_type
-	2, // [2:3] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	1, // 0: proto.ServerError.code:type_name -> proto.ServerError.Code
+	6, // 1: proto.Linker.Serve:input_type -> proto.Envelope
+	6, // 2: proto.Linker.Serve:output_type -> proto.Envelope
+	2, // [2:3] is the sub-list for method output_type
+	1, // [1:2] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_linker_proto_init() }

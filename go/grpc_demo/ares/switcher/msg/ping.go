@@ -10,11 +10,12 @@ type Ping struct {
 	pb *pb.Ping
 }
 
-func PingCreator(session ares.ISession, envelope *pb.Envelope) (ares.IMsg, error) {
+func PingCreator(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
 	res := NewPing()
 	res.SetSession(session)
-	res.SetContext(envelope)
-	err := res.Unmarshal(envelope.GetPayload())
+	res.SetPvId(pvId)
+	res.SetType(typeId)
+	err := res.Unmarshal(payload)
 	return res, err
 }
 
@@ -38,6 +39,7 @@ func (msg *Ping) TypedPB() *pb.Ping {
 }
 
 func (msg *Ping) Process() error {
+	msg.GetSession().ResetAlive()
 	resp := NewPong()
 	resp.TypedPB().Serial = msg.TypedPB().Serial
 	return msg.GetSession().Send(resp)

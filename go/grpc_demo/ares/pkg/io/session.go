@@ -17,12 +17,16 @@ type ISession interface {
 	Process(IMsg)
 	Send(IMsg) error
 	Close()
+	Alive() bool
+	ResetAlive()
+	Node() INode
 }
 
 type Session struct {
 	State
 	sid         uint32
 	stream      grpc.ServerStream
+	node        INode
 	remoteAddr  net.Addr
 	ctx         context.Context
 	cancel      context.CancelFunc
@@ -34,9 +38,10 @@ var genSessionId atomic.Uint32
 
 var ChanSize = 64
 
-func NewSession(stream grpc.ServerStream) *Session {
+func NewSession(stream grpc.ServerStream, node INode) *Session {
 	session := &Session{
 		stream:      stream,
+		node:        node,
 		sid:         genSessionId.Add(1),
 		sendChan:    make(chan *pb.Envelope, ChanSize),
 		processChan: make(chan IMsg, ChanSize),
@@ -87,16 +92,16 @@ func (s *Session) Send0(msg IMsg) error {
 }
 
 func (s *Session) StartProcess() {
-	defer Logger.Infof("session[%v] process goroutine stopped", s)
+	defer LOGGER.Infof("session[%v] process goroutine stopped", s)
 	processFunc := func(msg IMsg) {
 		defer func() {
 			if r := recover(); r != nil {
-				Logger.Errorf("session[%v] panic processing msg %v: %v\n%s", s, msg, r, string(debug.Stack()))
+				LOGGER.Errorf("session[%v] panic processing msg %v: %v\n%s", s, msg, r, string(debug.Stack()))
 			}
 		}()
 
 		if err := msg.Process(); err != nil {
-			Logger.Errorf("session[%v] process msg %v err: %v", s, msg, err)
+			LOGGER.Errorf("session[%v] process msg %v err: %v", s, msg, err)
 		}
 	}
 	for {
@@ -115,7 +120,7 @@ func (s *Session) StartProcess() {
 }
 
 func (s *Session) StartSend() {
-	defer Logger.Infof("session[%v] send goroutine stopped", s)
+	defer LOGGER.Infof("session[%v] send goroutine stopped", s)
 	for {
 		if err := s.Context().Err(); err != nil {
 			// session close 后就不发了
@@ -124,7 +129,7 @@ func (s *Session) StartSend() {
 		select {
 		case envelope := <-s.sendChan:
 			if err := s.stream.SendMsg(envelope); err != nil {
-				Logger.Errorf("session[%v] send err: %v", s, err)
+				LOGGER.Errorf("session[%v] send err: %v", s, err)
 				return
 			}
 		}
@@ -145,6 +150,18 @@ func (s *Session) Close() {
 
 func (s *Session) Context() context.Context {
 	return s.ctx
+}
+
+func (s *Session) Alive() bool {
+	return false
+}
+
+func (s *Session) ResetAlive() {
+	panic("implement me")
+}
+
+func (s *Session) Node() INode {
+	return s.node
 }
 
 func (s *Session) OnClose() {}

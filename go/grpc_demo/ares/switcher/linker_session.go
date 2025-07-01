@@ -17,9 +17,9 @@ type LinkerSession struct {
 	aliveTime      int64
 }
 
-func NewLinkerSession(stream pb.Linker_ServeServer) *LinkerSession {
+func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *LinkerSession {
 	session := &LinkerSession{
-		Session:   ares.NewSession(stream),
+		Session:   ares.NewSession(stream, node),
 		aliveTime: time.Now().Unix(),
 	}
 	linker := linker.(*Linker)
@@ -34,7 +34,7 @@ func NewLinkerSession(stream pb.Linker_ServeServer) *LinkerSession {
 
 func (s *LinkerSession) HandleEnvelope(envelope *pb.Envelope) {
 	linker := linker.(*Linker)
-	m, err := linker.MsgCreator().Create(s, envelope)
+	m, err := linker.MsgCreator().Create(s, envelope.GetPvId(), envelope.GetTypeId(), envelope.GetPayload())
 	if err != nil {
 		LOGGER.Errorf("session[%v] create err: %v", s, err)
 		return

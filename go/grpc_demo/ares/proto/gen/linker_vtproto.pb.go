@@ -343,7 +343,7 @@ func (m *SessionError) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Code |= SessionError_Code(b&0x7F) << shift
+				m.Code |= uint32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

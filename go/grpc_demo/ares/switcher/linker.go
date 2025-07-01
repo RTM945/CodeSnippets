@@ -133,7 +133,7 @@ func (l *Linker) Start() error {
 }
 
 func (l *Linker) Serve(stream pb.Linker_ServeServer) error {
-	session := NewLinkerSession(stream)
+	session := NewLinkerSession(stream, l)
 	l.sessions.OnAddSession(session)
 	defer l.sessions.OnRemoveSession(session)
 

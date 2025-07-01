@@ -18,8 +18,7 @@ type Session struct {
 
 func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *Session {
 	session := &Session{
-		Session: ares.NewSession(stream),
-		node:    node,
+		Session: ares.NewSession(stream, node),
 	}
 	linker := node.(*Linker)
 	if linker.rateMin > 0 {
@@ -32,7 +31,7 @@ func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *Session {
 }
 
 func (s *Session) HandleEnvelope(envelope *pb.Envelope) {
-	msg, err := s.node.MsgCreator().Create(s, envelope)
+	msg, err := s.node.MsgCreator().Create(s, envelope.GetPvId(), envelope.GetTypeId(), envelope.GetPayload())
 	if err != nil {
 		LOGGER.Errorf("session[%v] create err: %v", s, err)
 		return

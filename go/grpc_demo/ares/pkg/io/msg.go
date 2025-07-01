@@ -1,13 +1,13 @@
 package io
 
-import pb "ares/proto/gen"
-
 type IMsg interface {
 	Marshal() ([]byte, error)
 	Unmarshal([]byte) error
 	GetType() uint32
+	SetType(uint32)
 	GetPvId() uint32
 	SetPvId(pvId uint32)
+	SetContext(ctx any)
 	Process() error
 	Dispatch()
 }
@@ -35,6 +35,10 @@ func (msg *Msg) Unmarshal(data []byte) error {
 
 func (msg *Msg) GetType() uint32 { return msg.typeId }
 
+func (msg *Msg) SetType(typeId uint32) {
+	msg.typeId = typeId
+}
+
 func (msg *Msg) GetPvId() uint32 { return msg.pvId }
 
 func (msg *Msg) SetPvId(pvId uint32) {
@@ -59,9 +63,9 @@ func (msg *Msg) SetSession(session ISession) {
 
 func (msg *Msg) GetSession() ISession { return msg.session }
 
-type MsgCreatorFunc func(session ISession, envelope *pb.Envelope) (IMsg, error)
+type MsgCreatorFunc func(session ISession, pvId, typeId uint32, payload []byte) (IMsg, error)
 
 type IMsgCreator interface {
-	Create(session ISession, envelope *pb.Envelope) (IMsg, error)
+	Create(session ISession, pvId, typeId uint32, payload []byte) (IMsg, error)
 	Register(id uint32, f MsgCreatorFunc)
 }

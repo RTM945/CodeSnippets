@@ -168,7 +168,7 @@ func (l *Linker) CanAddSession() bool {
 	return l.sessions.Size() < l.maxSession
 }
 
-func (l *Linker) CloseSession(session *Session, code pb.SessionError_Code) {
+func (l *Linker) CloseSession(session *Session, code uint32) {
 	sessionError := msg.NewSessionError()
 	sessionError.TypedPB().Code = code
 	_ = session.Send0(sessionError)
