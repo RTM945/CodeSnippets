@@ -14,6 +14,8 @@ func DispatchCreator(session ares.ISession, pvId, typeId uint32, payload []byte)
 	return res, err
 }
 
+var DispatcherProcessor = func(dispatch *Dispatch) error { panic("implement me") }
+
 type Dispatch struct {
 	*ares.Msg
 	pb *pb.Dispatch
@@ -39,21 +41,5 @@ func (msg *Dispatch) TypedPB() *pb.Dispatch {
 }
 
 func (msg *Dispatch) Process() error {
-	dispatch := msg.TypedPB()
-	create, err := msg.GetSession().Node().MsgCreator().Create(
-		msg.GetSession(), dispatch.GetPvId(), dispatch.GetTypeId(), dispatch.GetPayload(),
-	)
-	if err != nil {
-		provideeKick := NewProvideeKick()
-		provideeKick.TypedPB().ClientSid = msg.TypedPB().GetClientSid()
-		provideeKick.TypedPB().Reason = pb.ProvideeKick_EXCEPTION
-		msg.GetSession().Send(provideeKick)
-		ares.LOGGER.Errorf("Dispatch pvId=%d, typeId=%d, clientSid=%d", dispatch.GetPvId(), dispatch.GetTypeId(), dispatch.GetClientSid())
-	} else {
-		// msgDebug.OnReceive(create, session)
-		create.SetContext(msg)
-		create.Dispatch()
-	}
-
-	return nil
+	return DispatcherProcessor(msg)
 }

@@ -17,8 +17,6 @@ type ISession interface {
 	Process(IMsg)
 	Send(IMsg) error
 	Close()
-	Alive() bool
-	ResetAlive()
 	Node() INode
 }
 
@@ -150,14 +148,6 @@ func (s *Session) Close() {
 
 func (s *Session) Context() context.Context {
 	return s.ctx
-}
-
-func (s *Session) Alive() bool {
-	return false
-}
-
-func (s *Session) ResetAlive() {
-	panic("implement me")
 }
 
 func (s *Session) Node() INode {

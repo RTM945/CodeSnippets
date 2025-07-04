@@ -12,18 +12,19 @@ type LinkerMsgCreator struct {
 
 func NewLinkerMsgCreator() *LinkerMsgCreator {
 	msgCreator := &LinkerMsgCreator{
-		registry: linkerMsgRegistry,
+		registry: make(map[uint32]ares.MsgCreatorFunc),
 	}
+
 	return msgCreator
 }
 
-func (c *LinkerMsgCreator) Register(id uint32, f ares.MsgCreatorFunc) {
-	c.registry[id] = f
+func (c *LinkerMsgCreator) Register(typeId uint32, f ares.MsgCreatorFunc) {
+	c.registry[typeId] = f
 }
 
 func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
-	creator, ok := c.registry[typeId]
-	if ok {
+	creator := c.registry[typeId]
+	if creator != nil {
 		return creator(session, pvId, typeId, payload)
 	} else {
 		if pvId != 0 {
@@ -40,19 +41,19 @@ func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, pa
 			// 后端服务还没准备好
 			if toSession.CheckToProvide() && !linkerSession.CheckState(int(pb.ClientState_TOPROVIDEE)) {
 				LOGGER.Errorf("Client to Providee, state error: %d, session: %v", linkerSession.GetState(), linkerSession)
-				linkerSession.CloseBySessionError(pb.SessionError_CANT_DISPATCH)
+				linkerSession.CloseBySessionError(uint32(pb.SessionError_CANT_DISPATCH))
 				return nil, nil
 			}
 			// 白名单
 			if linkerSession.WhiteFilterByProvider(toSession) {
 				LOGGER.Errorf("providee writeip kick, pvid: %d, session: %v, typeId: %d", pvId, linkerSession, typeId)
-				linkerSession.CloseBySessionError(pb.SessionError_OPEN_WHITE_IP)
+				linkerSession.CloseBySessionError(uint32(pb.SessionError_OPEN_WHITE_IP))
 				return nil, nil
 			}
 			// 黑名单
 			if linkerSession.BlackFilterByProvider(toSession) {
 				LOGGER.Errorf("providee blackip kick, pvid: %d, session: %v, typeId: %d", pvId, linkerSession, typeId)
-				linkerSession.CloseBySessionError(pb.SessionError_OPEN_BLACK_IP)
+				linkerSession.CloseBySessionError(uint32(pb.SessionError_OPEN_BLACK_IP))
 				return nil, nil
 			}
 			linkerSession.receiveUnknown(typeId)
@@ -66,6 +67,6 @@ func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, pa
 				LOGGER.Errorf("session[%v] sendToProvidee msg pvid: %d typeId: %d err: %v", linkerSession, pvId, typeId, err)
 			}
 		}
-		return nil, nil
 	}
+	return nil, nil
 }

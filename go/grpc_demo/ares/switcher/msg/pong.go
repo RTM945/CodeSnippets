@@ -28,7 +28,3 @@ func (msg *Pong) Unmarshal(bytes []byte) error {
 func (msg *Pong) TypedPB() *pb.Pong {
 	return msg.pb
 }
-
-func (msg *Pong) Process() error {
-	panic("unimplemented")
-}

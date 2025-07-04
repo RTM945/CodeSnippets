@@ -10,18 +10,18 @@ type ProviderMsgCreator struct {
 
 func NewProviderMsgCreator() *ProviderMsgCreator {
 	msgCreator := &ProviderMsgCreator{
-		registry: providerMsgRegistry,
+		registry: make(map[uint32]ares.MsgCreatorFunc),
 	}
 	return msgCreator
 }
 
-func (c *ProviderMsgCreator) Register(id uint32, f ares.MsgCreatorFunc) {
-	c.registry[id] = f
+func (c *ProviderMsgCreator) Register(typeId uint32, f ares.MsgCreatorFunc) {
+	c.registry[typeId] = f
 }
 
 func (c *ProviderMsgCreator) Create(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
-	creator, ok := c.registry[typeId]
-	if ok {
+	creator := c.registry[typeId]
+	if creator != nil {
 		return creator(session, pvId, typeId, payload)
 	} else {
 		providerSession := session.(*ProviderSession)

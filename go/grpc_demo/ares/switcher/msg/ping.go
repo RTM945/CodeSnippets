@@ -19,6 +19,8 @@ func PingCreator(session ares.ISession, pvId, typeId uint32, payload []byte) (ar
 	return res, err
 }
 
+var PingProcessor = func(ping *Ping) error { panic("implement me") }
+
 func NewPing() *Ping {
 	return &Ping{
 		Msg: ares.NewMsg(4),
@@ -39,8 +41,5 @@ func (msg *Ping) TypedPB() *pb.Ping {
 }
 
 func (msg *Ping) Process() error {
-	msg.GetSession().ResetAlive()
-	resp := NewPong()
-	resp.TypedPB().Serial = msg.TypedPB().Serial
-	return msg.GetSession().Send(resp)
+	return PingProcessor(msg)
 }

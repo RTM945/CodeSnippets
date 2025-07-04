@@ -10,6 +10,17 @@ type ProvideeKick struct {
 	pb *pb.ProvideeKick
 }
 
+func ProvideeKickCreator(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
+	res := NewProvideeKick()
+	res.SetSession(session)
+	res.SetPvId(pvId)
+	res.SetType(typeId)
+	err := res.Unmarshal(payload)
+	return res, err
+}
+
+var ProvideeKickProcessor = func(msg *ProvideeKick) error { panic("implement me") }
+
 func NewProvideeKick() *ProvideeKick {
 	return &ProvideeKick{
 		Msg: ares.NewMsg(53),
@@ -30,10 +41,5 @@ func (msg *ProvideeKick) TypedPB() *pb.ProvideeKick {
 }
 
 func (msg *ProvideeKick) Process() error {
-	msg.GetSession().Node().Sessions()
-	sessionErr := NewSessionError()
-	sessionErr.TypedPB().Code = uint32(msg.TypedPB().Reason)
-	//_ = session.Send0(sessionErr)
-	//session.Close()
-	return nil
+	return ProvideeKickProcessor(msg)
 }

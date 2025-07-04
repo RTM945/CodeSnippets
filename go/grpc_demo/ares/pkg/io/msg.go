@@ -10,6 +10,8 @@ type IMsg interface {
 	SetContext(ctx any)
 	Process() error
 	Dispatch()
+	GetSession() ISession
+	SetSession(session ISession)
 }
 
 type Msg struct {

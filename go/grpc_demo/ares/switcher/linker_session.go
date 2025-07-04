@@ -22,7 +22,7 @@ func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *LinkerSess
 		Session:   ares.NewSession(stream, node),
 		aliveTime: time.Now().Unix(),
 	}
-	linker := linker.(*Linker)
+	linker := session.Session.Node().(*Linker)
 	if linker.rateMin > 0 {
 		session.minRateLimiter = rate.NewLimiter(rate.Limit(linker.rateMin), 1)
 	}
@@ -33,8 +33,7 @@ func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *LinkerSess
 }
 
 func (s *LinkerSession) HandleEnvelope(envelope *pb.Envelope) {
-	linker := linker.(*Linker)
-	m, err := linker.MsgCreator().Create(s, envelope.GetPvId(), envelope.GetTypeId(), envelope.GetPayload())
+	m, err := s.Session.Node().MsgCreator().Create(s, envelope.GetPvId(), envelope.GetTypeId(), envelope.GetPayload())
 	if err != nil {
 		LOGGER.Errorf("session[%v] create err: %v", s, err)
 		return
@@ -47,7 +46,7 @@ func (s *LinkerSession) HandleEnvelope(envelope *pb.Envelope) {
 func (s *LinkerSession) receiveUnknown(typeId uint32) {
 	s.ResetAlive()
 	if s.maxRateLimiter != nil && !s.maxRateLimiter.Allow() {
-		s.CloseBySessionError(pb.SessionError_RATE_LIMIT)
+		s.CloseBySessionError(uint32(pb.SessionError_RATE_LIMIT))
 		return
 	}
 	if s.minRateLimiter != nil && !s.minRateLimiter.Allow() {
@@ -55,7 +54,7 @@ func (s *LinkerSession) receiveUnknown(typeId uint32) {
 	}
 }
 
-func (s *LinkerSession) CloseBySessionError(code pb.SessionError_Code) {
+func (s *LinkerSession) CloseBySessionError(code uint32) {
 	sessionError := msg.NewSessionError()
 	sessionError.TypedPB().Code = code
 	_ = s.Send0(sessionError)
@@ -68,7 +67,7 @@ func (s *LinkerSession) WhiteFilterByProvider(ps *ProviderSession) bool {
 	}
 	host, _, err := net.SplitHostPort(ps.RemoteAddr().String())
 	if err == nil {
-		linker := linker.(*Linker)
+		linker := s.Session.Node().(*Linker)
 		for ip := range linker.GetWhiteIps() {
 			if host == ip {
 				return false
@@ -86,7 +85,7 @@ func (s *LinkerSession) BlackFilterByProvider(ps *ProviderSession) bool {
 	}
 	host, _, err := net.SplitHostPort(s.RemoteAddr().String())
 	if err == nil {
-		linker := linker.(*Linker)
+		linker := s.Session.Node().(*Linker)
 		for ip := range linker.GetBlackIps() {
 			if host == ip {
 				return false
@@ -99,7 +98,7 @@ func (s *LinkerSession) BlackFilterByProvider(ps *ProviderSession) bool {
 }
 
 func (s *LinkerSession) Alive() bool {
-	linker := linker.(*Linker)
+	linker := s.Session.Node().(*Linker)
 	return time.Now().Unix()-s.aliveTime < linker.sessionTimeout
 }
 
