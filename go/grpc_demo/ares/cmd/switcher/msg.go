@@ -1,7 +1,7 @@
 package main
 
 import (
-	switchermsg "ares/msg/switcher"
+	switchermsg "ares/switcher/msg"
 	switcherprocessor "ares/switcher/processor"
 )
 
