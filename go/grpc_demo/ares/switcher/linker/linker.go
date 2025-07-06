@@ -24,9 +24,12 @@ type Linker struct {
 	kaCheckPeriod, kaTimeout time.Duration
 	address                  string
 	sessions                 *Sessions
-
-	maxSession uint32
-	provider   switcher.IProvider
+	maxSession               uint32
+	provider                 switcher.IProvider
+	whiteIps                 []string
+	blackIps                 []string
+	rateMin                  int
+	rateMax                  int
 
 	pb.UnimplementedLinkerServer
 }
@@ -141,4 +144,20 @@ func (l *Linker) CloseSession(session *Session, code pb.SessionError_Code) {
 
 func (l *Linker) GetSessions() ares.ISessions {
 	return l.sessions
+}
+
+func (l *Linker) GetWhiteIps() map[string]struct{} {
+	tmp := make(map[string]struct{}, len(l.whiteIps))
+	for _, ip := range l.whiteIps {
+		tmp[ip] = struct{}{}
+	}
+	return tmp
+}
+
+func (l *Linker) GetBlackIps() map[string]struct{} {
+	tmp := make(map[string]struct{}, len(l.blackIps))
+	for _, ip := range l.blackIps {
+		tmp[ip] = struct{}{}
+	}
+	return tmp
 }

@@ -5,6 +5,11 @@ option go_package = "./pb";
 
 import "common.proto";
 
+// providee <-> switcher
+service Provider {
+  rpc Serve(stream Envelope) returns (stream Envelope);
+}
+
 message Dispatch  {
   option (proto.type_id) = 51;
   uint32 clientSid = 1;
@@ -13,16 +18,99 @@ message Dispatch  {
   bytes payload = 4;
 }
 
+message ProvideeKick {
+  option (proto.type_id) = 53;
+  enum Reason {
+    NONE = 0;
+    EXCEPTION = 1001;
+    ONLINE_USER_OFFLINE = 1002;
+    AU_NOT_REGISTER_SERVER = 1003;
+    GS_NOT_EXIST_ROLE = 1004;
+    // 顶号
+    ROLE_MULTI_LOGIN = 1005;
+    // 客户端平台错误
+    ROLE_ERROR_PLAT = 1006;
+    // GS在线已满
+    ROLE_GS_FULL = 1007;
+    // GS注册平台异常
+    GS_ERROR_PLAT = 1008;
+    // 登录验证token失效
+    TOKEN_TIMEOUT = 1009;
+    // 其他情况的SDK登录验证失败
+    SDK_CHECK_FAIL = 1010;
+  }
+  uint32 clientSid = 1;
+  Reason reason = 2;
+}
+
+enum ClientState {
+  ClientState_NONE = 0;
+  // 可发送消息到providee
+  TOPROVIDEE = 1;
+  // 接收广播消息
+  BROADCAST = 2;
+}
+
+message AddClientState {
+  option (proto.type_id) = 61;
+  uint32 clientSid = 1;
+  ClientState state = 2;
+}
+
+message RemoveClientState {
+  option (proto.type_id) = 62;
+  uint32 clientSid = 1;
+  ClientState state = 2;
+}
+
+message ProviderInfo {
+  string ip = 1;
+  uint32 port = 2;
+}
+
+message ProvideeInfo{
+  uint32 pvId = 1;
+  uint32 serverType = 2;
+  uint32 serverId = 3;
+  uint32 ip = 4;
+  repeated string topics = 5;
+}
+
+message ProvideeBroken {
+  option (proto.type_id) = 63;
+  uint32 pvId = 1;
+  ProviderInfo provider = 2;
+}
+
+message ProvideeBind {
+  option (proto.type_id) = 64;
+  ProvideeInfo providee = 1;
+}
+
+enum ProvideeState {
+  ProvideeState_NONE = 0;
+  // IP白名单状态
+  WHITEIP = 1;
+  // IP黑名单状态
+  BLACKIP = 2;
+}
+
+message AddProvideeState {
+  option (proto.type_id) = 65;
+  ProvideeState state = 1;
+}
+
+message RemoveProvideeState {
+  option (proto.type_id) = 66;
+  ProvideeState state = 1;
+}
+
 message SendToClient {
   option (proto.type_id) = 73;
   uint32 clientSid = 1;
   uint32 pvId = 2;
   uint32 typeId = 3;
   bytes payload = 4;
-}
-
-service Provider {
-  rpc Serve(stream Envelope) returns (stream Envelope);
 }
 
 

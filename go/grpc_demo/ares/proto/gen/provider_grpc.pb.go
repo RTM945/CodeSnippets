@@ -25,6 +25,8 @@ const (
 // ProviderClient is the client API for Provider service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// providee <-> switcher
 type ProviderClient interface {
 	Serve(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error)
 }
@@ -53,6 +55,8 @@ type Provider_ServeClient = grpc.BidiStreamingClient[Envelope, Envelope]
 // ProviderServer is the server API for Provider service.
 // All implementations must embed UnimplementedProviderServer
 // for forward compatibility.
+//
+// providee <-> switcher
 type ProviderServer interface {
 	Serve(grpc.BidiStreamingServer[Envelope, Envelope]) error
 	mustEmbedUnimplementedProviderServer()

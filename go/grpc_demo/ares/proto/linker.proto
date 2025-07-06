@@ -5,6 +5,7 @@ option go_package = "./pb";
 
 import "common.proto";
 
+// client <-> linker
 service Linker {
   rpc Serve(stream Envelope) returns (stream Envelope);
 }

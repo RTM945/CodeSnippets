@@ -25,6 +25,8 @@ const (
 // LinkerClient is the client API for Linker service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// client <-> linker
 type LinkerClient interface {
 	Serve(ctx context.Context, opts ...grpc.CallOption) (grpc.BidiStreamingClient[Envelope, Envelope], error)
 }
@@ -53,6 +55,8 @@ type Linker_ServeClient = grpc.BidiStreamingClient[Envelope, Envelope]
 // LinkerServer is the server API for Linker service.
 // All implementations must embed UnimplementedLinkerServer
 // for forward compatibility.
+//
+// client <-> linker
 type LinkerServer interface {
 	Serve(grpc.BidiStreamingServer[Envelope, Envelope]) error
 	mustEmbedUnimplementedLinkerServer()
