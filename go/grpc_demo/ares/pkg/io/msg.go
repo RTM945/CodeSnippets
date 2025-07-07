@@ -1,5 +1,7 @@
 package io
 
+import pb "ares/proto/gen"
+
 type IMsg interface {
 	Marshal() ([]byte, error)
 	Unmarshal([]byte) error
@@ -56,3 +58,10 @@ func (msg *Msg) SetSession(session ISession) {
 }
 
 func (msg *Msg) GetSession() ISession { return msg.session }
+
+type MsgCreatorFunc func(session ISession, envelope *pb.Envelope) (IMsg, error)
+
+type IMsgCreator interface {
+	Create(session ISession, envelope *pb.Envelope) (IMsg, error)
+	Register(id uint32, f MsgCreatorFunc)
+}

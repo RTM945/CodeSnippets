@@ -30,6 +30,7 @@ type Linker struct {
 	blackIps                 []string
 	rateMin                  int
 	rateMax                  int
+	msgCreator               ares.IMsgCreator
 
 	pb.UnimplementedLinkerServer
 }
@@ -40,6 +41,7 @@ func New(options ...func(*Linker)) *Linker {
 		o(linker)
 	}
 	linker.sessions = NewSessions(linker)
+	linker.msgCreator = NewMsgCreator(linker)
 	return linker
 }
 
@@ -62,6 +64,25 @@ func WithKeepAlive(checkPeriod, timeout time.Duration) func(*Linker) {
 	return func(l *Linker) {
 		l.kaCheckPeriod = checkPeriod
 		l.kaTimeout = timeout
+	}
+}
+
+func WithRateLimit(min, max int) func(*Linker) {
+	return func(l *Linker) {
+		l.rateMin = min
+		l.rateMax = max
+	}
+}
+
+func WithWhiteIps(whiteIps []string) func(*Linker) {
+	return func(l *Linker) {
+		l.whiteIps = whiteIps
+	}
+}
+
+func WithBlackIps(blackIps []string) func(*Linker) {
+	return func(l *Linker) {
+		l.blackIps = blackIps
 	}
 }
 

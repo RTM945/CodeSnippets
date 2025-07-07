@@ -14,7 +14,7 @@ func PingCreator(session ares.ISession, envelope *pb.Envelope) (ares.IMsg, error
 	res := NewPing()
 	res.SetSession(session)
 	res.SetContext(envelope)
-	err := res.Unmarshal(envelope.Payload)
+	err := res.Unmarshal(envelope.GetPayload())
 	return res, err
 }
 

@@ -9,7 +9,7 @@ func DispatchCreator(session ares.ISession, envelope *pb.Envelope) (ares.IMsg, e
 	res := NewDispatch()
 	res.SetSession(session)
 	res.SetContext(envelope)
-	err := res.Unmarshal(envelope.Payload)
+	err := res.Unmarshal(envelope.GetPayload())
 	return res, err
 }
 

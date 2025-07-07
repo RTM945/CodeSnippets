@@ -14,7 +14,7 @@ func SendToClientCreator(session ares.ISession, envelope *pb.Envelope) (ares.IMs
 	res := NewSendToClient()
 	res.SetSession(session)
 	res.SetContext(envelope)
-	err := res.Unmarshal(envelope.Payload)
+	err := res.Unmarshal(envelope.GetPayload())
 	return res, err
 }
 
