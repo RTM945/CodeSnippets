@@ -7,25 +7,21 @@ import (
 )
 
 type LinkerMsgCreator struct {
-	registry map[uint32]ares.MsgCreatorFunc
+	*ares.MsgCreator
 }
 
 func NewLinkerMsgCreator() *LinkerMsgCreator {
 	msgCreator := &LinkerMsgCreator{
-		registry: make(map[uint32]ares.MsgCreatorFunc),
+		MsgCreator: ares.NewMsgCreator(),
 	}
 
 	return msgCreator
 }
 
-func (c *LinkerMsgCreator) Register(typeId uint32, f ares.MsgCreatorFunc) {
-	c.registry[typeId] = f
-}
-
 func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
-	creator := c.registry[typeId]
-	if creator != nil {
-		return creator(session, pvId, typeId, payload)
+	create, _ := c.MsgCreator.Create(session, pvId, typeId, payload)
+	if create != nil {
+		return create, nil
 	} else {
 		if pvId != 0 {
 			linkerSession := session.(*LinkerSession)

@@ -12,3 +12,7 @@ var provider *Provider
 func GetLinker() *Linker {
 	return linker
 }
+
+func GetProvider() *Provider {
+	return provider
+}

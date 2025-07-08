@@ -1,5 +1,7 @@
 package io
 
+import "errors"
+
 type IMsg interface {
 	Marshal() ([]byte, error)
 	Unmarshal([]byte) error
@@ -68,6 +70,71 @@ func (msg *Msg) GetSession() ISession { return msg.session }
 type MsgCreatorFunc func(session ISession, pvId, typeId uint32, payload []byte) (IMsg, error)
 
 type IMsgCreator interface {
-	Create(session ISession, pvId, typeId uint32, payload []byte) (IMsg, error)
 	Register(id uint32, f MsgCreatorFunc)
+	Create(session ISession, pvId, typeId uint32, payload []byte) (IMsg, error)
+}
+
+type MsgCreator struct {
+	register map[uint32]MsgCreatorFunc
+}
+
+func NewMsgCreator() *MsgCreator {
+	return &MsgCreator{
+		register: make(map[uint32]MsgCreatorFunc),
+	}
+}
+
+func (mc *MsgCreator) Register(id uint32, f MsgCreatorFunc) {
+	mc.register[id] = f
+}
+
+var NoMsgCreatorErr = errors.New("no msg creator")
+
+func (mc *MsgCreator) Create(session ISession, pvId, typeId uint32, payload []byte) (IMsg, error) {
+	creator, ok := mc.register[typeId]
+	if !ok {
+		return nil, NoMsgCreatorErr
+	}
+	return creator(session, pvId, typeId, payload)
+}
+
+type MsgProcessorFunc[T IMsg] func(T) error
+
+type IMsgProcessor interface {
+	Register(typeId uint32, processor func(IMsg) error)
+	Process(m IMsg) error
+}
+
+type MsgProcessor struct {
+	register map[uint32]func(msg IMsg) error
+}
+
+func NewMsgProcessor() *MsgProcessor {
+	return &MsgProcessor{
+		register: make(map[uint32]func(msg IMsg) error),
+	}
+}
+
+func (mp *MsgProcessor) Register(typeId uint32, processor func(IMsg) error) {
+	RegisterMsgProcessor(mp, typeId, processor)
+}
+
+var NoMsgProcessorErr = errors.New("no msg processor")
+
+func (mp *MsgProcessor) Process(m IMsg) error {
+	h, ok := mp.register[m.GetType()]
+	if !ok {
+		return NoMsgProcessorErr
+	}
+	return h(m)
+}
+
+func RegisterMsgProcessor[T IMsg](mp IMsgProcessor, typeId uint32, processor MsgProcessorFunc[T]) {
+	mp.Register(typeId, func(m IMsg) error {
+		typed, ok := m.(T)
+		if !ok {
+			return nil
+		}
+		return processor(typed)
+	})
 }

@@ -16,7 +16,7 @@ func Dispatch(dispatch *msg.Dispatch) error {
 		provideeKick.TypedPB().ClientSid = typedPB.GetClientSid()
 		provideeKick.TypedPB().Reason = pb.ProvideeKick_EXCEPTION
 		_ = dispatch.GetSession().Send(provideeKick)
-		ares.LOGGER.Errorf("Dispatch pvId=%d, typeId=%d, clientSid=%d", typedPB.GetPvId(), typedPB.GetTypeId(), typedPB.GetClientSid())
+		ares.LOGGER.Errorf("Process pvId=%d, typeId=%d, clientSid=%d", typedPB.GetPvId(), typedPB.GetTypeId(), typedPB.GetClientSid())
 	} else {
 		// msgDebug.OnReceive(create, session)
 		create.SetContext(dispatch)

@@ -14,8 +14,6 @@ func DispatchCreator(session ares.ISession, pvId, typeId uint32, payload []byte)
 	return res, err
 }
 
-var DispatcherProcessor = func(dispatch *Dispatch) error { panic("implement me") }
-
 type Dispatch struct {
 	*ares.Msg
 	pb *pb.Dispatch
@@ -41,5 +39,5 @@ func (msg *Dispatch) TypedPB() *pb.Dispatch {
 }
 
 func (msg *Dispatch) Process() error {
-	return DispatcherProcessor(msg)
+	return msg.GetSession().Node().MsgProcessor().Process(msg)
 }
