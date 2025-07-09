@@ -329,7 +329,7 @@ func (x *Dispatch) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Process.ProtoReflect.Descriptor instead.
+// Deprecated: Use Dispatch.ProtoReflect.Descriptor instead.
 func (*Dispatch) Descriptor() ([]byte, []int) {
 	return file_provider_proto_rawDescGZIP(), []int{0}
 }
@@ -966,7 +966,7 @@ var file_provider_proto_goTypes = []any{
 	(ClientState_Op)(0),      // 2: proto.ClientState.Op
 	(ProvideeState_State)(0), // 3: proto.ProvideeState.State
 	(ProvideeState_Op)(0),    // 4: proto.ProvideeState.Op
-	(*Dispatch)(nil),         // 5: proto.Process
+	(*Dispatch)(nil),         // 5: proto.Dispatch
 	(*ProvideeKick)(nil),     // 6: proto.ProvideeKick
 	(*ClientState)(nil),      // 7: proto.ClientState
 	(*ProviderInfo)(nil),     // 8: proto.ProviderInfo

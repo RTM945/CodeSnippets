@@ -26,6 +26,10 @@ type Linker struct {
 	msgCreator               ares.IMsgCreator
 	msgProcessor             ares.IMsgProcessor
 
+	OnSessionError func(session *LinkerSession, code uint32) error
+	OnServerError  func(session *LinkerSession, pvId, code uint32) error
+	OnDispatch     func(session *ProviderSession, pvId, typeId uint32, payload []byte) error
+
 	pb.UnimplementedLinkerServer
 }
 

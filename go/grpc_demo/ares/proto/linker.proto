@@ -45,7 +45,7 @@ message ServerError {
     SERVER_NOT_ACCESSIBLE = 9001;
   }
   uint32 pvId = 2;
-  Code code = 1;
+  uint32 code = 1;
 }
 
 message Pong {

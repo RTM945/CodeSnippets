@@ -222,7 +222,7 @@ func (x *SessionError) GetCode() uint32 {
 type ServerError struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PvId          uint32                 `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
-	Code          ServerError_Code       `protobuf:"varint,1,opt,name=code,proto3,enum=proto.ServerError_Code" json:"code,omitempty"`
+	Code          uint32                 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -264,11 +264,11 @@ func (x *ServerError) GetPvId() uint32 {
 	return 0
 }
 
-func (x *ServerError) GetCode() ServerError_Code {
+func (x *ServerError) GetCode() uint32 {
 	if x != nil {
 		return x.Code
 	}
-	return ServerError_NONE
+	return 0
 }
 
 type Pong struct {
@@ -331,10 +331,10 @@ const file_linker_proto_rawDesc = "" +
 	"\x11OVER_MAX_SESSIONS\x10\xc5>\x12\x0f\n" +
 	"\n" +
 	"RATE_LIMIT\x10\xc6>\x12\x12\n" +
-	"\rCANT_DISPATCH\x10\xc7>:\x03\xc0>\x06\"\x81\x01\n" +
+	"\rCANT_DISPATCH\x10\xc7>:\x03\xc0>\x06\"h\n" +
 	"\vServerError\x12\x12\n" +
-	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12+\n" +
-	"\x04code\x18\x01 \x01(\x0e2\x17.proto.ServerError.CodeR\x04code\",\n" +
+	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\rR\x04code\",\n" +
 	"\x04Code\x12\b\n" +
 	"\x04NONE\x10\x00\x12\x1a\n" +
 	"\x15SERVER_NOT_ACCESSIBLE\x10\xa9F:\x03\xc0>\v\"#\n" +
@@ -367,14 +367,13 @@ var file_linker_proto_goTypes = []any{
 	(*Envelope)(nil),       // 6: proto.Envelope
 }
 var file_linker_proto_depIdxs = []int32{
-	1, // 0: proto.ServerError.code:type_name -> proto.ServerError.Code
-	6, // 1: proto.Linker.Serve:input_type -> proto.Envelope
-	6, // 2: proto.Linker.Serve:output_type -> proto.Envelope
-	2, // [2:3] is the sub-list for method output_type
-	1, // [1:2] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	6, // 0: proto.Linker.Serve:input_type -> proto.Envelope
+	6, // 1: proto.Linker.Serve:output_type -> proto.Envelope
+	1, // [1:2] is the sub-list for method output_type
+	0, // [0:1] is the sub-list for method input_type
+	0, // [0:0] is the sub-list for extension type_name
+	0, // [0:0] is the sub-list for extension extendee
+	0, // [0:0] is the sub-list for field type_name
 }
 
 func init() { file_linker_proto_init() }

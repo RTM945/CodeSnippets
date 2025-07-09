@@ -19,7 +19,7 @@ func NewLinkerSessions() *LinkerSessions {
 func (ls *LinkerSessions) OnAddSession(session ares.ISession) {
 	if ls.Size() >= linker.maxSession {
 		linkerSession := session.(*LinkerSession)
-		linkerSession.CloseBySessionError(uint32(pb.SessionError_OVER_MAX_SESSIONS))
+		_ = linker.OnSessionError(linkerSession, uint32(pb.SessionError_OVER_MAX_SESSIONS))
 		return
 	}
 	ls.Sessions.OnAddSession(session)
