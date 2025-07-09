@@ -7,10 +7,24 @@ import (
 
 var LOGGER = logger.GetLogger("provider")
 
-type Provider struct {
-	sessions *Sessions
+var provider = &Provider{
+	sessions:   nil,
+	msgCreator: nil,
 }
 
-func (p *Provider) GetSessions() ares.ISessions {
+func GetInstance() *Provider {
+	return provider
+}
+
+type Provider struct {
+	sessions   *Sessions
+	msgCreator ares.IMsgCreator
+}
+
+func (p *Provider) Sessions() ares.ISessions {
 	return p.sessions
+}
+
+func (p *Provider) MsgCreator() ares.IMsgCreator {
+	return p.msgCreator
 }

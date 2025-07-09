@@ -319,9 +319,9 @@ var File_linker_proto protoreflect.FileDescriptor
 
 const file_linker_proto_rawDesc = "" +
 	"\n" +
-	"\flinker.proto\x12\x05proto\x1a\fcommon.proto\"%\n" +
+	"\flinker.proto\x12\x05proto\x1a\fcommon.proto\"#\n" +
 	"\x04Ping\x12\x16\n" +
-	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\x04\"\xba\x01\n" +
+	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\x04\"\xb8\x01\n" +
 	"\fSessionError\x12,\n" +
 	"\x04code\x18\x01 \x01(\x0e2\x18.proto.SessionError.CodeR\x04code\"u\n" +
 	"\x04Code\x12\b\n" +
@@ -331,17 +331,17 @@ const file_linker_proto_rawDesc = "" +
 	"\x11OVER_MAX_SESSIONS\x10\xc5>\x12\x0f\n" +
 	"\n" +
 	"RATE_LIMIT\x10\xc6>\x12\x12\n" +
-	"\rCANT_DISPATCH\x10\xc7>:\x05\xf8\xa3\xe8\x03\x06\"\x83\x01\n" +
+	"\rCANT_DISPATCH\x10\xc7>:\x03\xc0>\x06\"\x81\x01\n" +
 	"\vServerError\x12\x12\n" +
 	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12+\n" +
 	"\x04code\x18\x01 \x01(\x0e2\x17.proto.ServerError.CodeR\x04code\",\n" +
 	"\x04Code\x12\b\n" +
 	"\x04NONE\x10\x00\x12\x1a\n" +
-	"\x15SERVER_NOT_ACCESSIBLE\x10\xa9F:\x05\xf8\xa3\xe8\x03\v\"%\n" +
+	"\x15SERVER_NOT_ACCESSIBLE\x10\xa9F:\x03\xc0>\v\"#\n" +
 	"\x04Pong\x12\x16\n" +
-	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x05\xf8\xa3\xe8\x03\b27\n" +
+	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\b27\n" +
 	"\x06Linker\x12-\n" +
-	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B\x06Z\x04./pbb\x06proto3"
+	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B7\xca>\fswitcher/msg\xd2>\x1fswitcher/msg/linker_msg_init.goZ\x04./pbb\x06proto3"
 
 var (
 	file_linker_proto_rawDescOnce sync.Once

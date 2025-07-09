@@ -1,9 +1,18 @@
 package switcher
 
 import (
+	"ares/logger"
 	"ares/switcher/linker"
 	"ares/switcher/provider"
 )
+
+var (
+	linkerRateMin int
+	linkerRateMax int
+	maxSession    int
+)
+
+var LOGGER = logger.GetLogger("switcher")
 
 type Switcher struct {
 	linker   *linker.Linker

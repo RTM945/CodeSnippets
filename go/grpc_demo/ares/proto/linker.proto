@@ -5,6 +5,9 @@ option go_package = "./pb";
 
 import "common.proto";
 
+option (msg_package) = "switcher/msg";
+option (msg_init_file) = "switcher/msg/linker_msg_init.go";
+
 // client <-> linker
 service Linker {
   rpc Serve(stream Envelope) returns (stream Envelope);

@@ -11,13 +11,13 @@ var sessionCNT uint32
 
 type Sessions struct {
 	sync.RWMutex
-	linker   *Linker
+	node     ares.INode
 	sessions map[uint32]*Session
 }
 
-func NewSessions(linker *Linker) *Sessions {
+func NewSessions(node ares.INode) *Sessions {
 	return &Sessions{
-		linker:   linker,
+		node:     node,
 		sessions: make(map[uint32]*Session),
 	}
 }
@@ -44,8 +44,9 @@ func (s *Sessions) Size() uint32 {
 
 func (s *Sessions) OnAddSession(session ares.ISession) {
 	linkerSession := session.(*Session)
-	if !s.linker.CanAddSession() {
-		s.linker.CloseSession(linkerSession, pb.SessionError_OVER_MAX_SESSIONS)
+	linker := s.node.(*Linker)
+	if !linker.CanAddSession() {
+		linker.CloseSession(linkerSession, pb.SessionError_OVER_MAX_SESSIONS)
 		return
 	}
 	s.Lock()

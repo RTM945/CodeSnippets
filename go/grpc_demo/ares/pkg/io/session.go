@@ -19,13 +19,6 @@ type ISession interface {
 	Close()
 }
 
-type ISessions interface {
-	OnAddSession(ISession)
-	OnRemoveSession(ISession)
-	GetSession(uint32) ISession
-	Sessions() []ISession
-}
-
 type Session struct {
 	State
 	sid         uint32
@@ -37,14 +30,14 @@ type Session struct {
 	processChan chan IMsg
 }
 
-var genSessionId uint32
+var genSessionId atomic.Uint32
 
 var ChanSize = 64
 
 func NewSession(stream grpc.ServerStream) *Session {
 	session := &Session{
 		stream:      stream,
-		sid:         atomic.AddUint32(&genSessionId, 1),
+		sid:         genSessionId.Add(1),
 		sendChan:    make(chan *pb.Envelope, ChanSize),
 		processChan: make(chan IMsg, ChanSize),
 	}
@@ -156,11 +149,6 @@ func (s *Session) Context() context.Context {
 
 func (s *Session) OnClose() {}
 
-type SessionHandler interface {
-	OnAddSession(Session)
-	OnRemoveSession(Session)
-}
-
 type IState interface {
 	AddState(state int)
 	RemoveState(state int)
@@ -191,4 +179,66 @@ func (s *State) CheckState(state int) bool {
 
 func (s *State) GetState() int {
 	return s.state
+}
+
+type ISessions interface {
+	OnAddSession(ISession)
+	OnRemoveSession(ISession)
+	GetSession(uint32) ISession
+	Sessions() []ISession
+}
+
+type Sessions struct {
+	sync.RWMutex
+	sessions   map[uint32]ISession
+	sessionCNT atomic.Uint32
+}
+
+func NewSessions() *Sessions {
+	return &Sessions{
+		sessions: make(map[uint32]ISession),
+	}
+}
+
+func (s *Sessions) GetSession(sid uint32) ISession {
+	s.RLock()
+	defer s.RUnlock()
+	return s.sessions[sid]
+}
+
+func (s *Sessions) Sessions() []ISession {
+	res := make([]ISession, 0, len(s.sessions))
+	s.RLock()
+	defer s.RUnlock()
+	for _, v := range s.sessions {
+		res = append(res, v)
+	}
+	return res
+}
+
+func (s *Sessions) Size() uint32 {
+	return s.sessionCNT.Load()
+}
+
+func (s *Sessions) OnAddSession(session ISession) {
+	s.Lock()
+	defer s.Unlock()
+	s.sessionCNT.Add(1)
+	s.sessions[session.GetSid()] = session
+}
+
+func (s *Sessions) OnRemoveSession(session ISession) {
+	s.Lock()
+	defer s.Unlock()
+	s.sessionCNT.Add(-1)
+	delete(s.sessions, session.GetSid())
+}
+
+func (s *Sessions) Stop() {
+	s.Lock()
+	defer s.Unlock()
+	for _, v := range s.sessions {
+		v.Close()
+	}
+	clear(s.sessions)
 }

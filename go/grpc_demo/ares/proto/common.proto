@@ -6,7 +6,12 @@ option go_package = "./pb";
 
 // 扩展 MessageOptions，让每个 message 都可以打一个 type_id 标签
 extend google.protobuf.MessageOptions {
-  uint32 type_id = 999999;
+  uint32 type_id = 1000;
+}
+
+extend google.protobuf.FileOptions {
+  string msg_package = 1001;
+  string msg_init_file = 1002;
 }
 
 message Envelope {

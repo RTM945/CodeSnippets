@@ -11,16 +11,17 @@ import (
 // Session client<->linker
 type Session struct {
 	*ares.Session
-	linker         *Linker
+	node           ares.INode
 	minRateLimiter *rate.Limiter
 	maxRateLimiter *rate.Limiter
 }
 
-func NewLinkerSession(stream pb.Linker_ServeServer, linker *Linker) *Session {
+func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *Session {
 	session := &Session{
 		Session: ares.NewSession(stream),
-		linker:  linker,
+		node:    node,
 	}
+	linker := node.(*Linker)
 	if linker.rateMin > 0 {
 		session.minRateLimiter = rate.NewLimiter(rate.Limit(linker.rateMin), 1)
 	}
@@ -31,7 +32,7 @@ func NewLinkerSession(stream pb.Linker_ServeServer, linker *Linker) *Session {
 }
 
 func (s *Session) HandleEnvelope(envelope *pb.Envelope) {
-	msg, err := s.linker.msgCreator.Create(s, envelope)
+	msg, err := s.node.MsgCreator().Create(s, envelope)
 	if err != nil {
 		LOGGER.Errorf("session[%v] create err: %v", s, err)
 		return
@@ -51,7 +52,8 @@ func (s *Session) WhiteFilterByProvider(ps *provider.Session) bool {
 	}
 	host, _, err := net.SplitHostPort(ps.RemoteAddr().String())
 	if err == nil {
-		for ip := range s.linker.GetWhiteIps() {
+		linker := s.node.(*Linker)
+		for ip := range linker.GetWhiteIps() {
 			if host == ip {
 				return false
 			}
@@ -68,7 +70,8 @@ func (s *Session) BlackFilterByProvider(ps *provider.Session) bool {
 	}
 	host, _, err := net.SplitHostPort(s.RemoteAddr().String())
 	if err == nil {
-		for ip := range s.linker.GetBlackIps() {
+		linker := s.node.(*Linker)
+		for ip := range linker.GetBlackIps() {
 			if host == ip {
 				return false
 			}
@@ -81,7 +84,8 @@ func (s *Session) BlackFilterByProvider(ps *provider.Session) bool {
 
 func (s *Session) receiveUnknown(typeId uint32) {
 	if s.maxRateLimiter != nil && !s.maxRateLimiter.Allow() {
-		s.linker.CloseSession(s, pb.SessionError_RATE_LIMIT)
+		linker := s.node.(*Linker)
+		linker.CloseSession(s, pb.SessionError_RATE_LIMIT)
 		return
 	}
 	if s.minRateLimiter != nil && !s.minRateLimiter.Allow() {

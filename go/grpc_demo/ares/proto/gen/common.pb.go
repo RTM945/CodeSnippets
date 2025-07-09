@@ -86,17 +86,41 @@ var file_common_proto_extTypes = []protoimpl.ExtensionInfo{
 	{
 		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
 		ExtensionType: (*uint32)(nil),
-		Field:         999999,
+		Field:         1000,
 		Name:          "proto.type_id",
-		Tag:           "varint,999999,opt,name=type_id",
+		Tag:           "varint,1000,opt,name=type_id",
+		Filename:      "common.proto",
+	},
+	{
+		ExtendedType:  (*descriptorpb.FileOptions)(nil),
+		ExtensionType: (*string)(nil),
+		Field:         1001,
+		Name:          "proto.msg_package",
+		Tag:           "bytes,1001,opt,name=msg_package",
+		Filename:      "common.proto",
+	},
+	{
+		ExtendedType:  (*descriptorpb.FileOptions)(nil),
+		ExtensionType: (*string)(nil),
+		Field:         1002,
+		Name:          "proto.msg_init_file",
+		Tag:           "bytes,1002,opt,name=msg_init_file",
 		Filename:      "common.proto",
 	},
 }
 
 // Extension fields to descriptorpb.MessageOptions.
 var (
-	// optional uint32 type_id = 999999;
+	// optional uint32 type_id = 1000;
 	E_TypeId = &file_common_proto_extTypes[0]
+)
+
+// Extension fields to descriptorpb.FileOptions.
+var (
+	// optional string msg_package = 1001;
+	E_MsgPackage = &file_common_proto_extTypes[1]
+	// optional string msg_init_file = 1002;
+	E_MsgInitFile = &file_common_proto_extTypes[2]
 )
 
 var File_common_proto protoreflect.FileDescriptor
@@ -107,8 +131,11 @@ const file_common_proto_rawDesc = "" +
 	"\bEnvelope\x12\x16\n" +
 	"\x06typeId\x18\x01 \x01(\rR\x06typeId\x12\x12\n" +
 	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x18\n" +
-	"\apayload\x18\x03 \x01(\fR\apayload::\n" +
-	"\atype_id\x12\x1f.google.protobuf.MessageOptions\x18\xbf\x84= \x01(\rR\x06typeIdB\x06Z\x04./pbb\x06proto3"
+	"\apayload\x18\x03 \x01(\fR\apayload:9\n" +
+	"\atype_id\x12\x1f.google.protobuf.MessageOptions\x18\xe8\a \x01(\rR\x06typeId:>\n" +
+	"\vmsg_package\x12\x1c.google.protobuf.FileOptions\x18\xe9\a \x01(\tR\n" +
+	"msgPackage:A\n" +
+	"\rmsg_init_file\x12\x1c.google.protobuf.FileOptions\x18\xea\a \x01(\tR\vmsgInitFileB\x06Z\x04./pbb\x06proto3"
 
 var (
 	file_common_proto_rawDescOnce sync.Once
@@ -126,13 +153,16 @@ var file_common_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_common_proto_goTypes = []any{
 	(*Envelope)(nil),                    // 0: proto.Envelope
 	(*descriptorpb.MessageOptions)(nil), // 1: google.protobuf.MessageOptions
+	(*descriptorpb.FileOptions)(nil),    // 2: google.protobuf.FileOptions
 }
 var file_common_proto_depIdxs = []int32{
 	1, // 0: proto.type_id:extendee -> google.protobuf.MessageOptions
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	0, // [0:1] is the sub-list for extension extendee
+	2, // 1: proto.msg_package:extendee -> google.protobuf.FileOptions
+	2, // 2: proto.msg_init_file:extendee -> google.protobuf.FileOptions
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	0, // [0:3] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
 }
 
@@ -148,7 +178,7 @@ func file_common_proto_init() {
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_common_proto_rawDesc), len(file_common_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   1,
-			NumExtensions: 1,
+			NumExtensions: 3,
 			NumServices:   0,
 		},
 		GoTypes:           file_common_proto_goTypes,

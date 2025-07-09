@@ -3,7 +3,6 @@ package linker
 import (
 	"ares/logger"
 	ares "ares/pkg/io"
-	"ares/pkg/switcher"
 	pb "ares/proto/gen"
 	"ares/switcher/msg"
 	"crypto/tls"
@@ -25,7 +24,6 @@ type Linker struct {
 	address                  string
 	sessions                 *Sessions
 	maxSession               uint32
-	provider                 switcher.IProvider
 	whiteIps                 []string
 	blackIps                 []string
 	rateMin                  int
@@ -33,6 +31,20 @@ type Linker struct {
 	msgCreator               ares.IMsgCreator
 
 	pb.UnimplementedLinkerServer
+}
+
+var linker = New()
+
+func GetInstance() *Linker {
+	return linker
+}
+
+func (l *Linker) Sessions() ares.ISessions {
+	return l.sessions
+}
+
+func (l *Linker) MsgCreator() ares.IMsgCreator {
+	return l.msgCreator
 }
 
 func New(options ...func(*Linker)) *Linker {
@@ -161,10 +173,6 @@ func (l *Linker) CloseSession(session *Session, code pb.SessionError_Code) {
 	sessionError.TypedPB().Code = code
 	_ = session.Send0(sessionError)
 	session.Close()
-}
-
-func (l *Linker) GetSessions() ares.ISessions {
-	return l.sessions
 }
 
 func (l *Linker) GetWhiteIps() map[string]struct{} {

@@ -116,7 +116,7 @@ func (m *ProvideeKick) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *AddClientState) MarshalVT() (dAtA []byte, err error) {
+func (m *ClientState) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -129,12 +129,12 @@ func (m *AddClientState) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *AddClientState) MarshalToVT(dAtA []byte) (int, error) {
+func (m *ClientState) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *AddClientState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *ClientState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -151,51 +151,8 @@ func (m *AddClientState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x10
 	}
-	if m.ClientSid != 0 {
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.ClientSid))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *RemoveClientState) MarshalVT() (dAtA []byte, err error) {
-	if m == nil {
-		return nil, nil
-	}
-	size := m.SizeVT()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBufferVT(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *RemoveClientState) MarshalToVT(dAtA []byte) (int, error) {
-	size := m.SizeVT()
-	return m.MarshalToSizedBufferVT(dAtA[:size])
-}
-
-func (m *RemoveClientState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
-	if m == nil {
-		return 0, nil
-	}
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.unknownFields != nil {
-		i -= len(m.unknownFields)
-		copy(dAtA[i:], m.unknownFields)
-	}
-	if m.State != 0 {
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.State))
-		i--
-		dAtA[i] = 0x10
-	}
-	if m.ClientSid != 0 {
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.ClientSid))
+	if m.Op != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.Op))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -400,7 +357,7 @@ func (m *ProvideeBind) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *AddProvideeState) MarshalVT() (dAtA []byte, err error) {
+func (m *ProvideeState) MarshalVT() (dAtA []byte, err error) {
 	if m == nil {
 		return nil, nil
 	}
@@ -413,12 +370,12 @@ func (m *AddProvideeState) MarshalVT() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *AddProvideeState) MarshalToVT(dAtA []byte) (int, error) {
+func (m *ProvideeState) MarshalToVT(dAtA []byte) (int, error) {
 	size := m.SizeVT()
 	return m.MarshalToSizedBufferVT(dAtA[:size])
 }
 
-func (m *AddProvideeState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
+func (m *ProvideeState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m == nil {
 		return 0, nil
 	}
@@ -433,43 +390,10 @@ func (m *AddProvideeState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
 	if m.State != 0 {
 		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.State))
 		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0x10
 	}
-	return len(dAtA) - i, nil
-}
-
-func (m *RemoveProvideeState) MarshalVT() (dAtA []byte, err error) {
-	if m == nil {
-		return nil, nil
-	}
-	size := m.SizeVT()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBufferVT(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *RemoveProvideeState) MarshalToVT(dAtA []byte) (int, error) {
-	size := m.SizeVT()
-	return m.MarshalToSizedBufferVT(dAtA[:size])
-}
-
-func (m *RemoveProvideeState) MarshalToSizedBufferVT(dAtA []byte) (int, error) {
-	if m == nil {
-		return 0, nil
-	}
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.unknownFields != nil {
-		i -= len(m.unknownFields)
-		copy(dAtA[i:], m.unknownFields)
-	}
-	if m.State != 0 {
-		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.State))
+	if m.Op != 0 {
+		i = protohelpers.EncodeVarint(dAtA, i, uint64(m.Op))
 		i--
 		dAtA[i] = 0x8
 	}
@@ -570,30 +494,14 @@ func (m *ProvideeKick) SizeVT() (n int) {
 	return n
 }
 
-func (m *AddClientState) SizeVT() (n int) {
+func (m *ClientState) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.ClientSid != 0 {
-		n += 1 + protohelpers.SizeOfVarint(uint64(m.ClientSid))
-	}
-	if m.State != 0 {
-		n += 1 + protohelpers.SizeOfVarint(uint64(m.State))
-	}
-	n += len(m.unknownFields)
-	return n
-}
-
-func (m *RemoveClientState) SizeVT() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.ClientSid != 0 {
-		n += 1 + protohelpers.SizeOfVarint(uint64(m.ClientSid))
+	if m.Op != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.Op))
 	}
 	if m.State != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.State))
@@ -678,25 +586,15 @@ func (m *ProvideeBind) SizeVT() (n int) {
 	return n
 }
 
-func (m *AddProvideeState) SizeVT() (n int) {
+func (m *ProvideeState) SizeVT() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.State != 0 {
-		n += 1 + protohelpers.SizeOfVarint(uint64(m.State))
+	if m.Op != 0 {
+		n += 1 + protohelpers.SizeOfVarint(uint64(m.Op))
 	}
-	n += len(m.unknownFields)
-	return n
-}
-
-func (m *RemoveProvideeState) SizeVT() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
 	if m.State != 0 {
 		n += 1 + protohelpers.SizeOfVarint(uint64(m.State))
 	}
@@ -958,7 +856,7 @@ func (m *ProvideeKick) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *AddClientState) UnmarshalVT(dAtA []byte) error {
+func (m *ClientState) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -981,17 +879,17 @@ func (m *AddClientState) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AddClientState: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClientState: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AddClientState: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClientState: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientSid", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Op", wireType)
 			}
-			m.ClientSid = 0
+			m.Op = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return protohelpers.ErrIntOverflow
@@ -1001,7 +899,7 @@ func (m *AddClientState) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ClientSid |= uint32(b&0x7F) << shift
+				m.Op |= ClientState_Op(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1020,96 +918,7 @@ func (m *AddClientState) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.State |= ClientState(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return protohelpers.ErrInvalidLength
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.unknownFields = append(m.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *RemoveClientState) UnmarshalVT(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return protohelpers.ErrIntOverflow
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: RemoveClientState: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RemoveClientState: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ClientSid", wireType)
-			}
-			m.ClientSid = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return protohelpers.ErrIntOverflow
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.ClientSid |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
-			}
-			m.State = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return protohelpers.ErrIntOverflow
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.State |= ClientState(b&0x7F) << shift
+				m.State |= ClientState_State(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1590,7 +1399,7 @@ func (m *ProvideeBind) UnmarshalVT(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *AddProvideeState) UnmarshalVT(dAtA []byte) error {
+func (m *ProvideeState) UnmarshalVT(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1613,17 +1422,17 @@ func (m *AddProvideeState) UnmarshalVT(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: AddProvideeState: wiretype end group for non-group")
+			return fmt.Errorf("proto: ProvideeState: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: AddProvideeState: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ProvideeState: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
 			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Op", wireType)
 			}
-			m.State = 0
+			m.Op = 0
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return protohelpers.ErrIntOverflow
@@ -1633,63 +1442,12 @@ func (m *AddProvideeState) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.State |= ProvideeState(b&0x7F) << shift
+				m.Op |= ProvideeState_Op(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-		default:
-			iNdEx = preIndex
-			skippy, err := protohelpers.Skip(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return protohelpers.ErrInvalidLength
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.unknownFields = append(m.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *RemoveProvideeState) UnmarshalVT(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return protohelpers.ErrIntOverflow
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: RemoveProvideeState: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: RemoveProvideeState: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
+		case 2:
 			if wireType != 0 {
 				return fmt.Errorf("proto: wrong wireType = %d for field State", wireType)
 			}
@@ -1703,7 +1461,7 @@ func (m *RemoveProvideeState) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.State |= ProvideeState(b&0x7F) << shift
+				m.State |= ProvideeState_State(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

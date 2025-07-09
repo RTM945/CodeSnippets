@@ -4,6 +4,8 @@ package proto;
 option go_package = "./pb";
 
 import "common.proto";
+option (msg_package) = "switcher/msg";
+option (msg_init_file) = "switcher/msg/provider_msg_init.go";
 
 // providee <-> switcher
 service Provider {
@@ -43,24 +45,21 @@ message ProvideeKick {
   Reason reason = 2;
 }
 
-enum ClientState {
-  ClientState_NONE = 0;
-  // 可发送消息到providee
-  TOPROVIDEE = 1;
-  // 接收广播消息
-  BROADCAST = 2;
-}
-
-message AddClientState {
+message ClientState {
   option (proto.type_id) = 61;
-  uint32 clientSid = 1;
-  ClientState state = 2;
-}
-
-message RemoveClientState {
-  option (proto.type_id) = 62;
-  uint32 clientSid = 1;
-  ClientState state = 2;
+  enum State {
+    NONE = 0;
+    // 可发送消息到providee
+    TOPROVIDEE = 1;
+    // 接收广播消息
+    BROADCAST = 2;
+  }
+  enum Op {
+    ADD = 0;
+    REMOVE = 1;
+  }
+  Op op = 1;
+  State state = 2;
 }
 
 message ProviderInfo {
@@ -87,22 +86,21 @@ message ProvideeBind {
   ProvideeInfo providee = 1;
 }
 
-enum ProvideeState {
-  ProvideeState_NONE = 0;
-  // IP白名单状态
-  WHITEIP = 1;
-  // IP黑名单状态
-  BLACKIP = 2;
-}
-
-message AddProvideeState {
+message ProvideeState {
   option (proto.type_id) = 65;
-  ProvideeState state = 1;
-}
-
-message RemoveProvideeState {
-  option (proto.type_id) = 66;
-  ProvideeState state = 1;
+  enum State {
+    NONE = 0;
+    // IP白名单状态
+    WHITEIP = 1;
+    // IP黑名单状态
+    BLACKIP = 2;
+  }
+  enum Op {
+    ADD = 0;
+    REMOVE = 1;
+  }
+  Op op = 1;
+  State state = 2;
 }
 
 message SendToClient {
