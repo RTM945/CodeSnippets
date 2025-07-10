@@ -11,7 +11,7 @@ extend google.protobuf.MessageOptions {
 
 extend google.protobuf.FileOptions {
   string msg_package = 1001;
-  string msg_init_file = 1002;
+  string msg_registry = 1002;
 }
 
 message Envelope {

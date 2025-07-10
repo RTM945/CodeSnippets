@@ -18,7 +18,8 @@ func NewLinkerSessions(node ares.INode) *LinkerSessions {
 }
 
 func (ls *LinkerSessions) OnAddSession(session ares.ISession) {
-	if ls.Size() >= uint32(maxSession) {
+	linker := ls.node.(*Linker)
+	if ls.Size() >= linker.maxSession {
 		linkerSession := session.(*LinkerSession)
 		linkerSession.CloseBySessionError(pb.SessionError_OVER_MAX_SESSIONS)
 		return

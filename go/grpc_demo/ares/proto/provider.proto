@@ -5,7 +5,7 @@ option go_package = "./pb";
 
 import "common.proto";
 option (msg_package) = "switcher/msg";
-option (msg_init_file) = "switcher/msg/provider_msg_init.go";
+option (msg_registry) = "switcher/msg/provider_msg_registry.go";
 
 // providee <-> switcher
 service Provider {
