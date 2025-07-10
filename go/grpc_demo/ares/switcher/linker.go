@@ -24,7 +24,6 @@ type Linker struct {
 	whiteIps, blackIps       []string
 	rateMin, rateMax         int
 	msgCreator               ares.IMsgCreator
-	msgProcessor             ares.IMsgProcessor
 
 	OnSessionError func(session *LinkerSession, code uint32) error
 	OnServerError  func(session *LinkerSession, pvId, code uint32) error
@@ -41,10 +40,6 @@ func (l *Linker) MsgCreator() ares.IMsgCreator {
 	return l.msgCreator
 }
 
-func (l *Linker) MsgProcessor() ares.IMsgProcessor {
-	return l.msgProcessor
-}
-
 func New(options ...func(*Linker)) *Linker {
 	linker := &Linker{}
 	for _, o := range options {
@@ -52,7 +47,6 @@ func New(options ...func(*Linker)) *Linker {
 	}
 	linker.sessions = NewLinkerSessions()
 	linker.msgCreator = NewLinkerMsgCreator()
-	linker.msgProcessor = ares.NewMsgProcessor()
 	return linker
 }
 

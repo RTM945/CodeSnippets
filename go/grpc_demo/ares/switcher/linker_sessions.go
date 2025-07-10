@@ -38,7 +38,7 @@ func (ls *LinkerSessions) StartCheck() {
 		for range ticker.C {
 			ls.RLock()
 			toClose := make([]ares.ISession, 0, ls.Size())
-			for _, s := range ls.Sessions.Sessions() {
+			for _, s := range ls.Sessions.AllSessions() {
 				linkerSession := s.(*LinkerSession)
 				if !linkerSession.Alive() {
 					toClose = append(toClose, linkerSession)

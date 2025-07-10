@@ -3,6 +3,7 @@ package switcher
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"errors"
 )
 
 type LinkerMsgCreator struct {
@@ -18,10 +19,10 @@ func NewLinkerMsgCreator() *LinkerMsgCreator {
 }
 
 func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
-	create, _ := c.MsgCreator.Create(session, pvId, typeId, payload)
-	if create != nil {
+	create, err := c.MsgCreator.Create(session, pvId, typeId, payload)
+	if err == nil {
 		return create, nil
-	} else {
+	} else if errors.Is(err, ares.NoMsgCreatorErr) {
 		if pvId != 0 {
 			linkerSession := session.(*LinkerSession)
 			toSession, ok := provider.Sessions().GetSession(pvId).(*ProviderSession)
@@ -56,5 +57,5 @@ func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, pa
 			}
 		}
 	}
-	return nil, nil
+	return nil, err
 }

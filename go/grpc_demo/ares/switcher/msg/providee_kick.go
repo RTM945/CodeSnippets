@@ -3,6 +3,7 @@ package msg
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"ares/switcher"
 )
 
 type ProvideeKick struct {
@@ -41,5 +42,12 @@ func (msg *ProvideeKick) TypedPB() *pb.ProvideeKick {
 }
 
 func (msg *ProvideeKick) Process() error {
-	return ProvideeKickProcessor(msg)
+	typedPB := msg.TypedPB()
+	linkerSession, ok := switcher.GetLinker().Sessions().GetSession(typedPB.GetClientSid()).(*switcher.LinkerSession)
+	if ok && linkerSession != nil {
+		_ = switcher.GetLinker().OnSessionError(linkerSession, uint32(typedPB.Reason))
+		providerSession := msg.GetSession()
+		switcher.LOGGER.Infof("Providee kick: %v reason: %v providerSession: %v", typedPB.Reason, typedPB.Reason, providerSession)
+	}
+	return nil
 }

@@ -18,8 +18,6 @@ func SendToClientCreator(session ares.ISession, envelope *pb.Envelope) (ares.IMs
 	return res, err
 }
 
-var SendToClientProcessor = func(msg *SendToClient) error { panic("implement me") }
-
 func NewSendToClient() *SendToClient {
 	return &SendToClient{
 		Msg: ares.NewMsg(73),
@@ -40,5 +38,5 @@ func (msg *SendToClient) TypedPB() *pb.SendToClient {
 }
 
 func (msg *SendToClient) Process() error {
-	return SendToClientProcessor(msg)
+	return nil
 }

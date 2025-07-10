@@ -192,32 +192,32 @@ type ISessions interface {
 	OnAddSession(ISession)
 	OnRemoveSession(ISession)
 	GetSession(uint32) ISession
-	Sessions() []ISession
+	AllSessions() []ISession
 }
 
 type Sessions struct {
 	sync.RWMutex
-	sessions   map[uint32]ISession
-	sessionCNT atomic.Uint32
+	allSessions map[uint32]ISession
+	sessionCNT  atomic.Uint32
 }
 
 func NewSessions() *Sessions {
 	return &Sessions{
-		sessions: make(map[uint32]ISession),
+		allSessions: make(map[uint32]ISession),
 	}
 }
 
 func (s *Sessions) GetSession(sid uint32) ISession {
 	s.RLock()
 	defer s.RUnlock()
-	return s.sessions[sid]
+	return s.allSessions[sid]
 }
 
-func (s *Sessions) Sessions() []ISession {
-	res := make([]ISession, 0, len(s.sessions))
+func (s *Sessions) AllSessions() []ISession {
+	res := make([]ISession, 0, len(s.allSessions))
 	s.RLock()
 	defer s.RUnlock()
-	for _, v := range s.sessions {
+	for _, v := range s.allSessions {
 		res = append(res, v)
 	}
 	return res
@@ -231,21 +231,21 @@ func (s *Sessions) OnAddSession(session ISession) {
 	s.Lock()
 	defer s.Unlock()
 	s.sessionCNT.Add(1)
-	s.sessions[session.GetSid()] = session
+	s.allSessions[session.GetSid()] = session
 }
 
 func (s *Sessions) OnRemoveSession(session ISession) {
 	s.Lock()
 	defer s.Unlock()
-	s.sessionCNT.Add(-1)
-	delete(s.sessions, session.GetSid())
+	s.sessionCNT.Add(^uint32(0))
+	delete(s.allSessions, session.GetSid())
 }
 
 func (s *Sessions) Stop() {
 	s.Lock()
 	defer s.Unlock()
-	for _, v := range s.sessions {
+	for _, v := range s.allSessions {
 		v.Close()
 	}
-	clear(s.sessions)
+	clear(s.allSessions)
 }
