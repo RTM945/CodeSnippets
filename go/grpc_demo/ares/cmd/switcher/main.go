@@ -1,5 +1,10 @@
 package main
 
+import (
+	"ares/switcher"
+	"ares/switcher/msg"
+)
+
 func main() {
 	//linker := switcher.GetLinker()
 	//linker.OnSessionError = func(session *switcher.LinkerSession, code uint32) error {
@@ -22,4 +27,26 @@ func main() {
 	//	dispatch.TypedPB().Payload = payload
 	//	return session.Send(dispatch)
 	//}
+	provider := switcher.GetProvider()
+	provider.OnClientBroken = func(clientSid uint32, linkerSession *switcher.LinkerSession) {
+		if linkerSession == nil {
+			for _, v := range provider.Sessions().AllSessions() {
+				providerSession := v.(*switcher.ProviderSession)
+				if providerSession.SessionBroken(clientSid) {
+					clientBroken := msg.NewClientBroken()
+					clientBroken.TypedPB().ClientSid = clientSid
+					providerSession.Send(clientBroken)
+				}
+			}
+		} else {
+			for _, pvId := range linkerSession.GetBindProvidees() {
+				providerSession := provider.Sessions().GetSession(pvId)
+				if providerSession != nil {
+					clientBroken := msg.NewClientBroken()
+					clientBroken.TypedPB().ClientSid = clientSid
+					providerSession.Send(clientBroken)
+				}
+			}
+		}
+	}
 }

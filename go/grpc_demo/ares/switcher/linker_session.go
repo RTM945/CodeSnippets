@@ -14,12 +14,14 @@ type LinkerSession struct {
 	minRateLimiter *rate.Limiter
 	maxRateLimiter *rate.Limiter
 	aliveTime      int64
+	bindProvidees  []uint32
 }
 
 func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *LinkerSession {
 	session := &LinkerSession{
-		Session:   ares.NewSession(stream, node),
-		aliveTime: time.Now().Unix(),
+		Session:       ares.NewSession(stream, node),
+		aliveTime:     time.Now().Unix(),
+		bindProvidees: make([]uint32, 0),
 	}
 	linker := session.Session.Node().(*Linker)
 	if linker.rateMin > 0 {
@@ -96,4 +98,12 @@ func (s *LinkerSession) Alive() bool {
 
 func (s *LinkerSession) ResetAlive() {
 	s.aliveTime = time.Now().Unix()
+}
+
+func (s *LinkerSession) BindProvidee(pvId uint32) {
+	s.bindProvidees = append(s.bindProvidees, pvId)
+}
+
+func (s *LinkerSession) GetBindProvidees() []uint32 {
+	return s.bindProvidees
 }

@@ -13,6 +13,12 @@ service Linker {
   rpc Serve(stream Envelope) returns (stream Envelope);
 }
 
+message MsgBox {
+  option (proto.type_id) = 3;
+  uint32 typeId = 1;
+  bytes payload = 2;
+}
+
 message Ping {
   option (proto.type_id) = 4;
   int32 serial = 1;
@@ -51,4 +57,10 @@ message ServerError {
 message Pong {
   option (proto.type_id) = 8;
   int32 serial = 1;
+}
+
+enum ServerType {
+  NONE = 0;
+  PHANTOM = 1;
+  AU = 2;
 }

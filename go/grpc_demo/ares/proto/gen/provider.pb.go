@@ -148,7 +148,7 @@ func (x ClientState_State) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ClientState_State.Descriptor instead.
 func (ClientState_State) EnumDescriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{2, 0}
+	return file_provider_proto_rawDescGZIP(), []int{3, 0}
 }
 
 type ClientState_Op int32
@@ -194,7 +194,7 @@ func (x ClientState_Op) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ClientState_Op.Descriptor instead.
 func (ClientState_Op) EnumDescriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{2, 1}
+	return file_provider_proto_rawDescGZIP(), []int{3, 1}
 }
 
 type ProvideeState_State int32
@@ -245,7 +245,7 @@ func (x ProvideeState_State) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ProvideeState_State.Descriptor instead.
 func (ProvideeState_State) EnumDescriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{7, 0}
+	return file_provider_proto_rawDescGZIP(), []int{8, 0}
 }
 
 type ProvideeState_Op int32
@@ -291,7 +291,7 @@ func (x ProvideeState_Op) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ProvideeState_Op.Descriptor instead.
 func (ProvideeState_Op) EnumDescriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{7, 1}
+	return file_provider_proto_rawDescGZIP(), []int{8, 1}
 }
 
 type Dispatch struct {
@@ -414,6 +414,50 @@ func (x *ProvideeKick) GetReason() ProvideeKick_Reason {
 	return ProvideeKick_NONE
 }
 
+type ClientBroken struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientSid     uint32                 `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClientBroken) Reset() {
+	*x = ClientBroken{}
+	mi := &file_provider_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClientBroken) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClientBroken) ProtoMessage() {}
+
+func (x *ClientBroken) ProtoReflect() protoreflect.Message {
+	mi := &file_provider_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClientBroken.ProtoReflect.Descriptor instead.
+func (*ClientBroken) Descriptor() ([]byte, []int) {
+	return file_provider_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ClientBroken) GetClientSid() uint32 {
+	if x != nil {
+		return x.ClientSid
+	}
+	return 0
+}
+
 type ClientState struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Op            ClientState_Op         `protobuf:"varint,1,opt,name=op,proto3,enum=proto.ClientState_Op" json:"op,omitempty"`
@@ -424,7 +468,7 @@ type ClientState struct {
 
 func (x *ClientState) Reset() {
 	*x = ClientState{}
-	mi := &file_provider_proto_msgTypes[2]
+	mi := &file_provider_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -436,7 +480,7 @@ func (x *ClientState) String() string {
 func (*ClientState) ProtoMessage() {}
 
 func (x *ClientState) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[2]
+	mi := &file_provider_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -449,7 +493,7 @@ func (x *ClientState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ClientState.ProtoReflect.Descriptor instead.
 func (*ClientState) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{2}
+	return file_provider_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ClientState) GetOp() ClientState_Op {
@@ -476,7 +520,7 @@ type ProviderInfo struct {
 
 func (x *ProviderInfo) Reset() {
 	*x = ProviderInfo{}
-	mi := &file_provider_proto_msgTypes[3]
+	mi := &file_provider_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -488,7 +532,7 @@ func (x *ProviderInfo) String() string {
 func (*ProviderInfo) ProtoMessage() {}
 
 func (x *ProviderInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[3]
+	mi := &file_provider_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,7 +545,7 @@ func (x *ProviderInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProviderInfo.ProtoReflect.Descriptor instead.
 func (*ProviderInfo) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{3}
+	return file_provider_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ProviderInfo) GetIp() string {
@@ -531,7 +575,7 @@ type ProvideeInfo struct {
 
 func (x *ProvideeInfo) Reset() {
 	*x = ProvideeInfo{}
-	mi := &file_provider_proto_msgTypes[4]
+	mi := &file_provider_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -543,7 +587,7 @@ func (x *ProvideeInfo) String() string {
 func (*ProvideeInfo) ProtoMessage() {}
 
 func (x *ProvideeInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[4]
+	mi := &file_provider_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -556,7 +600,7 @@ func (x *ProvideeInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProvideeInfo.ProtoReflect.Descriptor instead.
 func (*ProvideeInfo) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{4}
+	return file_provider_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *ProvideeInfo) GetPvId() uint32 {
@@ -604,7 +648,7 @@ type ProvideeBroken struct {
 
 func (x *ProvideeBroken) Reset() {
 	*x = ProvideeBroken{}
-	mi := &file_provider_proto_msgTypes[5]
+	mi := &file_provider_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -616,7 +660,7 @@ func (x *ProvideeBroken) String() string {
 func (*ProvideeBroken) ProtoMessage() {}
 
 func (x *ProvideeBroken) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[5]
+	mi := &file_provider_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -629,7 +673,7 @@ func (x *ProvideeBroken) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProvideeBroken.ProtoReflect.Descriptor instead.
 func (*ProvideeBroken) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{5}
+	return file_provider_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ProvideeBroken) GetPvId() uint32 {
@@ -655,7 +699,7 @@ type ProvideeBind struct {
 
 func (x *ProvideeBind) Reset() {
 	*x = ProvideeBind{}
-	mi := &file_provider_proto_msgTypes[6]
+	mi := &file_provider_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -667,7 +711,7 @@ func (x *ProvideeBind) String() string {
 func (*ProvideeBind) ProtoMessage() {}
 
 func (x *ProvideeBind) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[6]
+	mi := &file_provider_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -680,7 +724,7 @@ func (x *ProvideeBind) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProvideeBind.ProtoReflect.Descriptor instead.
 func (*ProvideeBind) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{6}
+	return file_provider_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ProvideeBind) GetProvidee() *ProvideeInfo {
@@ -700,7 +744,7 @@ type ProvideeState struct {
 
 func (x *ProvideeState) Reset() {
 	*x = ProvideeState{}
-	mi := &file_provider_proto_msgTypes[7]
+	mi := &file_provider_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -712,7 +756,7 @@ func (x *ProvideeState) String() string {
 func (*ProvideeState) ProtoMessage() {}
 
 func (x *ProvideeState) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[7]
+	mi := &file_provider_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -725,7 +769,7 @@ func (x *ProvideeState) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProvideeState.ProtoReflect.Descriptor instead.
 func (*ProvideeState) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{7}
+	return file_provider_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ProvideeState) GetOp() ProvideeState_Op {
@@ -754,7 +798,7 @@ type SendToClient struct {
 
 func (x *SendToClient) Reset() {
 	*x = SendToClient{}
-	mi := &file_provider_proto_msgTypes[8]
+	mi := &file_provider_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -766,7 +810,7 @@ func (x *SendToClient) String() string {
 func (*SendToClient) ProtoMessage() {}
 
 func (x *SendToClient) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[8]
+	mi := &file_provider_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -779,7 +823,7 @@ func (x *SendToClient) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SendToClient.ProtoReflect.Descriptor instead.
 func (*SendToClient) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{8}
+	return file_provider_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SendToClient) GetClientSid() uint32 {
@@ -821,7 +865,7 @@ type PDispatch struct {
 
 func (x *PDispatch) Reset() {
 	*x = PDispatch{}
-	mi := &file_provider_proto_msgTypes[9]
+	mi := &file_provider_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -833,7 +877,7 @@ func (x *PDispatch) String() string {
 func (*PDispatch) ProtoMessage() {}
 
 func (x *PDispatch) ProtoReflect() protoreflect.Message {
-	mi := &file_provider_proto_msgTypes[9]
+	mi := &file_provider_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -846,7 +890,7 @@ func (x *PDispatch) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PDispatch.ProtoReflect.Descriptor instead.
 func (*PDispatch) Descriptor() ([]byte, []int) {
-	return file_provider_proto_rawDescGZIP(), []int{9}
+	return file_provider_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PDispatch) GetPvId() uint32 {
@@ -894,7 +938,9 @@ const file_provider_proto_rawDesc = "" +
 	"\fROLE_GS_FULL\x10\xef\a\x12\x12\n" +
 	"\rGS_ERROR_PLAT\x10\xf0\a\x12\x12\n" +
 	"\rTOKEN_TIMEOUT\x10\xf1\a\x12\x13\n" +
-	"\x0eSDK_CHECK_FAIL\x10\xf2\a:\x03\xc0>5\"\xb6\x01\n" +
+	"\x0eSDK_CHECK_FAIL\x10\xf2\a:\x03\xc0>5\"1\n" +
+	"\fClientBroken\x12\x1c\n" +
+	"\tclientSid\x18\x01 \x01(\rR\tclientSid:\x03\xc0>7\"\xb6\x01\n" +
 	"\vClientState\x12%\n" +
 	"\x02op\x18\x01 \x01(\x0e2\x15.proto.ClientState.OpR\x02op\x12.\n" +
 	"\x05state\x18\x02 \x01(\x0e2\x18.proto.ClientState.StateR\x05state\"0\n" +
@@ -959,7 +1005,7 @@ func file_provider_proto_rawDescGZIP() []byte {
 }
 
 var file_provider_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_provider_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_provider_proto_goTypes = []any{
 	(ProvideeKick_Reason)(0), // 0: proto.ProvideeKick.Reason
 	(ClientState_State)(0),   // 1: proto.ClientState.State
@@ -968,26 +1014,27 @@ var file_provider_proto_goTypes = []any{
 	(ProvideeState_Op)(0),    // 4: proto.ProvideeState.Op
 	(*Dispatch)(nil),         // 5: proto.Dispatch
 	(*ProvideeKick)(nil),     // 6: proto.ProvideeKick
-	(*ClientState)(nil),      // 7: proto.ClientState
-	(*ProviderInfo)(nil),     // 8: proto.ProviderInfo
-	(*ProvideeInfo)(nil),     // 9: proto.ProvideeInfo
-	(*ProvideeBroken)(nil),   // 10: proto.ProvideeBroken
-	(*ProvideeBind)(nil),     // 11: proto.ProvideeBind
-	(*ProvideeState)(nil),    // 12: proto.ProvideeState
-	(*SendToClient)(nil),     // 13: proto.SendToClient
-	(*PDispatch)(nil),        // 14: proto.PDispatch
-	(*Envelope)(nil),         // 15: proto.Envelope
+	(*ClientBroken)(nil),     // 7: proto.ClientBroken
+	(*ClientState)(nil),      // 8: proto.ClientState
+	(*ProviderInfo)(nil),     // 9: proto.ProviderInfo
+	(*ProvideeInfo)(nil),     // 10: proto.ProvideeInfo
+	(*ProvideeBroken)(nil),   // 11: proto.ProvideeBroken
+	(*ProvideeBind)(nil),     // 12: proto.ProvideeBind
+	(*ProvideeState)(nil),    // 13: proto.ProvideeState
+	(*SendToClient)(nil),     // 14: proto.SendToClient
+	(*PDispatch)(nil),        // 15: proto.PDispatch
+	(*Envelope)(nil),         // 16: proto.Envelope
 }
 var file_provider_proto_depIdxs = []int32{
 	0,  // 0: proto.ProvideeKick.reason:type_name -> proto.ProvideeKick.Reason
 	2,  // 1: proto.ClientState.op:type_name -> proto.ClientState.Op
 	1,  // 2: proto.ClientState.state:type_name -> proto.ClientState.State
-	8,  // 3: proto.ProvideeBroken.provider:type_name -> proto.ProviderInfo
-	9,  // 4: proto.ProvideeBind.providee:type_name -> proto.ProvideeInfo
+	9,  // 3: proto.ProvideeBroken.provider:type_name -> proto.ProviderInfo
+	10, // 4: proto.ProvideeBind.providee:type_name -> proto.ProvideeInfo
 	4,  // 5: proto.ProvideeState.op:type_name -> proto.ProvideeState.Op
 	3,  // 6: proto.ProvideeState.state:type_name -> proto.ProvideeState.State
-	15, // 7: proto.Provider.Serve:input_type -> proto.Envelope
-	15, // 8: proto.Provider.Serve:output_type -> proto.Envelope
+	16, // 7: proto.Provider.Serve:input_type -> proto.Envelope
+	16, // 8: proto.Provider.Serve:output_type -> proto.Envelope
 	8,  // [8:9] is the sub-list for method output_type
 	7,  // [7:8] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
@@ -1007,7 +1054,7 @@ func file_provider_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_provider_proto_rawDesc), len(file_provider_proto_rawDesc)),
 			NumEnums:      5,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

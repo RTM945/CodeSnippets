@@ -35,11 +35,12 @@ func init() {
 		fmt.Printf("Registered message %s with type_id %d\n", desc.FullName(), typeID)
 		return true
 	})
-
+	// TODO 用反射获取到了 type_id 和 pb 对象 下面的 creator 注册 可以尝试用反射生成
 }
 
 func Init(node ares.INode) {
 	node.MsgCreator().Register(4, switchermsg.PingCreator)
 	node.MsgCreator().Register(51, switchermsg.DispatchCreator)
 	node.MsgCreator().Register(53, switchermsg.ProvideeKickCreator)
+	node.MsgCreator().Register(73, switchermsg.SendToClientCreator)
 }

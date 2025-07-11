@@ -45,6 +45,11 @@ message ProvideeKick {
   Reason reason = 2;
 }
 
+message ClientBroken {
+  option (proto.type_id) = 55;
+  uint32 clientSid = 1;
+}
+
 message ClientState {
   option (proto.type_id) = 61;
   enum State {
