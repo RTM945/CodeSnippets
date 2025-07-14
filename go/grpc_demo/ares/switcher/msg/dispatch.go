@@ -37,23 +37,3 @@ func (msg *Dispatch) Unmarshal(bytes []byte) error {
 func (msg *Dispatch) TypedPB() *pb.Dispatch {
 	return msg.pb
 }
-
-func (msg *Dispatch) Process() error {
-	typedPB := msg.TypedPB()
-	create, err := msg.GetSession().Node().MsgCreator().Create(
-		msg.GetSession(), typedPB.GetPvId(), typedPB.GetTypeId(), typedPB.GetPayload(),
-	)
-	if err != nil {
-		provideeKick := NewProvideeKick()
-		provideeKick.TypedPB().ClientSid = typedPB.GetClientSid()
-		provideeKick.TypedPB().Reason = pb.ProvideeKick_EXCEPTION
-		_ = msg.GetSession().Send(provideeKick)
-		ares.LOGGER.Errorf("Process pvId=%d, typeId=%d, clientSid=%d", typedPB.GetPvId(), typedPB.GetTypeId(), typedPB.GetClientSid())
-	} else {
-		// msgDebug.OnReceive(create, session)
-		create.SetContext(msg)
-		create.Dispatch()
-	}
-
-	return nil
-}

@@ -3,6 +3,7 @@ package switcher
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"ares/switcher/msg"
 	"time"
 )
 
@@ -41,13 +42,14 @@ func (s *ProviderSession) BlackFilter() bool {
 	return s.CheckState(int(pb.ProvideeState_BLACKIP))
 }
 
-func (s *ProviderSession) SessionBroken(brokenSessionId uint32) bool {
+func (s *ProviderSession) SessionBroken(brokenSessionId uint32) {
 	if _, ok := s.brokenSessionIds[brokenSessionId]; !ok {
 		s.brokenSessionIds[brokenSessionId] = time.Now().Unix()
 		LOGGER.Infof("Add a broeken session, sessionId=%d", brokenSessionId)
-		return true
+		clientBroken := msg.NewClientBroken()
+		clientBroken.TypedPB().ClientSid = brokenSessionId
+		_ = s.Send(clientBroken)
 	}
-	return false
 }
 
 func (s *ProviderSession) Alive() bool {

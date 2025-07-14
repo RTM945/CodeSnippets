@@ -24,10 +24,7 @@ type Linker struct {
 	whiteIps, blackIps       []string
 	rateMin, rateMax         int
 	msgCreator               ares.IMsgCreator
-
-	OnSessionError func(session *LinkerSession, code uint32) error
-	OnServerError  func(session *LinkerSession, pvId, code uint32) error
-	OnDispatch     func(session *ProviderSession, pvId, typeId uint32, payload []byte) error
+	msgProcessor             ares.IMsgProcessor
 
 	pb.UnimplementedLinkerServer
 }
@@ -38,6 +35,10 @@ func (l *Linker) Sessions() ares.ISessions {
 
 func (l *Linker) MsgCreator() ares.IMsgCreator {
 	return l.msgCreator
+}
+
+func (l *Linker) MsgProcessor() ares.IMsgProcessor {
+	return l.msgProcessor
 }
 
 func New(options ...func(*Linker)) *Linker {

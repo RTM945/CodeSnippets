@@ -58,7 +58,7 @@ func (msg *Msg) Dispatch() {
 }
 
 func (msg *Msg) Process() error {
-	panic("implement me")
+	return msg.GetSession().Node().MsgProcessor().Process(msg)
 }
 
 func (msg *Msg) SetSession(session ISession) {
@@ -91,9 +91,62 @@ func (mc *MsgCreator) Register(id uint32, f MsgCreatorFunc) {
 var NoMsgCreatorErr = errors.New("no msg creator")
 
 func (mc *MsgCreator) Create(session ISession, pvId, typeId uint32, payload []byte) (IMsg, error) {
-	creator, ok := mc.register[typeId]
-	if !ok {
-		return nil, NoMsgCreatorErr
+	if creator, ok := mc.register[typeId]; ok {
+		return creator(session, pvId, typeId, payload)
 	}
-	return creator(session, pvId, typeId, payload)
+	return nil, NoMsgCreatorErr
+}
+
+type TypedMsgProcessor[T IMsg] struct {
+	processor func(T) error
+}
+
+var MsgProcessorCastErr = errors.New("msg processor cast error")
+
+func (t TypedMsgProcessor[T]) Process(msg IMsg) error {
+	var typed T
+	typed, ok := msg.(T)
+	if !ok {
+		return MsgProcessorCastErr
+	}
+	return t.processor(typed)
+}
+
+type RawProcessor interface {
+	Process(msg IMsg) error
+}
+
+func NewTypedMsgProcessor[T IMsg](logicProcessor interface{}) RawProcessor {
+	typed := logicProcessor.(interface{ Process(T) error })
+	return TypedMsgProcessor[T]{
+		processor: typed.Process,
+	}
+}
+
+type IMsgProcessor interface {
+	Register(id uint32, f RawProcessor)
+	Process(msg IMsg) error
+}
+
+type MsgProcessor struct {
+	register map[uint32]RawProcessor
+}
+
+func NewMsgProcessor() *MsgProcessor {
+	return &MsgProcessor{
+		register: make(map[uint32]RawProcessor),
+	}
+}
+
+func (mp *MsgProcessor) Register(id uint32, f RawProcessor) {
+	mp.register[id] = f
+}
+
+var NoMsgProcessorErr = errors.New("no msg processor")
+
+func (mp *MsgProcessor) Process(msg IMsg) error {
+	if proc, ok := mp.register[msg.GetType()]; ok {
+		return proc.Process(msg)
+	}
+	return NoMsgProcessorErr
 }

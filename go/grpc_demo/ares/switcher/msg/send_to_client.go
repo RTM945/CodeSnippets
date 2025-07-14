@@ -3,7 +3,6 @@ package msg
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
-	"ares/switcher"
 )
 
 type SendToClient struct {
@@ -37,18 +36,4 @@ func (msg *SendToClient) Unmarshal(bytes []byte) error {
 
 func (msg *SendToClient) TypedPB() *pb.SendToClient {
 	return msg.pb
-}
-
-func (msg *SendToClient) Process() error {
-	typedPB := msg.TypedPB()
-	linkerSession, ok := switcher.GetLinker().Sessions().GetSession(typedPB.GetClientSid()).(*switcher.LinkerSession)
-	if ok && linkerSession != nil {
-		msgBox := NewMsgBox()
-		msgBox.TypedPB().TypeId = typedPB.TypeId
-		msgBox.TypedPB().Payload = typedPB.Payload
-		return linkerSession.Send(msgBox)
-	} else {
-		// provide client broken
-	}
-	return nil
 }

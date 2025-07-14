@@ -3,6 +3,7 @@ package switcher
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"ares/switcher/msg"
 	"golang.org/x/time/rate"
 	"net"
 	"time"
@@ -47,7 +48,7 @@ func (s *LinkerSession) HandleEnvelope(envelope *pb.Envelope) {
 func (s *LinkerSession) receiveUnknown(typeId uint32) {
 	s.ResetAlive()
 	if s.maxRateLimiter != nil && !s.maxRateLimiter.Allow() {
-		_ = linker.OnSessionError(s, uint32(pb.SessionError_RATE_LIMIT))
+		s.CloseBySessionError(uint32(pb.SessionError_RATE_LIMIT))
 		return
 	}
 	if s.minRateLimiter != nil && !s.minRateLimiter.Allow() {
@@ -106,4 +107,11 @@ func (s *LinkerSession) BindProvidee(pvId uint32) {
 
 func (s *LinkerSession) GetBindProvidees() []uint32 {
 	return s.bindProvidees
+}
+
+func (s *LinkerSession) CloseBySessionError(code uint32) {
+	sessionError := msg.NewSessionError()
+	sessionError.TypedPB().Code = code
+	_ = s.Send0(sessionError)
+	s.Close()
 }

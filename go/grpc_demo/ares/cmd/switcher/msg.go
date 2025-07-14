@@ -4,6 +4,7 @@ import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
 	switchermsg "ares/switcher/msg"
+	switcherprocessor "ares/switcher/processor"
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -43,4 +44,10 @@ func Init(node ares.INode) {
 	node.MsgCreator().Register(51, switchermsg.DispatchCreator)
 	node.MsgCreator().Register(53, switchermsg.ProvideeKickCreator)
 	node.MsgCreator().Register(73, switchermsg.SendToClientCreator)
+
+	node.MsgProcessor().Register(4, ares.NewTypedMsgProcessor[*switchermsg.Ping](switcherprocessor.NewPingProcessor()))
+	node.MsgProcessor().Register(51, ares.NewTypedMsgProcessor[*switchermsg.Dispatch](switcherprocessor.NewDispatchProcessor()))
+	node.MsgProcessor().Register(53, ares.NewTypedMsgProcessor[*switchermsg.ProvideeKick](switcherprocessor.NewProvideeKickProcessor()))
+	node.MsgProcessor().Register(73, ares.NewTypedMsgProcessor[*switchermsg.SendToClient](switcherprocessor.NewSendToClientProcessor()))
+
 }

@@ -308,7 +308,7 @@ func (x *SessionError) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SessionError.ProtoReflect.Descriptor instead.
+// Deprecated: Use CloseBySessionError.ProtoReflect.Descriptor instead.
 func (*SessionError) Descriptor() ([]byte, []int) {
 	return file_linker_proto_rawDescGZIP(), []int{2}
 }
@@ -468,11 +468,11 @@ var file_linker_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
 var file_linker_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_linker_proto_goTypes = []any{
 	(ServerType)(0),        // 0: proto.ServerType
-	(SessionError_Code)(0), // 1: proto.SessionError.Code
+	(SessionError_Code)(0), // 1: proto.CloseBySessionError.Code
 	(ServerError_Code)(0),  // 2: proto.ServerError.Code
 	(*MsgBox)(nil),         // 3: proto.MsgBox
 	(*Ping)(nil),           // 4: proto.Ping
-	(*SessionError)(nil),   // 5: proto.SessionError
+	(*SessionError)(nil),   // 5: proto.CloseBySessionError
 	(*ServerError)(nil),    // 6: proto.ServerError
 	(*Pong)(nil),           // 7: proto.Pong
 	(*Envelope)(nil),       // 8: proto.Envelope

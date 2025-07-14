@@ -1,5 +1,10 @@
 package main
 
+import (
+	"errors"
+	"fmt"
+)
+
 //type server struct {
 //	pb.UnimplementedLinkerServer
 //}
@@ -106,23 +111,83 @@ func (msg Msg) TypeId() uint32 {
 	return msg.typeId
 }
 
-type MsgCreatorFunc[T IMsg] func() T
-
 type A struct {
 	*Msg
 }
 
-type MsgCreator[T IMsg] struct {
-	f MsgCreatorFunc[T]
+func NewA() *A {
+	return &A{
+		Msg: &Msg{
+			typeId: 1,
+		},
+	}
 }
 
-func (mc MsgCreator[T]) Create() T {
-	return mc.f()
+type TypedMsgProcessor[T IMsg] struct {
+	processor func(T) error
+}
+
+func (t TypedMsgProcessor[T]) Process(msg IMsg) error {
+	var typed T
+	typed = msg.(T)
+	return t.processor(typed)
+}
+
+type RawProcessor interface {
+	Process(msg IMsg) error
+}
+
+func NewTypedMsgProcessor[T IMsg](logicProcessor interface{}) RawProcessor {
+	typed := logicProcessor.(interface{ Process(T) error })
+	return TypedMsgProcessor[T]{
+		processor: typed.Process,
+	}
+}
+
+type IMsgProcessor interface {
+	Register(id uint32, f RawProcessor)
+	Process(msg IMsg) error
+}
+
+type MsgProcessor struct {
+	register map[uint32]RawProcessor
+}
+
+func NewMsgProcessor() *MsgProcessor {
+	return &MsgProcessor{
+		register: make(map[uint32]RawProcessor),
+	}
+}
+
+func (mp *MsgProcessor) Register(id uint32, f RawProcessor) {
+	mp.register[id] = f
+}
+
+var NoMsgProcessorErr = errors.New("no msg processor")
+
+func (mp *MsgProcessor) Process(msg IMsg) error {
+	if proc, ok := mp.register[msg.TypeId()]; ok {
+		return proc.Process(msg)
+	}
+	return NoMsgProcessorErr
+}
+
+type AProcessor struct {
+}
+
+func (ap *AProcessor) Process(msg *A) error {
+	fmt.Println("success A!")
+	return nil
 }
 
 func main() {
-	ma := MsgCreator[*A]{func() *A {
-		return &A{Msg: &Msg{1}}
-	}}
+	//ma := MsgCreator[*A]{func() *A {
+	//	return &A{Msg: &Msg{1}}
+	//}}
+	processor := NewTypedMsgProcessor[*A](&AProcessor{})
+	msgProcessor := NewMsgProcessor()
+	msgProcessor.Register(1, processor)
 
+	a := NewA()
+	fmt.Println(msgProcessor.Process(a))
 }

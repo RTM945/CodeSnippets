@@ -3,7 +3,6 @@ package msg
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
-	"ares/switcher"
 )
 
 type Ping struct {
@@ -37,11 +36,4 @@ func (msg *Ping) Unmarshal(bytes []byte) error {
 
 func (msg *Ping) TypedPB() *pb.Ping {
 	return msg.pb
-}
-
-func (msg *Ping) Process() error {
-	msg.GetSession().(*switcher.LinkerSession).ResetAlive()
-	resp := NewPong()
-	resp.TypedPB().Serial = msg.TypedPB().Serial
-	return msg.GetSession().Send(resp)
 }
