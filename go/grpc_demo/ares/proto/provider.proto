@@ -5,7 +5,7 @@ option go_package = "./pb";
 
 import "common.proto";
 option (msg_package) = "switcher/msg";
-option (msg_registry) = "switcher/msg/provider_msg_registry.go";
+option (msg_processor_package) = "switcher/msg/";
 
 // providee <-> switcher
 service Provider {
@@ -70,14 +70,6 @@ message ClientState {
 message ProviderInfo {
   string ip = 1;
   uint32 port = 2;
-}
-
-message ProvideeInfo{
-  uint32 pvId = 1;
-  uint32 serverType = 2;
-  uint32 serverId = 3;
-  uint32 ip = 4;
-  repeated string topics = 5;
 }
 
 message ProvideeBroken {

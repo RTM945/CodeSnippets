@@ -3,6 +3,7 @@ package msg
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"fmt"
 )
 
 type ProvideeKick struct {
@@ -18,8 +19,6 @@ func ProvideeKickCreator(session ares.ISession, pvId, typeId uint32, payload []b
 	err := res.Unmarshal(payload)
 	return res, err
 }
-
-var ProvideeKickProcessor = func(msg *ProvideeKick) error { panic("implement me") }
 
 func NewProvideeKick() *ProvideeKick {
 	return &ProvideeKick{
@@ -38,4 +37,8 @@ func (msg *ProvideeKick) Unmarshal(bytes []byte) error {
 
 func (msg *ProvideeKick) TypedPB() *pb.ProvideeKick {
 	return msg.pb
+}
+
+func (msg *ProvideeKick) String() string {
+	return fmt.Sprintf("ProvideeKick[type=%d, pvId=%d, pb=%v]", msg.GetType(), msg.GetPvId(), msg.pb.String())
 }

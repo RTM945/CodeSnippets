@@ -4,6 +4,7 @@ import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
 	"ares/switcher/msg"
+	"fmt"
 	"time"
 )
 
@@ -12,15 +13,7 @@ type ProviderSession struct {
 	checkToProvidee  bool
 	brokenSessionIds map[uint32]int64
 	aliveTime        int64
-	provideeInfo     *ProvideeInfo
-}
-
-type ProvideeInfo struct {
-	pvId       uint32
-	serverType uint32
-	serverId   uint32
-	ip         int
-	topics     map[string]struct{}
+	provideeInfo     *pb.ProvideeInfo
 }
 
 func NewProviderSession(stream pb.Provider_ServeServer, node ares.INode) *ProviderSession {
@@ -30,50 +23,81 @@ func NewProviderSession(stream pb.Provider_ServeServer, node ares.INode) *Provid
 	}
 }
 
-func (s *ProviderSession) CheckToProvide() bool {
-	return s.checkToProvidee
+func (ps *ProviderSession) CheckToProvide() bool {
+	return ps.checkToProvidee
 }
 
-func (s *ProviderSession) WhiteFilter() bool {
-	return s.CheckState(int(pb.ProvideeState_WHITEIP))
+func (ps *ProviderSession) WhiteFilter() bool {
+	return ps.CheckState(int(pb.ProvideeState_WHITEIP))
 }
 
-func (s *ProviderSession) BlackFilter() bool {
-	return s.CheckState(int(pb.ProvideeState_BLACKIP))
+func (ps *ProviderSession) BlackFilter() bool {
+	return ps.CheckState(int(pb.ProvideeState_BLACKIP))
 }
 
-func (s *ProviderSession) SessionBroken(brokenSessionId uint32) {
-	if _, ok := s.brokenSessionIds[brokenSessionId]; !ok {
-		s.brokenSessionIds[brokenSessionId] = time.Now().Unix()
+func (ps *ProviderSession) SessionBroken(brokenSessionId uint32) {
+	if _, ok := ps.brokenSessionIds[brokenSessionId]; !ok {
+		ps.brokenSessionIds[brokenSessionId] = time.Now().Unix()
 		LOGGER.Infof("Add a broeken session, sessionId=%d", brokenSessionId)
 		clientBroken := msg.NewClientBroken()
 		clientBroken.TypedPB().ClientSid = brokenSessionId
-		_ = s.Send(clientBroken)
+		_ = ps.Send(clientBroken)
 	}
 }
 
-func (s *ProviderSession) Alive() bool {
-	provider := s.Session.Node().(*Provider)
-	return time.Now().Unix()-s.aliveTime < provider.sessionTimeout
+func (ps *ProviderSession) Alive() bool {
+	provider := ps.Session.Node().(*Provider)
+	return time.Now().Unix()-ps.aliveTime < provider.sessionTimeout
 }
 
-func (s *ProviderSession) Check() {
+func (ps *ProviderSession) Check() {
 	now := time.Now().Unix()
-	provider := s.Session.Node().(*Provider)
-	for k, v := range s.brokenSessionIds {
+	provider := ps.Session.Node().(*Provider)
+	for k, v := range ps.brokenSessionIds {
 		if now-v > provider.sessionTimeout {
 			LOGGER.Infof("Removed a broken session, sessionId=%d", k)
-			delete(s.brokenSessionIds, k)
+			delete(ps.brokenSessionIds, k)
 		}
 	}
-	if len(s.brokenSessionIds) > 0 {
-		LOGGER.Infof("Now broken clientsids.size=%d", len(s.brokenSessionIds))
+	if len(ps.brokenSessionIds) > 0 {
+		LOGGER.Infof("Now broken clientsids.size=%d", len(ps.brokenSessionIds))
 	}
 }
 
 func (ps *ProviderSession) GetPvId() int32 {
 	if ps.provideeInfo == nil {
-		return 0
+		return -1
 	}
-	return int32(ps.provideeInfo.pvId)
+	return int32(ps.provideeInfo.PvId)
+}
+
+func (ps *ProviderSession) Send(msg ares.IMsg) error {
+	pvId := ps.GetPvId()
+	if 0 == msg.GetPvId() {
+		if 0 == pvId {
+			return fmt.Errorf("not Bind Providee: %v, msg: %v", ps, msg)
+		}
+		msg.SetPvId(uint32(pvId))
+	}
+	return ps.Session.Send(msg)
+}
+
+func (ps *ProviderSession) String() string {
+	return fmt.Sprintf("ProviderSession: %s, session: %s", ps.provideeInfo, ps.Session)
+}
+
+func (ps *ProviderSession) IsAUSession() bool {
+	return ps.provideeInfo.ServerType == uint32(pb.ServerType_AU)
+}
+
+func (ps *ProviderSession) IsPhantomSession() bool {
+	return ps.provideeInfo.ServerType == uint32(pb.ServerType_PHANTOM)
+}
+
+func (ps *ProviderSession) IsGameServerSession() bool {
+	return ps.provideeInfo.ServerType == uint32(pb.ServerType_LOGIC)
+}
+
+func (ps *ProviderSession) GetServerId() uint32 {
+	return ps.provideeInfo.ServerId
 }

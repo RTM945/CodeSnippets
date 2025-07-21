@@ -3,6 +3,7 @@ package msg
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"fmt"
 )
 
 type Pong struct {
@@ -27,4 +28,8 @@ func (msg *Pong) Unmarshal(bytes []byte) error {
 
 func (msg *Pong) TypedPB() *pb.Pong {
 	return msg.pb
+}
+
+func (msg *Pong) String() string {
+	return fmt.Sprintf("Pong[type=%d, pvId=%d, pb=%v]", msg.GetType(), msg.GetPvId(), msg.pb.String())
 }

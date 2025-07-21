@@ -2,12 +2,13 @@ package switcher
 
 import (
 	ares "ares/pkg/io"
+	pb "ares/proto/gen"
+	"ares/switcher/msg"
 	"sync"
 	"time"
 )
 
 type ProviderSessions struct {
-	*ares.Sessions
 	node ares.INode
 	sync.Mutex
 	providerSessions map[uint32]*ProviderSession
@@ -15,27 +16,26 @@ type ProviderSessions struct {
 
 func NewProviderSessions(node ares.INode) *ProviderSessions {
 	return &ProviderSessions{
-		Sessions:         ares.NewSessions(),
 		node:             node,
 		providerSessions: make(map[uint32]*ProviderSession),
 	}
 }
 
-func (ps *ProviderSessions) CheckAlive() {
+func (pss *ProviderSessions) CheckAlive() {
 	go func() {
 		ticker := time.NewTicker(time.Minute)
 		defer ticker.Stop()
 		for range ticker.C {
-			ps.Lock()
-			toClose := make([]*ProviderSession, 0, ps.Size())
-			for _, providerSession := range ps.providerSessions {
+			pss.Lock()
+			toClose := make([]*ProviderSession, 0)
+			for _, providerSession := range pss.providerSessions {
 				if !providerSession.Alive() {
 					toClose = append(toClose, providerSession)
 				} else {
 					providerSession.Check()
 				}
 			}
-			ps.Unlock()
+			pss.Unlock()
 			for _, session := range toClose {
 				session.Close()
 			}
@@ -43,28 +43,73 @@ func (ps *ProviderSessions) CheckAlive() {
 	}()
 }
 
-func (ps *ProviderSessions) OnAddSession(session ares.ISession) {
+func (pss *ProviderSessions) OnAddSession(session ares.ISession) {
 
 }
 
-func (ps *ProviderSessions) OnRemoveSession(session ares.ISession) {
+func (pss *ProviderSessions) OnRemoveSession(session ares.ISession) {
 	providerSession := session.(*ProviderSession)
-	ps.unbindSession(providerSession)
+	pss.unbindSession(providerSession)
 }
 
-func (ps *ProviderSessions) unbindSession(providerSession *ProviderSession) {
-	ps.Lock()
-	defer ps.Unlock()
+func (pss *ProviderSessions) GetSession(pvId uint32) ares.ISession {
+	pss.Lock()
+	defer pss.Unlock()
+	return pss.providerSessions[pvId]
+}
+
+func (pss *ProviderSessions) AllSessions() []ares.ISession {
+	pss.Lock()
+	defer pss.Unlock()
+	result := make([]ares.ISession, 0)
+	for _, providerSession := range pss.providerSessions {
+		result = append(result, providerSession)
+	}
+	return result
+}
+
+func (pss *ProviderSessions) unbindSession(providerSession *ProviderSession) {
+	pss.Lock()
+	defer pss.Unlock()
 	pvId := providerSession.GetPvId()
 	if -1 == pvId {
 		return
 	}
-	old, ok := ps.providerSessions[uint32(pvId)]
+	old, ok := pss.providerSessions[uint32(pvId)]
 	if !ok {
 		LOGGER.Errorf("Not bound providee:%d", pvId)
 	} else if old == providerSession {
-		delete(ps.providerSessions, uint32(pvId))
-		provider := ps.node.(*Provider)
+		delete(pss.providerSessions, uint32(pvId))
+		provider := pss.node.(*Provider)
+		if providerSession.IsAUSession() {
+			provider.RemoveAUPvId(uint32(pvId))
+		} else if providerSession.IsPhantomSession() {
+			provider.RemovePhantomPvId(uint32(pvId))
+		} else if providerSession.IsGameServerSession() {
+			provider.RemovePhantomGS(providerSession.GetServerId())
+		}
+		LOGGER.Infof("unbind providee:%v", providerSession)
 
+		if provider.phantomPvIds.Size() == 0 {
+			provideeBroken := msg.NewProvideeBroken()
+			provideeBroken.TypedPB().PvId = uint32(pvId)
+			provideeBroken.TypedPB().Provider = &pb.ProviderInfo{
+				Ip:   provider.providerIp,
+				Port: provider.port,
+			}
+			for _, s := range pss.providerSessions {
+				s.Send(provideeBroken)
+			}
+		} else {
+			for _, v := range provider.phantomPvIds.Snapshot() {
+				provideeBroken := msg.NewProvideeBroken()
+				provideeBroken.TypedPB().PvId = uint32(pvId)
+				provideeBroken.TypedPB().Provider = &pb.ProviderInfo{
+					Ip:   provider.providerIp,
+					Port: provider.port,
+				}
+				provider.SendToProvidee(v, provideeBroken)
+			}
+		}
 	}
 }

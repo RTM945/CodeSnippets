@@ -3,6 +3,7 @@ package msg
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"fmt"
 )
 
 type ClientBroken struct {
@@ -27,4 +28,8 @@ func (msg *ClientBroken) Unmarshal(bytes []byte) error {
 
 func (msg *ClientBroken) TypedPB() *pb.ClientBroken {
 	return msg.pb
+}
+
+func (msg *ClientBroken) String() string {
+	return fmt.Sprintf("ClientBroken[type=%d, pvId=%d, pb=%v]", msg.GetType(), msg.GetPvId(), msg.pb.String())
 }

@@ -21,55 +21,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ServerType int32
-
-const (
-	ServerType_NONE    ServerType = 0
-	ServerType_PHANTOM ServerType = 1
-	ServerType_AU      ServerType = 2
-)
-
-// Enum value maps for ServerType.
-var (
-	ServerType_name = map[int32]string{
-		0: "NONE",
-		1: "PHANTOM",
-		2: "AU",
-	}
-	ServerType_value = map[string]int32{
-		"NONE":    0,
-		"PHANTOM": 1,
-		"AU":      2,
-	}
-)
-
-func (x ServerType) Enum() *ServerType {
-	p := new(ServerType)
-	*p = x
-	return p
-}
-
-func (x ServerType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (ServerType) Descriptor() protoreflect.EnumDescriptor {
-	return file_linker_proto_enumTypes[0].Descriptor()
-}
-
-func (ServerType) Type() protoreflect.EnumType {
-	return &file_linker_proto_enumTypes[0]
-}
-
-func (x ServerType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use ServerType.Descriptor instead.
-func (ServerType) EnumDescriptor() ([]byte, []int) {
-	return file_linker_proto_rawDescGZIP(), []int{0}
-}
-
 type SessionError_Code int32
 
 const (
@@ -117,11 +68,11 @@ func (x SessionError_Code) String() string {
 }
 
 func (SessionError_Code) Descriptor() protoreflect.EnumDescriptor {
-	return file_linker_proto_enumTypes[1].Descriptor()
+	return file_linker_proto_enumTypes[0].Descriptor()
 }
 
 func (SessionError_Code) Type() protoreflect.EnumType {
-	return &file_linker_proto_enumTypes[1]
+	return &file_linker_proto_enumTypes[0]
 }
 
 func (x SessionError_Code) Number() protoreflect.EnumNumber {
@@ -164,11 +115,11 @@ func (x ServerError_Code) String() string {
 }
 
 func (ServerError_Code) Descriptor() protoreflect.EnumDescriptor {
-	return file_linker_proto_enumTypes[2].Descriptor()
+	return file_linker_proto_enumTypes[1].Descriptor()
 }
 
 func (ServerError_Code) Type() protoreflect.EnumType {
-	return &file_linker_proto_enumTypes[2]
+	return &file_linker_proto_enumTypes[1]
 }
 
 func (x ServerError_Code) Number() protoreflect.EnumNumber {
@@ -308,7 +259,7 @@ func (x *SessionError) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use CloseBySessionError.ProtoReflect.Descriptor instead.
+// Deprecated: Use SessionError.ProtoReflect.Descriptor instead.
 func (*SessionError) Descriptor() ([]byte, []int) {
 	return file_linker_proto_rawDescGZIP(), []int{2}
 }
@@ -443,14 +394,9 @@ const file_linker_proto_rawDesc = "" +
 	"\x04NONE\x10\x00\x12\x1a\n" +
 	"\x15SERVER_NOT_ACCESSIBLE\x10\xa9F:\x03\xc0>\v\"#\n" +
 	"\x04Pong\x12\x16\n" +
-	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\b*+\n" +
-	"\n" +
-	"ServerType\x12\b\n" +
-	"\x04NONE\x10\x00\x12\v\n" +
-	"\aPHANTOM\x10\x01\x12\x06\n" +
-	"\x02AU\x10\x0227\n" +
+	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\b27\n" +
 	"\x06Linker\x12-\n" +
-	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B;\xca>\fswitcher/msg\xd2>#switcher/msg/linker_msg_registry.goZ\x04./pbb\x06proto3"
+	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B*\xca>\fswitcher/msg\xd2>\x12switcher/processorZ\x04./pbb\x06proto3"
 
 var (
 	file_linker_proto_rawDescOnce sync.Once
@@ -464,22 +410,21 @@ func file_linker_proto_rawDescGZIP() []byte {
 	return file_linker_proto_rawDescData
 }
 
-var file_linker_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
+var file_linker_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
 var file_linker_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_linker_proto_goTypes = []any{
-	(ServerType)(0),        // 0: proto.ServerType
-	(SessionError_Code)(0), // 1: proto.CloseBySessionError.Code
-	(ServerError_Code)(0),  // 2: proto.ServerError.Code
-	(*MsgBox)(nil),         // 3: proto.MsgBox
-	(*Ping)(nil),           // 4: proto.Ping
-	(*SessionError)(nil),   // 5: proto.CloseBySessionError
-	(*ServerError)(nil),    // 6: proto.ServerError
-	(*Pong)(nil),           // 7: proto.Pong
-	(*Envelope)(nil),       // 8: proto.Envelope
+	(SessionError_Code)(0), // 0: proto.SessionError.Code
+	(ServerError_Code)(0),  // 1: proto.ServerError.Code
+	(*MsgBox)(nil),         // 2: proto.MsgBox
+	(*Ping)(nil),           // 3: proto.Ping
+	(*SessionError)(nil),   // 4: proto.SessionError
+	(*ServerError)(nil),    // 5: proto.ServerError
+	(*Pong)(nil),           // 6: proto.Pong
+	(*Envelope)(nil),       // 7: proto.Envelope
 }
 var file_linker_proto_depIdxs = []int32{
-	8, // 0: proto.Linker.Serve:input_type -> proto.Envelope
-	8, // 1: proto.Linker.Serve:output_type -> proto.Envelope
+	7, // 0: proto.Linker.Serve:input_type -> proto.Envelope
+	7, // 1: proto.Linker.Serve:output_type -> proto.Envelope
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
@@ -498,7 +443,7 @@ func file_linker_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_linker_proto_rawDesc), len(file_linker_proto_rawDesc)),
-			NumEnums:      3,
+			NumEnums:      2,
 			NumMessages:   5,
 			NumExtensions: 0,
 			NumServices:   1,

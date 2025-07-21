@@ -6,7 +6,7 @@ option go_package = "./pb";
 import "common.proto";
 
 option (msg_package) = "switcher/msg";
-option (msg_registry) = "switcher/msg/linker_msg_registry.go";
+option (msg_processor_package) = "switcher/processor";
 
 // client <-> linker
 service Linker {
@@ -57,10 +57,4 @@ message ServerError {
 message Pong {
   option (proto.type_id) = 8;
   int32 serial = 1;
-}
-
-enum ServerType {
-  NONE = 0;
-  PHANTOM = 1;
-  AU = 2;
 }

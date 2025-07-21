@@ -3,6 +3,7 @@ package msg
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+	"fmt"
 )
 
 func DispatchCreator(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
@@ -36,4 +37,8 @@ func (msg *Dispatch) Unmarshal(bytes []byte) error {
 
 func (msg *Dispatch) TypedPB() *pb.Dispatch {
 	return msg.pb
+}
+
+func (msg *Dispatch) String() string {
+	return fmt.Sprintf("Dispatch[type=%d, pvId=%d, pb=%v]", msg.GetType(), msg.GetPvId(), msg.pb.String())
 }
