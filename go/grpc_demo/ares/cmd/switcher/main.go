@@ -89,24 +89,37 @@ func (linker *Linker) Serve(stream pb.Linker_ServeServer) error {
 type Provider struct {
 	pb.UnimplementedProviderServer
 
-	sessions     map[uint32]grpc.ServerStream
-	msgProcessor map[uint32]func(msg proto.Message) error
+	sessions     map[uint32]*ProviderSession
+	msgProcessor map[uint32]func(session *ProviderSession, msg proto.Message) error
+
+	auPvIds map[uint32]struct{}
+}
+
+type ProviderSession struct {
+	grpc.ServerStream
+	info            *pb.ProvideeInfo
+	checkToProvidee bool
 }
 
 func NewProvider() *Provider {
 	return &Provider{
-		sessions:     make(map[uint32]grpc.ServerStream),
-		msgProcessor: make(map[uint32]func(msg proto.Message) error),
+		sessions:     make(map[uint32]*ProviderSession),
+		msgProcessor: make(map[uint32]func(session *ProviderSession, msg proto.Message) error),
+		auPvIds:      make(map[uint32]struct{}),
 	}
 }
 
-func (provider *Provider) Handler(typeId uint32, handler func(msg proto.Message) error) {
+func (provider *Provider) Handler(typeId uint32, handler func(session *ProviderSession, msg proto.Message) error) {
 	provider.msgProcessor[typeId] = handler
 }
 
 func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 	if p, ok := peer.FromContext(stream.Context()); ok {
 		log.Println("receive providee session", p.Addr.String())
+	}
+	providerSession := &ProviderSession{
+		ServerStream: stream,
+		info:         nil,
 	}
 	for {
 		req, err := stream.Recv()
@@ -117,7 +130,7 @@ func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 			return err
 		}
 		if processor, ok := provider.msgProcessor[req.TypeId]; ok {
-			if err := processor(req); err != nil {
+			if err := processor(providerSession, req); err != nil {
 				log.Printf("process %d error:%v", req.TypeId, err)
 			}
 		} else {
@@ -149,6 +162,13 @@ func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 
 var linker = NewLinker()
 var provider = NewProvider()
+
+// Phantom 启动 onProvideeInitDone, 但由于没有连接 return
+// switcher 启动, 连接Phantom, Phantom MasterNode ProvideeNode 触发onAddSession发送BindPvId
+// switcher收到BindPvId, 走到给Phantom发送SPRegisgerLinker、SPRegisgerProvider、OtherProvidees、ProvideeBind
+// OtherProvidees发送的是Phantom自己的providee信息
+// Phantom OtherProvidees走到provideeBind, 流程中走到setOrderSession(pvid, bindPs); 向自己发送 PhantomUpdateOrderSession
+// Phantom provideeBind 又调用onProvideeInitDone, 因为有连接继续, 给自己发送ProvideeInitDone
 
 func main() {
 	linkerLis, err := net.Listen("tcp", ":5000")
@@ -208,7 +228,6 @@ func main() {
 					switch string(ev.Kv.Key) {
 					case "/services/provider":
 						newAU(string(ev.Kv.Value))
-
 					}
 
 				case mvccpb.DELETE:
@@ -221,7 +240,7 @@ func main() {
 }
 
 type AU struct {
-	pb.ProviderClient
+	stream grpc.ClientStream
 }
 
 func newAU(addr string) *AU {
@@ -234,8 +253,38 @@ func newAU(addr string) *AU {
 		log.Fatal(err)
 	}
 	client := pb.NewLinkerClient(conn)
+	stream, err := client.Serve(context.TODO())
+	if err != nil {
+		log.Fatal(err)
+	}
+	// 发BindPvId
+	bindPvId := &pb.BindPvId{
+		Info: &pb.ProvideeInfo{
+			PvId:       101,
+			ServerType: uint32(pb.ServerType_AU),
+			ServerId:   0,
+			Topics:     []string{"MsgTopic_254", "MsgTopic_253"},
+			Ip:         2130706433, // 127.0.0.1
+		},
+		DefaultState:    0,
+		CheckToProvidee: false,
+	}
+	payload, err := bindPvId.MarshalVT()
+	if err != nil {
+		log.Printf("marshal payload error:%v", err)
+		return nil
+	}
+	err = stream.Send(&pb.Envelope{
+		TypeId:  52,
+		PvId:    0,
+		Payload: payload,
+	})
+	if err != nil {
+		log.Printf("send payload error:%v", err)
+		return nil
+	}
 
-	return &AU{client}
+	return &AU{stream}
 }
 
 func etcdAdd(cli *clientv3.Client, key, val string, ttl int64) {

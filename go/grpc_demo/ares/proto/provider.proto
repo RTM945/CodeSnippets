@@ -20,6 +20,13 @@ message Dispatch  {
   bytes payload = 4;
 }
 
+message BindPvId {
+  option (proto.type_id) = 52;
+  ProvideeInfo info = 1;
+  uint32 defaultState = 2;
+  bool checkToProvidee = 3;
+}
+
 message ProvideeKick {
   option (proto.type_id) = 53;
   enum Reason {
