@@ -70,11 +70,7 @@ func (linker *Linker) Serve(stream pb.Linker_ServeServer) error {
 						log.Printf("marshal payload error:%v", err)
 						continue
 					}
-					err = session.SendMsg(&pb.Envelope{
-						TypeId:  51,
-						PvId:    req.PvId,
-						Payload: payload,
-					})
+					err = SendMsg(session.stream, 51, req.PvId, payload)
 					if err != nil {
 						log.Printf("dispatch %d to %d error:%v", req.TypeId, req.PvId, err)
 					}
@@ -96,7 +92,7 @@ type Provider struct {
 }
 
 type ProviderSession struct {
-	grpc.ServerStream
+	stream          grpc.ServerStream
 	info            *pb.ProvideeInfo
 	checkToProvidee bool
 }
@@ -118,8 +114,8 @@ func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 		log.Println("receive providee session", p.Addr.String())
 	}
 	providerSession := &ProviderSession{
-		ServerStream: stream,
-		info:         nil,
+		stream: stream,
+		info:   nil,
 	}
 	for {
 		req, err := stream.Recv()
@@ -146,11 +142,7 @@ func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 						log.Printf("marshal payload error:%v", err)
 						continue
 					}
-					err = session.SendMsg(&pb.Envelope{
-						TypeId:  77,
-						PvId:    req.PvId,
-						Payload: payload,
-					})
+					err = SendMsg(session.stream, 77, req.PvId, payload)
 					if err != nil {
 						log.Printf("pdispatch %d to %d error:%v", req.TypeId, req.PvId, err)
 					}
@@ -168,7 +160,17 @@ var provider = NewProvider()
 // switcher收到BindPvId, 走到给Phantom发送SPRegisgerLinker、SPRegisgerProvider、OtherProvidees、ProvideeBind
 // OtherProvidees发送的是Phantom自己的providee信息
 // Phantom OtherProvidees走到provideeBind, 流程中走到setOrderSession(pvid, bindPs); 向自己发送 PhantomUpdateOrderSession
+// 向自己发送也是要通过provider转发的, 通过SendToProvidee协议包装先发到provider, provider再发回Phantom
 // Phantom provideeBind 又调用onProvideeInitDone, 因为有连接继续, 给自己发送ProvideeInitDone
+
+// gs流程:
+// 启动connector, 从Phantom获取provider列表后连接, provider不会主动发消息
+// 由providee的onAddSession给provider发送BindPvId协议, provider给所有Phantom发ProvideeBind协议
+// Phantom phantomSendProvideeBind 由于本服务类型不是Phantom而退出
+// 而在Phantom的流程基本是广播给已知的所有providee广播ProvideeBind和OtherProvidees
+// ProvideeBind负责通知其他服, 这个服启动了
+// OtherProvidees负责通知这个服, 所有已经启动的其他服
+// 而下面被注入的provideeContext.provideeBind(info)会执行每个服自己的provideeBind逻辑
 
 func main() {
 	linkerLis, err := net.Listen("tcp", ":5000")
@@ -308,4 +310,13 @@ func etcdAdd(cli *clientv3.Client, key, val string, ttl int64) {
 			}
 		}
 	}()
+}
+
+func SendMsg(stream grpc.ServerStream, typeId, pvId uint32, data []byte) error {
+	envelope := &pb.Envelope{
+		TypeId:  typeId,
+		PvId:    pvId,
+		Payload: data,
+	}
+	return stream.SendMsg(envelope)
 }

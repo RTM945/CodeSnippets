@@ -115,6 +115,13 @@ message SendToClient {
   bytes payload = 4;
 }
 
+message SendToProvidee {
+  option (proto.type_id) = 74;
+  repeated uint32 pvIds = 1;
+  uint32 typeId = 2;
+  bytes payload = 3;
+}
+
 message PDispatch  {
   option (proto.type_id) = 77;
   uint32 pvId = 1;

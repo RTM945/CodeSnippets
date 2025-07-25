@@ -63,7 +63,33 @@ func init() {
 		}
 
 		// 通知所有Phantom provideeBind 换成etcd后还需要吗
+		// 姑且先发送ProvideeBind
+		// 单服情况下就发自己
+		provideeBind := &pb.ProvideeBind{
+			Providee: bindPvId.Info,
+		}
+		payload, err := provideeBind.MarshalVT()
+		if err != nil {
+			return err
+		}
 
+		// 还要转成sendToProvidee
+		// 在provider内部发SendToProvidee没啥意义，明明可以自己调用自己
+		// 思考是否需要做一个Phantom
+		sendToProvidee := &pb.SendToProvidee{
+			PvIds:   []uint32{bindPvId.Info.PvId},
+			TypeId:  64,
+			Payload: payload,
+		}
+		payload, err = sendToProvidee.MarshalVT()
+		if err != nil {
+			return err
+		}
+
+		return SendMsg(session.stream, 74, 0, payload)
+	}
+
+	provider.msgProcessor[74] = func(session *ProviderSession, msg proto.Message) error {
 		return nil
 	}
 }
