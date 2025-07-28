@@ -200,7 +200,7 @@ func main() {
 		grpc.Creds(insecure.NewCredentials()),
 	)
 
-	pb.RegisterProviderServer(linkerGrpcServer, provider)
+	pb.RegisterProviderServer(providerGrpcServer, provider)
 
 	// linker
 	go func() {
@@ -254,7 +254,7 @@ func newAU(addr string) *AU {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client := pb.NewLinkerClient(conn)
+	client := pb.NewProviderClient(conn)
 	stream, err := client.Serve(context.TODO())
 	if err != nil {
 		log.Fatal(err)
