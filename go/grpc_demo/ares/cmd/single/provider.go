@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ares/logger"
 	pb "ares/proto/gen"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
@@ -9,7 +10,6 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
 	"io"
-	"log"
 	"net"
 )
 
@@ -38,13 +38,16 @@ func NewProvider() *Provider {
 	}
 }
 
+var providerLogger = logger.GetLogger("provider")
+
 func (provider *Provider) Handler(typeId uint32, handler func(session *ProviderSession, msg proto.Message) error) {
 	provider.msgProcessor[typeId] = handler
+	providerLogger.Infof("register handler type: %v", typeId)
 }
 
 func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 	if p, ok := peer.FromContext(stream.Context()); ok {
-		log.Println("receive providee session", p.Addr.String())
+		providerLogger.Infof("receive providee session: %s", p.Addr.String())
 	}
 	providerSession := &ProviderSession{
 		stream: stream,
@@ -60,7 +63,7 @@ func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 		}
 		if processor, ok := provider.msgProcessor[req.TypeId]; ok {
 			if err := processor(providerSession, req); err != nil {
-				log.Printf("process %d error:%v\n", req.TypeId, err)
+				providerLogger.Errorf("process %d error:%v", req.TypeId, err)
 			}
 		} else {
 			if req.PvId != 0 {
@@ -72,12 +75,12 @@ func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 					}
 					payload, err := pDispatch.MarshalVT()
 					if err != nil {
-						log.Printf("marshal payload error:%v\n", err)
+						providerLogger.Errorf("marshal payload error:%v", err)
 						continue
 					}
 					err = SendMsg(session.stream, 77, req.PvId, payload)
 					if err != nil {
-						log.Printf("pdispatch %d to %d error:%v\n", req.TypeId, req.PvId, err)
+						providerLogger.Errorf("pdispatch %d to %d error:%v", req.TypeId, req.PvId, err)
 					}
 				}
 			}
@@ -88,7 +91,8 @@ func (provider *Provider) Serve(stream pb.Provider_ServeServer) error {
 func (provider *Provider) Start(etcdClient *clientv3.Client) {
 	providerLis, err := net.Listen("tcp", ":5001")
 	if err != nil {
-		log.Fatal(err)
+		providerLogger.Errorf("listen error:%v", err)
+		return
 	}
 
 	providerGrpcServer := grpc.NewServer(
@@ -97,10 +101,12 @@ func (provider *Provider) Start(etcdClient *clientv3.Client) {
 	)
 
 	pb.RegisterProviderServer(providerGrpcServer, provider)
-	key := etcdKey(3, 301, 0)
-	etcdAdd(etcdClient, key, "127.0.0.1:5001", 10)
-	log.Println("provider grpc server start")
+	host := "127.0.0.1:5001"
+	key := "services/provider/3/301"
+	etcdAdd(etcdClient, key, host, 10)
+	providerLogger.Infof("provider grpc server start at %s", host)
 	if err := providerGrpcServer.Serve(providerLis); err != nil {
-		log.Fatal(err)
+		providerLogger.Errorf("provider grpc server start error:%v", err)
+		return
 	}
 }

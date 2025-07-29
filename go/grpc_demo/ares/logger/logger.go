@@ -28,7 +28,7 @@ func init() {
 			StacktraceKey:  "S",
 			LineEnding:     zapcore.DefaultLineEnding,
 			EncodeLevel:    zapcore.CapitalColorLevelEncoder,                   // 彩色等级词，如 DEBUG/INFO
-			EncodeTime:     zapcore.TimeEncoderOfLayout("2025-05-21 12:17:33"), // 可读时间格式
+			EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05"), // 可读时间格式
 			EncodeDuration: zapcore.StringDurationEncoder,
 			EncodeCaller:   zapcore.ShortCallerEncoder, // file:line
 		},

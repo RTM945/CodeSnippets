@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ares/logger"
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
@@ -10,7 +11,6 @@ import (
 	"google.golang.org/grpc/peer"
 	"google.golang.org/protobuf/proto"
 	"io"
-	"log"
 	"net"
 	"sync/atomic"
 )
@@ -37,11 +37,13 @@ func (linker *Linker) Handler(typeId uint32, handler func(msg proto.Message) err
 
 var genSessionId atomic.Uint32
 
+var linkerLogger = logger.GetLogger("linker")
+
 func (linker *Linker) Serve(stream pb.Linker_ServeServer) error {
 	sid := genSessionId.Add(1)
 	linker.sessions[sid] = stream
 	if p, ok := peer.FromContext(stream.Context()); ok {
-		log.Println("receive client session:", p.Addr)
+		linkerLogger.Infof("receive client session: %v", p.Addr)
 	}
 	for {
 		req, err := stream.Recv()
@@ -54,7 +56,8 @@ func (linker *Linker) Serve(stream pb.Linker_ServeServer) error {
 
 		if processor, ok := linker.msgProcessor[req.TypeId]; ok {
 			if err := processor(req); err != nil {
-				log.Printf("process %d error:%v", req.TypeId, err)
+				linkerLogger.Errorf("process %d error:%v", req.TypeId, err)
+				continue
 			}
 		} else {
 			if req.PvId != 0 {
@@ -67,15 +70,15 @@ func (linker *Linker) Serve(stream pb.Linker_ServeServer) error {
 					}
 					payload, err := dispatch.MarshalVT()
 					if err != nil {
-						log.Printf("marshal payload error:%v", err)
+						linkerLogger.Errorf("marshal payload error:%v", err)
 						continue
 					}
 					err = SendMsg(session.stream, 51, req.PvId, payload)
 					if err != nil {
-						log.Printf("dispatch %d to %d error:%v", req.TypeId, req.PvId, err)
+						linkerLogger.Errorf("dispatch %d to %d error:%v", req.TypeId, req.PvId, err)
 					}
 				} else {
-					log.Println("session not found:", req.PvId)
+					linkerLogger.Errorf("session not found: %d", req.PvId)
 				}
 			}
 		}
@@ -85,7 +88,8 @@ func (linker *Linker) Serve(stream pb.Linker_ServeServer) error {
 func (linker *Linker) Start(etcdClient *clientv3.Client) {
 	linkerLis, err := net.Listen("tcp", ":5000")
 	if err != nil {
-		log.Fatal(err)
+		linkerLogger.Errorf("listen error:%v", err)
+		return
 	}
 	linkerLis = ares.NewPROXYListener(linkerLis)
 
@@ -96,11 +100,13 @@ func (linker *Linker) Start(etcdClient *clientv3.Client) {
 
 	pb.RegisterLinkerServer(linkerGrpcServer, linker)
 
-	key := etcdKey(2, 201, 0)
-	etcdAdd(etcdClient, key, "127.0.0.1:5000", 10)
-	log.Println("linker grpc server start")
+	host := "127.0.0.1:5000"
+	key := "services/linker/2/201"
+	etcdAdd(etcdClient, key, host, 10)
+	linkerLogger.Infof("linker grpc server start at %s", host)
 	if err := linkerGrpcServer.Serve(linkerLis); err != nil {
-		log.Fatal(err)
+		linkerLogger.Errorf("grpc server start error:%v", err)
+		return
 	}
 }
 
