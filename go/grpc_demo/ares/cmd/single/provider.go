@@ -102,7 +102,7 @@ func (provider *Provider) Start(etcdClient *clientv3.Client) {
 
 	pb.RegisterProviderServer(providerGrpcServer, provider)
 	host := "127.0.0.1:5001"
-	key := "services/provider/3/301"
+	key := "/services/provider/3/301"
 	etcdAdd(etcdClient, key, host, 10)
 	providerLogger.Infof("provider grpc server start at %s", host)
 	if err := providerGrpcServer.Serve(providerLis); err != nil {

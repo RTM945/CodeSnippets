@@ -59,6 +59,7 @@ func (providee *Providee) Start(etcdClient *clientv3.Client) error {
 			providee.logger.Errorf("Error connecting to provider: %v", err)
 			continue
 		}
+		providee.logger.Infof("connected to provider: %v", providerInfo)
 	}
 
 	// watch provider, 有新的就连接
@@ -78,6 +79,7 @@ func (providee *Providee) Start(etcdClient *clientv3.Client) error {
 						providee.logger.Errorf("Error connecting to provider: %v", err)
 						continue
 					}
+					providee.logger.Infof("connected to provider: %v", providerInfo)
 				case mvccpb.DELETE:
 					providee.logger.Infof("provider %v has been deleted", ev.PrevKv)
 				}

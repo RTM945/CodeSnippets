@@ -101,7 +101,7 @@ func (linker *Linker) Start(etcdClient *clientv3.Client) {
 	pb.RegisterLinkerServer(linkerGrpcServer, linker)
 
 	host := "127.0.0.1:5000"
-	key := "services/linker/2/201"
+	key := "/services/linker/2/201"
 	etcdAdd(etcdClient, key, host, 10)
 	linkerLogger.Infof("linker grpc server start at %s", host)
 	if err := linkerGrpcServer.Serve(linkerLis); err != nil {
