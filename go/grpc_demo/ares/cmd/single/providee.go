@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ares/pkg/logger"
 	pb "ares/proto/gen"
 	"context"
 	"encoding/binary"
@@ -8,7 +9,6 @@ import (
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	clientv3 "go.etcd.io/etcd/client/v3"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"net"
@@ -25,17 +25,14 @@ type Providee struct {
 	pvId       uint32
 	serverId   uint32
 	sessions   map[string]grpc.ClientStream
-
-	logger *zap.SugaredLogger
 }
 
-func NewProvidee(serverType, pvId, serverId uint32, logger *zap.SugaredLogger) *Providee {
+func NewProvidee(serverType, pvId, serverId uint32) *Providee {
 	return &Providee{
 		serverType: serverType,
 		pvId:       pvId,
 		serverId:   serverId,
 		sessions:   make(map[string]grpc.ClientStream),
-		logger:     logger,
 	}
 }
 
@@ -51,15 +48,15 @@ func (providee *Providee) Start(etcdClient *clientv3.Client) error {
 		// 启动grpc client连接provider
 		providerInfo, err := etcdEventToProviderInfo(kv)
 		if err != nil {
-			providee.logger.Errorf("Error converting to provider info: %v", err)
+			logger.Log.Errorf("Error converting to provider info: %v", err)
 			continue
 		}
 		err = providee.Connect(providerInfo)
 		if err != nil {
-			providee.logger.Errorf("Error connecting to provider: %v", err)
+			logger.Log.Errorf("Error connecting to provider: %v", err)
 			continue
 		}
-		providee.logger.Infof("connected to provider: %v", providerInfo)
+		logger.Log.Infof("connected to provider: %v", providerInfo)
 	}
 
 	// watch provider, 有新的就连接
@@ -71,17 +68,17 @@ func (providee *Providee) Start(etcdClient *clientv3.Client) error {
 				case mvccpb.PUT:
 					providerInfo, err := etcdEventToProviderInfo(ev.Kv)
 					if err != nil {
-						providee.logger.Errorf("Error converting to provider info: %v", err)
+						logger.Log.Errorf("Error converting to provider info: %v", err)
 						continue
 					}
 					err = providee.Connect(providerInfo)
 					if err != nil {
-						providee.logger.Errorf("Error connecting to provider: %v", err)
+						logger.Log.Errorf("Error connecting to provider: %v", err)
 						continue
 					}
-					providee.logger.Infof("connected to provider: %v", providerInfo)
+					logger.Log.Infof("connected to provider: %v", providerInfo)
 				case mvccpb.DELETE:
-					providee.logger.Infof("provider %v has been deleted", ev.PrevKv)
+					logger.Log.Infof("provider %v has been deleted", ev.PrevKv)
 				}
 			}
 		}
@@ -102,7 +99,7 @@ func (providee *Providee) Start(etcdClient *clientv3.Client) error {
 		// 获取其他providee启动事件
 		provideeInfo, err := etcdEventToProvideeInfo(kv)
 		if err != nil {
-			providee.logger.Errorf("Error converting to providee info: %v", err)
+			logger.Log.Errorf("Error converting to providee info: %v", err)
 			continue
 		}
 		providee.OnProvideeInitDone(provideeInfo)
@@ -117,14 +114,14 @@ func (providee *Providee) Start(etcdClient *clientv3.Client) error {
 				case mvccpb.PUT:
 					putProvideeInfo, err := etcdEventToProvideeInfo(ev.Kv)
 					if err != nil {
-						providee.logger.Errorf("Error converting to providee info: %v", err)
+						logger.Log.Errorf("Error converting to providee info: %v", err)
 						continue
 					}
 					providee.OnProvideeInitDone(putProvideeInfo)
 				case mvccpb.DELETE:
 					delProvideeInfo, err := etcdEventToProvideeInfo(ev.PrevKv)
 					if err != nil {
-						providee.logger.Errorf("Error converting to providee info: %v", err)
+						logger.Log.Errorf("Error converting to providee info: %v", err)
 						continue
 					}
 					providee.OnProvideeInitDone(delProvideeInfo)
@@ -193,9 +190,9 @@ func (providee *Providee) Connect(providerInfo *pb.ProviderInfo) error {
 }
 
 func (providee *Providee) OnProvideeInitDone(provideeInfo *pb.ProvideeInfo) {
-	providee.logger.Infof("providee: %v init done", provideeInfo)
+	logger.Log.Infof("providee: %v init done", provideeInfo)
 }
 
 func (providee *Providee) OnProvideeBroken(provideeInfo *pb.ProvideeInfo) {
-	providee.logger.Infof("providee: %v broken", provideeInfo)
+	logger.Log.Infof("providee: %v broken", provideeInfo)
 }

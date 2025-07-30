@@ -1,7 +1,6 @@
 package main
 
 import (
-	"ares/logger"
 	"time"
 )
 
@@ -19,10 +18,10 @@ func main() {
 	}()
 	time.Sleep(5 * time.Second)
 	go func() {
-		NewProvidee(5, 501, 2501, logger.GetLogger("501")).Start(etcdClient)
+		NewProvidee(5, 501, 2501).Start(etcdClient)
 	}()
 	go func() {
-		NewProvidee(5, 502, 2502, logger.GetLogger("502")).Start(etcdClient)
+		NewProvidee(5, 502, 2502).Start(etcdClient)
 	}()
 
 	select {}

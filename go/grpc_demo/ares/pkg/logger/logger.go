@@ -1,57 +1,41 @@
 package logger
 
 import (
-	"go.uber.org/zap/zapcore"
-	"os"
-	"os/signal"
-	"syscall"
-
+	"ares/pkg/logger/interfaces"
+	zapwarpper "ares/pkg/logger/zap"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-var baseLogger *zap.Logger
+// Log is the default logger
+var Log = initLogger()
 
-func init() {
-	// 1. 构造一个自定义 Config
-	cfg := zap.Config{
+func initLogger() interfaces.Logger {
+	return zapwarpper.New(zap.Config{
 		Level:            zap.NewAtomicLevelAt(zap.DebugLevel), // 默认 DEBUG
 		Development:      true,                                 // 开发模式：Caller 信息更丰富
 		Encoding:         "console",                            // 纯文本控制台输出
 		OutputPaths:      []string{"stdout"},                   // 输出到标准输出
 		ErrorOutputPaths: []string{"stderr"},
 		EncoderConfig: zapcore.EncoderConfig{
-			TimeKey:        "T",
-			LevelKey:       "L",
-			NameKey:        "N",
-			CallerKey:      "C",
-			MessageKey:     "M",
-			StacktraceKey:  "S",
 			LineEnding:     zapcore.DefaultLineEnding,
 			EncodeLevel:    zapcore.CapitalColorLevelEncoder,                   // 彩色等级词，如 DEBUG/INFO
 			EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05"), // 可读时间格式
 			EncodeDuration: zapcore.StringDurationEncoder,
 			EncodeCaller:   zapcore.ShortCallerEncoder, // file:line
 		},
+	})
+
+}
+
+// SetLogger rewrites the default logger
+func SetLogger(l interfaces.Logger) {
+	if l != nil {
+		Log = l
 	}
-
-	var err error
-	baseLogger, err = cfg.Build(zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
-	if err != nil {
-		panic("failed to initialize logger: " + err.Error())
-	}
-
-	// 可选：替换全局 Logger，这样 zap.L()/zap.S() 也能用
-	// zap.ReplaceGlobals(baseLogger)
-
-	sigc := make(chan os.Signal, 1)
-	signal.Notify(sigc, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-sigc
-		_ = zap.L().Sync()
-	}()
 }
 
 // GetLogger 带tag的子logger
-func GetLogger(tag string) *zap.SugaredLogger {
-	return baseLogger.With(zap.String("tag", tag)).Sugar()
+func GetLogger(tag string) interfaces.Logger {
+	return Log.WithField("tag", tag)
 }

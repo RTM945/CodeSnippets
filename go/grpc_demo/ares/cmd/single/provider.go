@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ares/logger"
+	"ares/pkg/logger"
 	pb "ares/proto/gen"
 	vtcodec "github.com/planetscale/vtprotobuf/codec/grpc"
 	clientv3 "go.etcd.io/etcd/client/v3"
