@@ -1,7 +1,7 @@
 package phantom
 
 import (
-	"ares/configs"
+	"ares/config"
 	"ares/internel/discovery"
 	"ares/logger"
 	"encoding/json"
@@ -14,7 +14,7 @@ import (
 var LOGGER = logger.GetLogger("phantom http")
 
 func Start() {
-	cfg, err := configs.Load("resources/phantom/config.yaml")
+	cfg, err := config.Load("resources/phantom/config.yaml")
 	if err != nil {
 		panic(err)
 	}

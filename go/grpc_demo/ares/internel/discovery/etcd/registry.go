@@ -1,7 +1,7 @@
 package etcd
 
 import (
-	"ares/configs"
+	"ares/config"
 	"ares/logger"
 	"ares/pkg/discovery"
 	"context"
@@ -17,10 +17,10 @@ type Registry struct {
 	leaseID  clientv3.LeaseID
 	key      string
 	val      string
-	cfg      *configs.Discovery
+	cfg      *config.Discovery
 }
 
-func NewRegistry(cli *clientv3.Client, cfg *configs.Discovery) discovery.ServiceRegistry {
+func NewRegistry(cli *clientv3.Client, cfg *config.Discovery) discovery.ServiceRegistry {
 	return &Registry{cli: cli, leaseTTL: cfg.Etcd.LeaseTTL, cfg: cfg}
 }
 

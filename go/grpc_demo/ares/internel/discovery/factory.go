@@ -1,13 +1,13 @@
 package discovery
 
 import (
-	"ares/configs"
+	"ares/config"
 	"ares/internel/discovery/etcd"
 	"ares/pkg/discovery"
 	"fmt"
 )
 
-func NewRegistryAndResolver(cfg *configs.Discovery) (discovery.ServiceRegistry, discovery.ServiceResolver, error) {
+func NewRegistryAndResolver(cfg *config.Discovery) (discovery.ServiceRegistry, discovery.ServiceResolver, error) {
 	switch cfg.Type {
 	case "etcd":
 		cli, err := etcd.NewClient(cfg.Etcd)

@@ -1,7 +1,7 @@
 package etcd
 
 import (
-	"ares/configs"
+	"ares/config"
 	"ares/pkg/discovery"
 	"context"
 	"fmt"
@@ -13,10 +13,10 @@ type Resolver struct {
 	sync.Mutex
 	cli       *clientv3.Client
 	instances []discovery.ServiceInstance
-	cfg       *configs.Discovery
+	cfg       *config.Discovery
 }
 
-func NewResolver(cli *clientv3.Client, cfg *configs.Discovery) discovery.ServiceResolver {
+func NewResolver(cli *clientv3.Client, cfg *config.Discovery) discovery.ServiceResolver {
 	return &Resolver{
 		cli:       cli,
 		instances: make([]discovery.ServiceInstance, 0),
