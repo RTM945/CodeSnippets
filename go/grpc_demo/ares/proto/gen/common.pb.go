@@ -25,28 +25,28 @@ const (
 type ServerType int32
 
 const (
-	ServerType_NONE    ServerType = 0
-	ServerType_PHANTOM ServerType = 1
-	ServerType_AU      ServerType = 2
-	ServerType_LOGIC   ServerType = 3
-	ServerType_MAP     ServerType = 4
+	ServerType_NONE     ServerType = 0
+	ServerType_PHANTOM1 ServerType = 1
+	ServerType_AU       ServerType = 2
+	ServerType_LOGIC    ServerType = 3
+	ServerType_MAP      ServerType = 4
 )
 
 // Enum value maps for ServerType.
 var (
 	ServerType_name = map[int32]string{
 		0: "NONE",
-		1: "PHANTOM",
+		1: "PHANTOM1",
 		2: "AU",
 		3: "LOGIC",
 		4: "MAP",
 	}
 	ServerType_value = map[string]int32{
-		"NONE":    0,
-		"PHANTOM": 1,
-		"AU":      2,
-		"LOGIC":   3,
-		"MAP":     4,
+		"NONE":     0,
+		"PHANTOM1": 1,
+		"AU":       2,
+		"LOGIC":    3,
+		"MAP":      4,
 	}
 )
 
@@ -79,8 +79,8 @@ func (ServerType) EnumDescriptor() ([]byte, []int) {
 
 type Envelope struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TypeId        uint32                 `protobuf:"varint,1,opt,name=typeId,proto3" json:"typeId,omitempty"`
-	PvId          uint32                 `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	TypeId        int32                  `protobuf:"varint,1,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	PvId          int32                  `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
 	Payload       []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -116,14 +116,14 @@ func (*Envelope) Descriptor() ([]byte, []int) {
 	return file_common_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Envelope) GetTypeId() uint32 {
+func (x *Envelope) GetTypeId() int32 {
 	if x != nil {
 		return x.TypeId
 	}
 	return 0
 }
 
-func (x *Envelope) GetPvId() uint32 {
+func (x *Envelope) GetPvId() int32 {
 	if x != nil {
 		return x.PvId
 	}
@@ -139,11 +139,11 @@ func (x *Envelope) GetPayload() []byte {
 
 type ProvideeInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PvId          uint32                 `protobuf:"varint,1,opt,name=pvId,proto3" json:"pvId,omitempty"`
-	ServerType    uint32                 `protobuf:"varint,2,opt,name=serverType,proto3" json:"serverType,omitempty"`
-	ServerId      uint32                 `protobuf:"varint,3,opt,name=serverId,proto3" json:"serverId,omitempty"`
+	PvId          int32                  `protobuf:"varint,1,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	ServerType    int32                  `protobuf:"varint,2,opt,name=serverType,proto3" json:"serverType,omitempty"`
+	ServerId      int32                  `protobuf:"varint,3,opt,name=serverId,proto3" json:"serverId,omitempty"`
 	Topics        []string               `protobuf:"bytes,4,rep,name=topics,proto3" json:"topics,omitempty"`
-	Ip            uint32                 `protobuf:"varint,5,opt,name=ip,proto3" json:"ip,omitempty"`
+	Ip            int32                  `protobuf:"varint,5,opt,name=ip,proto3" json:"ip,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -178,21 +178,21 @@ func (*ProvideeInfo) Descriptor() ([]byte, []int) {
 	return file_common_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ProvideeInfo) GetPvId() uint32 {
+func (x *ProvideeInfo) GetPvId() int32 {
 	if x != nil {
 		return x.PvId
 	}
 	return 0
 }
 
-func (x *ProvideeInfo) GetServerType() uint32 {
+func (x *ProvideeInfo) GetServerType() int32 {
 	if x != nil {
 		return x.ServerType
 	}
 	return 0
 }
 
-func (x *ProvideeInfo) GetServerId() uint32 {
+func (x *ProvideeInfo) GetServerId() int32 {
 	if x != nil {
 		return x.ServerId
 	}
@@ -206,7 +206,7 @@ func (x *ProvideeInfo) GetTopics() []string {
 	return nil
 }
 
-func (x *ProvideeInfo) GetIp() uint32 {
+func (x *ProvideeInfo) GetIp() int32 {
 	if x != nil {
 		return x.Ip
 	}
@@ -216,7 +216,7 @@ func (x *ProvideeInfo) GetIp() uint32 {
 var file_common_proto_extTypes = []protoimpl.ExtensionInfo{
 	{
 		ExtendedType:  (*descriptorpb.MessageOptions)(nil),
-		ExtensionType: (*uint32)(nil),
+		ExtensionType: (*int32)(nil),
 		Field:         1000,
 		Name:          "proto.type_id",
 		Tag:           "varint,1000,opt,name=type_id",
@@ -242,7 +242,7 @@ var file_common_proto_extTypes = []protoimpl.ExtensionInfo{
 
 // Extension fields to descriptorpb.MessageOptions.
 var (
-	// optional uint32 type_id = 1000;
+	// optional int32 type_id = 1000;
 	E_TypeId = &file_common_proto_extTypes[0]
 )
 
@@ -260,25 +260,25 @@ const file_common_proto_rawDesc = "" +
 	"\n" +
 	"\fcommon.proto\x12\x05proto\x1a google/protobuf/descriptor.proto\"P\n" +
 	"\bEnvelope\x12\x16\n" +
-	"\x06typeId\x18\x01 \x01(\rR\x06typeId\x12\x12\n" +
-	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x18\n" +
+	"\x06typeId\x18\x01 \x01(\x05R\x06typeId\x12\x12\n" +
+	"\x04pvId\x18\x02 \x01(\x05R\x04pvId\x12\x18\n" +
 	"\apayload\x18\x03 \x01(\fR\apayload\"\x86\x01\n" +
 	"\fProvideeInfo\x12\x12\n" +
-	"\x04pvId\x18\x01 \x01(\rR\x04pvId\x12\x1e\n" +
+	"\x04pvId\x18\x01 \x01(\x05R\x04pvId\x12\x1e\n" +
 	"\n" +
-	"serverType\x18\x02 \x01(\rR\n" +
+	"serverType\x18\x02 \x01(\x05R\n" +
 	"serverType\x12\x1a\n" +
-	"\bserverId\x18\x03 \x01(\rR\bserverId\x12\x16\n" +
+	"\bserverId\x18\x03 \x01(\x05R\bserverId\x12\x16\n" +
 	"\x06topics\x18\x04 \x03(\tR\x06topics\x12\x0e\n" +
-	"\x02ip\x18\x05 \x01(\rR\x02ip*?\n" +
+	"\x02ip\x18\x05 \x01(\x05R\x02ip*@\n" +
 	"\n" +
 	"ServerType\x12\b\n" +
-	"\x04NONE\x10\x00\x12\v\n" +
-	"\aPHANTOM\x10\x01\x12\x06\n" +
+	"\x04NONE\x10\x00\x12\f\n" +
+	"\bPHANTOM1\x10\x01\x12\x06\n" +
 	"\x02AU\x10\x02\x12\t\n" +
 	"\x05LOGIC\x10\x03\x12\a\n" +
 	"\x03MAP\x10\x04:9\n" +
-	"\atype_id\x12\x1f.google.protobuf.MessageOptions\x18\xe8\a \x01(\rR\x06typeId:>\n" +
+	"\atype_id\x12\x1f.google.protobuf.MessageOptions\x18\xe8\a \x01(\x05R\x06typeId:>\n" +
 	"\vmsg_package\x12\x1c.google.protobuf.FileOptions\x18\xe9\a \x01(\tR\n" +
 	"msgPackage:Q\n" +
 	"\x15msg_processor_package\x12\x1c.google.protobuf.FileOptions\x18\xea\a \x01(\tR\x13msgProcessorPackageB\x06Z\x04./pbb\x06proto3"

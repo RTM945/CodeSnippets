@@ -296,9 +296,9 @@ func (ProvideeState_Op) EnumDescriptor() ([]byte, []int) {
 
 type Dispatch struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClientSid     uint32                 `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
-	PvId          uint32                 `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
-	TypeId        uint32                 `protobuf:"varint,3,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	ClientSid     int32                  `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
+	PvId          int32                  `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	TypeId        int32                  `protobuf:"varint,3,opt,name=typeId,proto3" json:"typeId,omitempty"`
 	Payload       []byte                 `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -334,21 +334,21 @@ func (*Dispatch) Descriptor() ([]byte, []int) {
 	return file_provider_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Dispatch) GetClientSid() uint32 {
+func (x *Dispatch) GetClientSid() int32 {
 	if x != nil {
 		return x.ClientSid
 	}
 	return 0
 }
 
-func (x *Dispatch) GetPvId() uint32 {
+func (x *Dispatch) GetPvId() int32 {
 	if x != nil {
 		return x.PvId
 	}
 	return 0
 }
 
-func (x *Dispatch) GetTypeId() uint32 {
+func (x *Dispatch) GetTypeId() int32 {
 	if x != nil {
 		return x.TypeId
 	}
@@ -365,7 +365,7 @@ func (x *Dispatch) GetPayload() []byte {
 type BindPvId struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Info            *ProvideeInfo          `protobuf:"bytes,1,opt,name=info,proto3" json:"info,omitempty"`
-	DefaultState    uint32                 `protobuf:"varint,2,opt,name=defaultState,proto3" json:"defaultState,omitempty"`
+	DefaultState    int32                  `protobuf:"varint,2,opt,name=defaultState,proto3" json:"defaultState,omitempty"`
 	CheckToProvidee bool                   `protobuf:"varint,3,opt,name=checkToProvidee,proto3" json:"checkToProvidee,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
@@ -408,7 +408,7 @@ func (x *BindPvId) GetInfo() *ProvideeInfo {
 	return nil
 }
 
-func (x *BindPvId) GetDefaultState() uint32 {
+func (x *BindPvId) GetDefaultState() int32 {
 	if x != nil {
 		return x.DefaultState
 	}
@@ -424,7 +424,7 @@ func (x *BindPvId) GetCheckToProvidee() bool {
 
 type ProvideeKick struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClientSid     uint32                 `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
+	ClientSid     int32                  `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
 	Reason        ProvideeKick_Reason    `protobuf:"varint,2,opt,name=reason,proto3,enum=proto.ProvideeKick_Reason" json:"reason,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -460,7 +460,7 @@ func (*ProvideeKick) Descriptor() ([]byte, []int) {
 	return file_provider_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ProvideeKick) GetClientSid() uint32 {
+func (x *ProvideeKick) GetClientSid() int32 {
 	if x != nil {
 		return x.ClientSid
 	}
@@ -476,7 +476,7 @@ func (x *ProvideeKick) GetReason() ProvideeKick_Reason {
 
 type ClientBroken struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClientSid     uint32                 `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
+	ClientSid     int32                  `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -511,7 +511,7 @@ func (*ClientBroken) Descriptor() ([]byte, []int) {
 	return file_provider_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ClientBroken) GetClientSid() uint32 {
+func (x *ClientBroken) GetClientSid() int32 {
 	if x != nil {
 		return x.ClientSid
 	}
@@ -573,7 +573,7 @@ func (x *ClientState) GetState() ClientState_State {
 type ProviderInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Ip            string                 `protobuf:"bytes,1,opt,name=ip,proto3" json:"ip,omitempty"`
-	Port          uint32                 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	Port          int32                  `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -615,7 +615,7 @@ func (x *ProviderInfo) GetIp() string {
 	return ""
 }
 
-func (x *ProviderInfo) GetPort() uint32 {
+func (x *ProviderInfo) GetPort() int32 {
 	if x != nil {
 		return x.Port
 	}
@@ -624,7 +624,7 @@ func (x *ProviderInfo) GetPort() uint32 {
 
 type ProvideeBroken struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PvId          uint32                 `protobuf:"varint,1,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	PvId          int32                  `protobuf:"varint,1,opt,name=pvId,proto3" json:"pvId,omitempty"`
 	Provider      *ProviderInfo          `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -660,7 +660,7 @@ func (*ProvideeBroken) Descriptor() ([]byte, []int) {
 	return file_provider_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *ProvideeBroken) GetPvId() uint32 {
+func (x *ProvideeBroken) GetPvId() int32 {
 	if x != nil {
 		return x.PvId
 	}
@@ -772,9 +772,9 @@ func (x *ProvideeState) GetState() ProvideeState_State {
 
 type SendToClient struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ClientSid     uint32                 `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
-	PvId          uint32                 `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
-	TypeId        uint32                 `protobuf:"varint,3,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	ClientSid     int32                  `protobuf:"varint,1,opt,name=clientSid,proto3" json:"clientSid,omitempty"`
+	PvId          int32                  `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	TypeId        int32                  `protobuf:"varint,3,opt,name=typeId,proto3" json:"typeId,omitempty"`
 	Payload       []byte                 `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -810,21 +810,21 @@ func (*SendToClient) Descriptor() ([]byte, []int) {
 	return file_provider_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *SendToClient) GetClientSid() uint32 {
+func (x *SendToClient) GetClientSid() int32 {
 	if x != nil {
 		return x.ClientSid
 	}
 	return 0
 }
 
-func (x *SendToClient) GetPvId() uint32 {
+func (x *SendToClient) GetPvId() int32 {
 	if x != nil {
 		return x.PvId
 	}
 	return 0
 }
 
-func (x *SendToClient) GetTypeId() uint32 {
+func (x *SendToClient) GetTypeId() int32 {
 	if x != nil {
 		return x.TypeId
 	}
@@ -841,7 +841,7 @@ func (x *SendToClient) GetPayload() []byte {
 type SendToProvidee struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	PvIds         []uint32               `protobuf:"varint,1,rep,packed,name=pvIds,proto3" json:"pvIds,omitempty"`
-	TypeId        uint32                 `protobuf:"varint,2,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	TypeId        int32                  `protobuf:"varint,2,opt,name=typeId,proto3" json:"typeId,omitempty"`
 	Payload       []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -884,7 +884,7 @@ func (x *SendToProvidee) GetPvIds() []uint32 {
 	return nil
 }
 
-func (x *SendToProvidee) GetTypeId() uint32 {
+func (x *SendToProvidee) GetTypeId() int32 {
 	if x != nil {
 		return x.TypeId
 	}
@@ -900,8 +900,8 @@ func (x *SendToProvidee) GetPayload() []byte {
 
 type PDispatch struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PvId          uint32                 `protobuf:"varint,1,opt,name=pvId,proto3" json:"pvId,omitempty"`
-	TypeId        uint32                 `protobuf:"varint,2,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	PvId          int32                  `protobuf:"varint,1,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	TypeId        int32                  `protobuf:"varint,2,opt,name=typeId,proto3" json:"typeId,omitempty"`
 	Payload       []byte                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -937,14 +937,14 @@ func (*PDispatch) Descriptor() ([]byte, []int) {
 	return file_provider_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *PDispatch) GetPvId() uint32 {
+func (x *PDispatch) GetPvId() int32 {
 	if x != nil {
 		return x.PvId
 	}
 	return 0
 }
 
-func (x *PDispatch) GetTypeId() uint32 {
+func (x *PDispatch) GetTypeId() int32 {
 	if x != nil {
 		return x.TypeId
 	}
@@ -964,16 +964,16 @@ const file_provider_proto_rawDesc = "" +
 	"\n" +
 	"\x0eprovider.proto\x12\x05proto\x1a\fcommon.proto\"s\n" +
 	"\bDispatch\x12\x1c\n" +
-	"\tclientSid\x18\x01 \x01(\rR\tclientSid\x12\x12\n" +
-	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x16\n" +
-	"\x06typeId\x18\x03 \x01(\rR\x06typeId\x12\x18\n" +
+	"\tclientSid\x18\x01 \x01(\x05R\tclientSid\x12\x12\n" +
+	"\x04pvId\x18\x02 \x01(\x05R\x04pvId\x12\x16\n" +
+	"\x06typeId\x18\x03 \x01(\x05R\x06typeId\x12\x18\n" +
 	"\apayload\x18\x04 \x01(\fR\apayload:\x03\xc0>3\"\x86\x01\n" +
 	"\bBindPvId\x12'\n" +
 	"\x04info\x18\x01 \x01(\v2\x13.proto.ProvideeInfoR\x04info\x12\"\n" +
-	"\fdefaultState\x18\x02 \x01(\rR\fdefaultState\x12(\n" +
+	"\fdefaultState\x18\x02 \x01(\x05R\fdefaultState\x12(\n" +
 	"\x0fcheckToProvidee\x18\x03 \x01(\bR\x0fcheckToProvidee:\x03\xc0>4\"\xd6\x02\n" +
 	"\fProvideeKick\x12\x1c\n" +
-	"\tclientSid\x18\x01 \x01(\rR\tclientSid\x122\n" +
+	"\tclientSid\x18\x01 \x01(\x05R\tclientSid\x122\n" +
 	"\x06reason\x18\x02 \x01(\x0e2\x1a.proto.ProvideeKick.ReasonR\x06reason\"\xee\x01\n" +
 	"\x06Reason\x12\b\n" +
 	"\x04NONE\x10\x00\x12\x0e\n" +
@@ -988,7 +988,7 @@ const file_provider_proto_rawDesc = "" +
 	"\rTOKEN_TIMEOUT\x10\xf1\a\x12\x13\n" +
 	"\x0eSDK_CHECK_FAIL\x10\xf2\a:\x03\xc0>5\"1\n" +
 	"\fClientBroken\x12\x1c\n" +
-	"\tclientSid\x18\x01 \x01(\rR\tclientSid:\x03\xc0>7\"\xb6\x01\n" +
+	"\tclientSid\x18\x01 \x01(\x05R\tclientSid:\x03\xc0>7\"\xb6\x01\n" +
 	"\vClientState\x12%\n" +
 	"\x02op\x18\x01 \x01(\x0e2\x15.proto.ClientState.OpR\x02op\x12.\n" +
 	"\x05state\x18\x02 \x01(\x0e2\x18.proto.ClientState.StateR\x05state\"0\n" +
@@ -1003,9 +1003,9 @@ const file_provider_proto_rawDesc = "" +
 	"\x06REMOVE\x10\x01:\x03\xc0>=\"2\n" +
 	"\fProviderInfo\x12\x0e\n" +
 	"\x02ip\x18\x01 \x01(\tR\x02ip\x12\x12\n" +
-	"\x04port\x18\x02 \x01(\rR\x04port\"Z\n" +
+	"\x04port\x18\x02 \x01(\x05R\x04port\"Z\n" +
 	"\x0eProvideeBroken\x12\x12\n" +
-	"\x04pvId\x18\x01 \x01(\rR\x04pvId\x12/\n" +
+	"\x04pvId\x18\x01 \x01(\x05R\x04pvId\x12/\n" +
 	"\bprovider\x18\x02 \x01(\v2\x13.proto.ProviderInfoR\bprovider:\x03\xc0>?\"D\n" +
 	"\fProvideeBind\x12/\n" +
 	"\bprovidee\x18\x01 \x01(\v2\x13.proto.ProvideeInfoR\bprovidee:\x03\xc0>@\"\xb7\x01\n" +
@@ -1021,17 +1021,17 @@ const file_provider_proto_rawDesc = "" +
 	"\n" +
 	"\x06REMOVE\x10\x01:\x03\xc0>A\"w\n" +
 	"\fSendToClient\x12\x1c\n" +
-	"\tclientSid\x18\x01 \x01(\rR\tclientSid\x12\x12\n" +
-	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x16\n" +
-	"\x06typeId\x18\x03 \x01(\rR\x06typeId\x12\x18\n" +
+	"\tclientSid\x18\x01 \x01(\x05R\tclientSid\x12\x12\n" +
+	"\x04pvId\x18\x02 \x01(\x05R\x04pvId\x12\x16\n" +
+	"\x06typeId\x18\x03 \x01(\x05R\x06typeId\x12\x18\n" +
 	"\apayload\x18\x04 \x01(\fR\apayload:\x03\xc0>I\"]\n" +
 	"\x0eSendToProvidee\x12\x14\n" +
 	"\x05pvIds\x18\x01 \x03(\rR\x05pvIds\x12\x16\n" +
-	"\x06typeId\x18\x02 \x01(\rR\x06typeId\x12\x18\n" +
+	"\x06typeId\x18\x02 \x01(\x05R\x06typeId\x12\x18\n" +
 	"\apayload\x18\x03 \x01(\fR\apayload:\x03\xc0>J\"V\n" +
 	"\tPDispatch\x12\x12\n" +
-	"\x04pvId\x18\x01 \x01(\rR\x04pvId\x12\x16\n" +
-	"\x06typeId\x18\x02 \x01(\rR\x06typeId\x12\x18\n" +
+	"\x04pvId\x18\x01 \x01(\x05R\x04pvId\x12\x16\n" +
+	"\x06typeId\x18\x02 \x01(\x05R\x06typeId\x12\x18\n" +
 	"\apayload\x18\x03 \x01(\fR\apayload:\x03\xc0>M29\n" +
 	"\bProvider\x12-\n" +
 	"\x05Serve\x12\x0f.proto.Envelope\x1a\x0f.proto.Envelope(\x010\x01B%\xca>\fswitcher/msg\xd2>\rswitcher/msg/Z\x04./pbb\x06proto3"

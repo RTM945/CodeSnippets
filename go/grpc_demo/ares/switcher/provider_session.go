@@ -3,6 +3,7 @@ package switcher
 import (
 	ares "ares/pkg/io"
 	pb "ares/proto/gen"
+
 	"ares/switcher/msg"
 	"fmt"
 	"time"
@@ -11,7 +12,7 @@ import (
 type ProviderSession struct {
 	*ares.Session
 	checkToProvidee  bool
-	brokenSessionIds map[uint32]int64
+	brokenSessionIds map[int32]int64
 	aliveTime        int64
 	provideeInfo     *pb.ProvideeInfo
 }
@@ -19,7 +20,7 @@ type ProviderSession struct {
 func NewProviderSession(stream pb.Provider_ServeServer, node ares.INode) *ProviderSession {
 	return &ProviderSession{
 		Session:          ares.NewSession(stream, node),
-		brokenSessionIds: make(map[uint32]int64),
+		brokenSessionIds: make(map[int32]int64),
 	}
 }
 
@@ -35,7 +36,7 @@ func (ps *ProviderSession) BlackFilter() bool {
 	return ps.CheckState(int(pb.ProvideeState_BLACKIP))
 }
 
-func (ps *ProviderSession) SessionBroken(brokenSessionId uint32) {
+func (ps *ProviderSession) SessionBroken(brokenSessionId int32) {
 	if _, ok := ps.brokenSessionIds[brokenSessionId]; !ok {
 		ps.brokenSessionIds[brokenSessionId] = time.Now().Unix()
 		LOGGER.Infof("Add a broeken session, sessionId=%d", brokenSessionId)
@@ -68,7 +69,7 @@ func (ps *ProviderSession) GetPvId() int32 {
 	if ps.provideeInfo == nil {
 		return -1
 	}
-	return int32(ps.provideeInfo.PvId)
+	return ps.provideeInfo.PvId
 }
 
 func (ps *ProviderSession) Send(msg ares.IMsg) error {
@@ -77,7 +78,7 @@ func (ps *ProviderSession) Send(msg ares.IMsg) error {
 		if 0 == pvId {
 			return fmt.Errorf("not Bind Providee: %v, msg: %v", ps, msg)
 		}
-		msg.SetPvId(uint32(pvId))
+		msg.SetPvId(pvId)
 	}
 	return ps.Session.Send(msg)
 }
@@ -87,17 +88,17 @@ func (ps *ProviderSession) String() string {
 }
 
 func (ps *ProviderSession) IsAUSession() bool {
-	return ps.provideeInfo.ServerType == uint32(pb.ServerType_AU)
+	return ps.provideeInfo.ServerType == int32(pb.ServerType_AU)
 }
 
 func (ps *ProviderSession) IsPhantomSession() bool {
-	return ps.provideeInfo.ServerType == uint32(pb.ServerType_PHANTOM)
+	return ps.provideeInfo.ServerType == int32(pb.ServerType_PHANTOM1)
 }
 
 func (ps *ProviderSession) IsGameServerSession() bool {
-	return ps.provideeInfo.ServerType == uint32(pb.ServerType_LOGIC)
+	return ps.provideeInfo.ServerType == int32(pb.ServerType_LOGIC)
 }
 
-func (ps *ProviderSession) GetServerId() uint32 {
+func (ps *ProviderSession) GetServerId() int32 {
 	return ps.provideeInfo.ServerId
 }

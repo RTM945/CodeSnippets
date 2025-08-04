@@ -6,7 +6,7 @@ option go_package = "./pb";
 
 // 扩展 MessageOptions，让每个 message 都可以打一个 type_id 标签
 extend google.protobuf.MessageOptions {
-  uint32 type_id = 1000;
+  int32 type_id = 1000;
 }
 
 extend google.protobuf.FileOptions {
@@ -15,23 +15,23 @@ extend google.protobuf.FileOptions {
 }
 
 message Envelope {
-  uint32 typeId = 1;
-  uint32 pvId = 2;
+  int32 typeId = 1;
+  int32 pvId = 2;
   bytes payload = 3;
 }
 
 enum ServerType {
   NONE = 0;
-  PHANTOM = 1;
+  PHANTOM1 = 1;
   AU = 2;
   LOGIC = 3;
   MAP = 4;
 }
 
 message ProvideeInfo {
-  uint32 pvId = 1;
-  uint32 serverType = 2;
-  uint32 serverId = 3;
+  int32 pvId = 1;
+  int32 serverType = 2;
+  int32 serverId = 3;
   repeated string topics = 4;
-  uint32 ip = 5;
+  int32 ip = 5;
 }

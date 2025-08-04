@@ -15,14 +15,14 @@ type LinkerSession struct {
 	minRateLimiter *rate.Limiter
 	maxRateLimiter *rate.Limiter
 	aliveTime      int64
-	bindProvidees  []uint32
+	bindProvidees  []int32
 }
 
 func NewLinkerSession(stream pb.Linker_ServeServer, node ares.INode) *LinkerSession {
 	session := &LinkerSession{
 		Session:       ares.NewSession(stream, node),
 		aliveTime:     time.Now().Unix(),
-		bindProvidees: make([]uint32, 0),
+		bindProvidees: make([]int32, 0),
 	}
 	linker := session.Session.Node().(*Linker)
 	if linker.rateMin > 0 {
@@ -45,10 +45,10 @@ func (s *LinkerSession) HandleEnvelope(envelope *pb.Envelope) {
 	}
 }
 
-func (s *LinkerSession) receiveUnknown(typeId uint32) {
+func (s *LinkerSession) receiveUnknown(typeId int32) {
 	s.ResetAlive()
 	if s.maxRateLimiter != nil && !s.maxRateLimiter.Allow() {
-		s.CloseBySessionError(uint32(pb.SessionError_RATE_LIMIT))
+		s.CloseBySessionError(int32(pb.SessionError_RATE_LIMIT))
 		return
 	}
 	if s.minRateLimiter != nil && !s.minRateLimiter.Allow() {
@@ -101,17 +101,17 @@ func (s *LinkerSession) ResetAlive() {
 	s.aliveTime = time.Now().Unix()
 }
 
-func (s *LinkerSession) BindProvidee(pvId uint32) {
+func (s *LinkerSession) BindProvidee(pvId int32) {
 	s.bindProvidees = append(s.bindProvidees, pvId)
 }
 
-func (s *LinkerSession) GetBindProvidees() []uint32 {
+func (s *LinkerSession) GetBindProvidees() []int32 {
 	return s.bindProvidees
 }
 
-func (s *LinkerSession) CloseBySessionError(code uint32) {
+func (s *LinkerSession) CloseBySessionError(code int32) {
 	sessionError := msg.NewSessionError()
 	sessionError.TypedPB().Code = code
-	_ = s.Send0(sessionError)
+	_ = s.Send(sessionError)
 	s.Close()
 }

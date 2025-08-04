@@ -13,7 +13,7 @@ import (
 )
 
 type ISession interface {
-	GetSid() uint32
+	GetSid() int32
 	Process(IMsg)
 	Send(IMsg) error
 	Close()
@@ -22,7 +22,7 @@ type ISession interface {
 
 type Session struct {
 	State
-	sid         uint32
+	sid         int32
 	stream      grpc.ServerStream
 	node        INode
 	remoteAddr  net.Addr
@@ -32,7 +32,7 @@ type Session struct {
 	processChan chan IMsg
 }
 
-var genSessionId atomic.Uint32
+var genSessionId atomic.Int32
 
 var ChanSize = 64
 
@@ -51,7 +51,7 @@ func NewSession(stream grpc.ServerStream, node INode) *Session {
 	return session
 }
 
-func (s *Session) GetSid() uint32 {
+func (s *Session) GetSid() int32 {
 	return s.sid
 }
 
@@ -71,11 +71,10 @@ func (s *Session) Send(msg IMsg) error {
 		Payload: payload,
 	}
 
-	s.sendChan <- envelope
-	return nil
+	return s.stream.SendMsg(envelope)
 }
 
-func (s *Session) Send0(msg IMsg) error {
+func (s *Session) SendAsync(msg IMsg) error {
 	payload, err := msg.Marshal()
 	if err != nil {
 		return err
@@ -86,7 +85,8 @@ func (s *Session) Send0(msg IMsg) error {
 		PvId:    msg.GetPvId(),
 		Payload: payload,
 	}
-	return s.stream.SendMsg(envelope)
+	s.sendChan <- envelope
+	return nil
 }
 
 func (s *Session) StartProcess() {
@@ -191,23 +191,23 @@ func (s *State) GetState() int {
 type ISessions interface {
 	OnAddSession(ISession)
 	OnRemoveSession(ISession)
-	GetSession(uint32) ISession
+	GetSession(int32) ISession
 	AllSessions() []ISession
 }
 
 type Sessions struct {
 	sync.RWMutex
-	allSessions map[uint32]ISession
+	allSessions map[int32]ISession
 	sessionCNT  atomic.Uint32
 }
 
 func NewSessions() *Sessions {
 	return &Sessions{
-		allSessions: make(map[uint32]ISession),
+		allSessions: make(map[int32]ISession),
 	}
 }
 
-func (s *Sessions) GetSession(sid uint32) ISession {
+func (s *Sessions) GetSession(sid int32) ISession {
 	s.RLock()
 	defer s.RUnlock()
 	return s.allSessions[sid]

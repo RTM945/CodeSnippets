@@ -2,7 +2,6 @@ package switcher
 
 import (
 	"ares/pkg/logger"
-	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
 var LOGGER = logger.GetLogger("switcher")
@@ -17,5 +16,3 @@ func GetLinker() *Linker {
 func GetProvider() *Provider {
 	return provider
 }
-
-var etcdClient *clientv3.Client

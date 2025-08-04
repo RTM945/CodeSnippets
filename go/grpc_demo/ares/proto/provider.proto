@@ -14,16 +14,16 @@ service Provider {
 
 message Dispatch  {
   option (proto.type_id) = 51;
-  uint32 clientSid = 1;
-  uint32 pvId = 2;
-  uint32 typeId = 3;
+  int32 clientSid = 1;
+  int32 pvId = 2;
+  int32 typeId = 3;
   bytes payload = 4;
 }
 
 message BindPvId {
   option (proto.type_id) = 52;
   ProvideeInfo info = 1;
-  uint32 defaultState = 2;
+  int32 defaultState = 2;
   bool checkToProvidee = 3;
 }
 
@@ -48,13 +48,13 @@ message ProvideeKick {
     // 其他情况的SDK登录验证失败
     SDK_CHECK_FAIL = 1010;
   }
-  uint32 clientSid = 1;
+  int32 clientSid = 1;
   Reason reason = 2;
 }
 
 message ClientBroken {
   option (proto.type_id) = 55;
-  uint32 clientSid = 1;
+  int32 clientSid = 1;
 }
 
 message ClientState {
@@ -76,12 +76,12 @@ message ClientState {
 
 message ProviderInfo {
   string ip = 1;
-  uint32 port = 2;
+  int32 port = 2;
 }
 
 message ProvideeBroken {
   option (proto.type_id) = 63;
-  uint32 pvId = 1;
+  int32 pvId = 1;
   ProviderInfo provider = 2;
 }
 
@@ -109,22 +109,22 @@ message ProvideeState {
 
 message SendToClient {
   option (proto.type_id) = 73;
-  uint32 clientSid = 1;
-  uint32 pvId = 2;
-  uint32 typeId = 3;
+  int32 clientSid = 1;
+  int32 pvId = 2;
+  int32 typeId = 3;
   bytes payload = 4;
 }
 
 message SendToProvidee {
   option (proto.type_id) = 74;
   repeated uint32 pvIds = 1;
-  uint32 typeId = 2;
+  int32 typeId = 2;
   bytes payload = 3;
 }
 
 message PDispatch  {
   option (proto.type_id) = 77;
-  uint32 pvId = 1;
-  uint32 typeId = 2;
+  int32 pvId = 1;
+  int32 typeId = 2;
   bytes payload = 3;
 }

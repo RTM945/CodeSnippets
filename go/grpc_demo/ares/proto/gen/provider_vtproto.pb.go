@@ -866,7 +866,7 @@ func (m *Dispatch) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ClientSid |= uint32(b&0x7F) << shift
+				m.ClientSid |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -885,7 +885,7 @@ func (m *Dispatch) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.PvId |= uint32(b&0x7F) << shift
+				m.PvId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -904,7 +904,7 @@ func (m *Dispatch) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TypeId |= uint32(b&0x7F) << shift
+				m.TypeId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1044,7 +1044,7 @@ func (m *BindPvId) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.DefaultState |= uint32(b&0x7F) << shift
+				m.DefaultState |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1134,7 +1134,7 @@ func (m *ProvideeKick) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ClientSid |= uint32(b&0x7F) << shift
+				m.ClientSid |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1223,7 +1223,7 @@ func (m *ClientBroken) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ClientSid |= uint32(b&0x7F) << shift
+				m.ClientSid |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1414,7 +1414,7 @@ func (m *ProviderInfo) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Port |= uint32(b&0x7F) << shift
+				m.Port |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1484,7 +1484,7 @@ func (m *ProvideeBroken) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.PvId |= uint32(b&0x7F) << shift
+				m.PvId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1766,7 +1766,7 @@ func (m *SendToClient) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ClientSid |= uint32(b&0x7F) << shift
+				m.ClientSid |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1785,7 +1785,7 @@ func (m *SendToClient) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.PvId |= uint32(b&0x7F) << shift
+				m.PvId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1804,7 +1804,7 @@ func (m *SendToClient) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TypeId |= uint32(b&0x7F) << shift
+				m.TypeId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -1984,7 +1984,7 @@ func (m *SendToProvidee) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TypeId |= uint32(b&0x7F) << shift
+				m.TypeId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2088,7 +2088,7 @@ func (m *PDispatch) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.PvId |= uint32(b&0x7F) << shift
+				m.PvId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -2107,7 +2107,7 @@ func (m *PDispatch) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TypeId |= uint32(b&0x7F) << shift
+				m.TypeId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

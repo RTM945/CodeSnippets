@@ -1,5 +1,5 @@
 package io
 
-import logger "ares/logger"
+import "ares/pkg/logger"
 
 var LOGGER = logger.GetLogger("io")

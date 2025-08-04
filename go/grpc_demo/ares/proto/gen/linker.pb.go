@@ -133,7 +133,7 @@ func (ServerError_Code) EnumDescriptor() ([]byte, []int) {
 
 type MsgBox struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	TypeId        uint32                 `protobuf:"varint,1,opt,name=typeId,proto3" json:"typeId,omitempty"`
+	TypeId        int32                  `protobuf:"varint,1,opt,name=typeId,proto3" json:"typeId,omitempty"`
 	Payload       []byte                 `protobuf:"bytes,2,opt,name=payload,proto3" json:"payload,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -169,7 +169,7 @@ func (*MsgBox) Descriptor() ([]byte, []int) {
 	return file_linker_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MsgBox) GetTypeId() uint32 {
+func (x *MsgBox) GetTypeId() int32 {
 	if x != nil {
 		return x.TypeId
 	}
@@ -229,7 +229,7 @@ func (x *Ping) GetSerial() int32 {
 
 type SessionError struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          uint32                 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -264,7 +264,7 @@ func (*SessionError) Descriptor() ([]byte, []int) {
 	return file_linker_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SessionError) GetCode() uint32 {
+func (x *SessionError) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
@@ -273,8 +273,8 @@ func (x *SessionError) GetCode() uint32 {
 
 type ServerError struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	PvId          uint32                 `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
-	Code          uint32                 `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
+	PvId          int32                  `protobuf:"varint,2,opt,name=pvId,proto3" json:"pvId,omitempty"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -309,14 +309,14 @@ func (*ServerError) Descriptor() ([]byte, []int) {
 	return file_linker_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ServerError) GetPvId() uint32 {
+func (x *ServerError) GetPvId() int32 {
 	if x != nil {
 		return x.PvId
 	}
 	return 0
 }
 
-func (x *ServerError) GetCode() uint32 {
+func (x *ServerError) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
@@ -373,12 +373,12 @@ const file_linker_proto_rawDesc = "" +
 	"\n" +
 	"\flinker.proto\x12\x05proto\x1a\fcommon.proto\"?\n" +
 	"\x06MsgBox\x12\x16\n" +
-	"\x06typeId\x18\x01 \x01(\rR\x06typeId\x12\x18\n" +
+	"\x06typeId\x18\x01 \x01(\x05R\x06typeId\x12\x18\n" +
 	"\apayload\x18\x02 \x01(\fR\apayload:\x03\xc0>\x03\"#\n" +
 	"\x04Ping\x12\x16\n" +
 	"\x06serial\x18\x01 \x01(\x05R\x06serial:\x03\xc0>\x04\"\x9e\x01\n" +
 	"\fSessionError\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\rR\x04code\"u\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\"u\n" +
 	"\x04Code\x12\b\n" +
 	"\x04NONE\x10\x00\x12\x12\n" +
 	"\rOPEN_WHITE_IP\x10\xc1>\x12\x12\n" +
@@ -388,8 +388,8 @@ const file_linker_proto_rawDesc = "" +
 	"RATE_LIMIT\x10\xc6>\x12\x12\n" +
 	"\rCANT_DISPATCH\x10\xc7>:\x03\xc0>\x06\"h\n" +
 	"\vServerError\x12\x12\n" +
-	"\x04pvId\x18\x02 \x01(\rR\x04pvId\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\rR\x04code\",\n" +
+	"\x04pvId\x18\x02 \x01(\x05R\x04pvId\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\",\n" +
 	"\x04Code\x12\b\n" +
 	"\x04NONE\x10\x00\x12\x1a\n" +
 	"\x15SERVER_NOT_ACCESSIBLE\x10\xa9F:\x03\xc0>\v\"#\n" +

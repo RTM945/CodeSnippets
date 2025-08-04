@@ -11,13 +11,12 @@ import (
 type ProviderSessions struct {
 	node ares.INode
 	sync.Mutex
-	providerSessions map[uint32]*ProviderSession
+	providerSessions sync.Map
 }
 
 func NewProviderSessions(node ares.INode) *ProviderSessions {
 	return &ProviderSessions{
-		node:             node,
-		providerSessions: make(map[uint32]*ProviderSession),
+		node: node,
 	}
 }
 
@@ -26,19 +25,15 @@ func (pss *ProviderSessions) CheckAlive() {
 		ticker := time.NewTicker(time.Minute)
 		defer ticker.Stop()
 		for range ticker.C {
-			pss.Lock()
-			toClose := make([]*ProviderSession, 0)
-			for _, providerSession := range pss.providerSessions {
+			pss.providerSessions.Range(func(k, v interface{}) bool {
+				providerSession := v.(*ProviderSession)
 				if !providerSession.Alive() {
-					toClose = append(toClose, providerSession)
+					providerSession.Close()
 				} else {
 					providerSession.Check()
 				}
-			}
-			pss.Unlock()
-			for _, session := range toClose {
-				session.Close()
-			}
+				return true
+			})
 		}
 	}()
 }
@@ -52,19 +47,23 @@ func (pss *ProviderSessions) OnRemoveSession(session ares.ISession) {
 	pss.unbindSession(providerSession)
 }
 
-func (pss *ProviderSessions) GetSession(pvId uint32) ares.ISession {
-	pss.Lock()
-	defer pss.Unlock()
-	return pss.providerSessions[pvId]
+func (pss *ProviderSessions) GetSession(pvId int32) ares.ISession {
+	value, ok := pss.providerSessions.Load(pvId)
+	if !ok {
+		return nil
+	}
+	return value.(*ProviderSession)
 }
 
 func (pss *ProviderSessions) AllSessions() []ares.ISession {
 	pss.Lock()
 	defer pss.Unlock()
 	result := make([]ares.ISession, 0)
-	for _, providerSession := range pss.providerSessions {
-		result = append(result, providerSession)
-	}
+	pss.providerSessions.Range(func(k, v interface{}) bool {
+		result = append(result, v.(*ProviderSession))
+		return true
+	})
+
 	return result
 }
 
@@ -75,41 +74,33 @@ func (pss *ProviderSessions) unbindSession(providerSession *ProviderSession) {
 	if -1 == pvId {
 		return
 	}
-	old, ok := pss.providerSessions[uint32(pvId)]
+	old, ok := pss.providerSessions.Load(pvId)
 	if !ok {
 		LOGGER.Errorf("Not bound providee:%d", pvId)
 	} else if old == providerSession {
-		delete(pss.providerSessions, uint32(pvId))
+		pss.providerSessions.Delete(pvId)
 		provider := pss.node.(*Provider)
 		if providerSession.IsAUSession() {
-			provider.RemoveAUPvId(uint32(pvId))
+			provider.RemoveAUPvId(pvId)
 		} else if providerSession.IsPhantomSession() {
-			provider.RemovePhantomPvId(uint32(pvId))
+			provider.RemovePhantomPvId(pvId)
 		} else if providerSession.IsGameServerSession() {
 			provider.RemovePhantomGS(providerSession.GetServerId())
 		}
 		LOGGER.Infof("unbind providee:%v", providerSession)
+		if !provider.ProvideeBroken(pvId) {
 
-		if provider.phantomPvIds.Size() == 0 {
-			provideeBroken := msg.NewProvideeBroken()
-			provideeBroken.TypedPB().PvId = uint32(pvId)
-			provideeBroken.TypedPB().Provider = &pb.ProviderInfo{
-				Ip:   provider.providerIp,
-				Port: provider.port,
-			}
-			for _, s := range pss.providerSessions {
-				s.Send(provideeBroken)
-			}
-		} else {
-			for _, v := range provider.phantomPvIds.Snapshot() {
+			pss.providerSessions.Range(func(k, v interface{}) bool {
+				providerSession := v.(*ProviderSession)
 				provideeBroken := msg.NewProvideeBroken()
-				provideeBroken.TypedPB().PvId = uint32(pvId)
+				provideeBroken.TypedPB().PvId = pvId
 				provideeBroken.TypedPB().Provider = &pb.ProviderInfo{
 					Ip:   provider.providerIp,
 					Port: provider.port,
 				}
-				provider.SendToProvidee(v, provideeBroken)
-			}
+				providerSession.Send(provideeBroken)
+				return true
+			})
 		}
 	}
 }

@@ -19,7 +19,7 @@ func NewLinkerMsgCreator() *LinkerMsgCreator {
 	return msgCreator
 }
 
-func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, payload []byte) (ares.IMsg, error) {
+func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId int32, payload []byte) (ares.IMsg, error) {
 	create, err := c.MsgCreator.Create(session, pvId, typeId, payload)
 	if err == nil {
 		return create, nil
@@ -31,26 +31,26 @@ func (c *LinkerMsgCreator) Create(session ares.ISession, pvId, typeId uint32, pa
 				LOGGER.Errorf("Client to Providee, No Providee exist, pvid: %d, session: %v, typeId: %d", pvId, linkerSession, typeId)
 				serverError := msg.NewServerError()
 				serverError.TypedPB().PvId = pvId
-				serverError.TypedPB().Code = uint32(pb.ServerError_SERVER_NOT_ACCESSIBLE)
-				_ = linkerSession.Send0(serverError)
+				serverError.TypedPB().Code = int32(pb.ServerError_SERVER_NOT_ACCESSIBLE)
+				_ = linkerSession.Send(serverError)
 				return nil, nil
 			}
 			// 后端服务还没准备好
 			if toSession.CheckToProvide() && !linkerSession.CheckState(int(pb.ClientState_TOPROVIDEE)) {
 				LOGGER.Errorf("Client to Providee, state error: %d, session: %v", linkerSession.GetState(), linkerSession)
-				linkerSession.CloseBySessionError(uint32(pb.SessionError_CANT_DISPATCH))
+				linkerSession.CloseBySessionError(int32(pb.SessionError_CANT_DISPATCH))
 				return nil, nil
 			}
 			// 白名单
 			if linkerSession.WhiteFilterByProvider(toSession) {
 				LOGGER.Errorf("providee writeip kick, pvid: %d, session: %v, typeId: %d", pvId, linkerSession, typeId)
-				linkerSession.CloseBySessionError(uint32(pb.SessionError_OPEN_WHITE_IP))
+				linkerSession.CloseBySessionError(int32(pb.SessionError_OPEN_WHITE_IP))
 				return nil, nil
 			}
 			// 黑名单
 			if linkerSession.BlackFilterByProvider(toSession) {
 				LOGGER.Errorf("providee blackip kick, pvid: %d, session: %v, typeId: %d", pvId, linkerSession, typeId)
-				linkerSession.CloseBySessionError(uint32(pb.SessionError_OPEN_BLACK_IP))
+				linkerSession.CloseBySessionError(int32(pb.SessionError_OPEN_BLACK_IP))
 				return nil, nil
 			}
 			linkerSession.receiveUnknown(typeId)

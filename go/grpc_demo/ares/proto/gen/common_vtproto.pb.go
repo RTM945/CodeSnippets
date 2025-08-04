@@ -221,7 +221,7 @@ func (m *Envelope) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TypeId |= uint32(b&0x7F) << shift
+				m.TypeId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -240,7 +240,7 @@ func (m *Envelope) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.PvId |= uint32(b&0x7F) << shift
+				m.PvId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -344,7 +344,7 @@ func (m *ProvideeInfo) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.PvId |= uint32(b&0x7F) << shift
+				m.PvId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -363,7 +363,7 @@ func (m *ProvideeInfo) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ServerType |= uint32(b&0x7F) << shift
+				m.ServerType |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -382,7 +382,7 @@ func (m *ProvideeInfo) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.ServerId |= uint32(b&0x7F) << shift
+				m.ServerId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -433,7 +433,7 @@ func (m *ProvideeInfo) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Ip |= uint32(b&0x7F) << shift
+				m.Ip |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}

@@ -13,8 +13,9 @@ func NewPingProcessor() *PingProcessor {
 }
 
 func (p *PingProcessor) Process(ping *msg.Ping) error {
-	ping.GetSession().(*switcher.LinkerSession).ResetAlive()
+	linkerSession := ping.GetSession().(*switcher.LinkerSession)
+	linkerSession.ResetAlive()
 	resp := msg.NewPong()
 	resp.TypedPB().Serial = ping.TypedPB().Serial
-	return ping.GetSession().Send(resp)
+	return linkerSession.Send(resp)
 }

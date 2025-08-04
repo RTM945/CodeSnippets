@@ -335,7 +335,7 @@ func (m *MsgBox) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.TypeId |= uint32(b&0x7F) << shift
+				m.TypeId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -509,7 +509,7 @@ func (m *SessionError) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Code |= uint32(b&0x7F) << shift
+				m.Code |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -579,7 +579,7 @@ func (m *ServerError) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Code |= uint32(b&0x7F) << shift
+				m.Code |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
@@ -598,7 +598,7 @@ func (m *ServerError) UnmarshalVT(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.PvId |= uint32(b&0x7F) << shift
+				m.PvId |= int32(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
