@@ -1,15 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
 
     public GameObject tilePrefab;
     public Transform board;
+    public TextMeshProUGUI scoreText;
+    public GameObject gameOverPanel;
 
     Tile[] tiles = new Tile[16];
     int[,] grid = new int[4, 4];
+    
+    int score = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -18,8 +24,7 @@ public class GameManager : MonoBehaviour
 
         CreateGrid();
 
-        SpawnNumber();
-        SpawnNumber();
+        Restart();
     }
 
     void CreateGrid()
@@ -72,11 +77,38 @@ public class GameManager : MonoBehaviour
 
     bool IsGameOver()
     {
-        return GetEmptyGrid().Count == 0;
+        if (GetEmptyGrid().Count > 0)
+        {
+            return false;
+        }
+
+        for (int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 3; x++)
+            {
+                if (grid[x, y] == grid[x + 1, y])
+                {
+                    return false;
+                }
+            }
+        }
+
+        for (int x = 0; x < 4; x++)
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                if (grid[x, y] == grid[x, y + 1])
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
-    void CompressLeft()
+    bool CompressLeft()
     {
+        bool compress = false;
         for (int y = 0; y < 4; y++)
         {
             for (int x = 1; x < 4; x++)
@@ -89,15 +121,17 @@ public class GameManager : MonoBehaviour
                         grid[newX - 1, y] = grid[newX, y];
                         grid[newX, y] = 0;
                         newX--;
+                        compress = true;
                     }
                 }
             }
         }
-        UpdateView();
+        return compress;
     }
 
-    void CompressRight()
+    bool CompressRight()
     {
+        bool compress = false;
         for (int y = 0; y < 4; y++)
         {
             for (int x = 2; x >= 0; x--)
@@ -110,15 +144,17 @@ public class GameManager : MonoBehaviour
                         grid[newX + 1, y] = grid[newX, y];
                         grid[newX, y] = 0;
                         newX++;
+                        compress = true;
                     }
                 }
             }
         }
-        UpdateView();
+        return compress;
     }
 
-    void CompressUp()
+    bool CompressUp()
     {
+        bool compress = false;
         for (int y = 1; y < 4; y++)
         {
             for (int x = 0; x < 4; x++)
@@ -131,15 +167,17 @@ public class GameManager : MonoBehaviour
                         grid[x, newY - 1] = grid[x, newY];
                         grid[x, newY] = 0;
                         newY--;
+                        compress = true;
                     }
                 }
             }
         }
-        UpdateView();
+        return compress;
     }
 
-    void CompressDown()
+    bool CompressDown()
     {
+        bool compress = false;
         for (int y = 2; y >= 0; y--)
         {
             for (int x = 0; x < 4; x++)
@@ -152,15 +190,17 @@ public class GameManager : MonoBehaviour
                         grid[x, newY + 1] = grid[x, newY];
                         grid[x, newY] = 0;
                         newY++;
+                        compress = true;
                     }
                 }
             }
         }
-        UpdateView();
+        return compress;
     }
 
-    void MergeLeft()
+    bool MergeLeft()
     {
+        bool merged = false;
         for (int y = 0; y < 4; y++)
         {
             for (int x = 0; x < 3; x++)
@@ -169,13 +209,17 @@ public class GameManager : MonoBehaviour
                 {
                     grid[x, y] *= 2;
                     grid[x + 1, y] = 0;
+                    score += grid[x, y];
+                    merged = true;
                 }
             }
         }
+        return merged;
     }
 
-    void MergeRight()
+    bool MergeRight()
     {
+        bool merged = false;
         for (int y = 0; y < 4; y++)
         {
             for (int x = 3; x > 0; x--)
@@ -183,14 +227,18 @@ public class GameManager : MonoBehaviour
                 if (grid[x, y] != 0 && grid[x, y] == grid[x - 1, y])
                 {
                     grid[x, y] *= 2;
+                    score += grid[x, y];
                     grid[x - 1, y] = 0;
+                    merged = true;
                 }
             }
         }
+        return merged;
     }
 
-    void MergeUp()
+    bool MergeUp()
     {
+        bool merged = false;
         for (int y = 0; y < 3; y++)
         {
             for (int x = 0; x < 4; x++)
@@ -198,14 +246,18 @@ public class GameManager : MonoBehaviour
                 if (grid[x, y] != 0 && grid[x, y] == grid[x, y + 1])
                 {
                     grid[x, y] *= 2;
+                    score += grid[x, y];
                     grid[x, y + 1] = 0;
+                    merged = true;
                 }
             }
         }
+        return merged;
     }
 
-    void MergeDown()
+    bool MergeDown()
     {
+        bool merged = false;
         for (int y = 3; y > 0; y--)
         {
             for (int x = 0; x < 4; x++)
@@ -213,45 +265,64 @@ public class GameManager : MonoBehaviour
                 if (grid[x, y] != 0 && grid[x, y] == grid[x, y - 1])
                 {
                     grid[x, y] *= 2;
+                    score += grid[x, y];
                     grid[x, y - 1] = 0;
+                    merged = true;
                 }
             }
         }
+        return merged;
     }
 
     void MoveLeft()
     {   
-        CompressLeft();
-        MergeLeft();
-        CompressLeft();
-        SpawnNumber();
+        bool moved = false;
+        moved |= CompressLeft();
+        moved |= MergeLeft();
+        moved |= CompressLeft();
+        if (moved)
+        {
+            SpawnNumber();
+        }
         UpdateView();
     }
 
     void MoveRight()
     {
-        CompressRight();
-        MergeRight();
-        CompressRight();
-        SpawnNumber();
+        bool moved = false;
+        moved |= CompressRight();
+        moved |= MergeRight();
+        moved |= CompressRight();
+        if (moved)
+        {
+            SpawnNumber();
+        }
         UpdateView();
     }
 
     void MoveUp()
     {
-        CompressUp();
-        MergeUp();
-        CompressUp();
-        SpawnNumber();
+        bool moved = false;
+        moved |= CompressUp();
+        moved |= MergeUp();
+        moved |= CompressUp();
+        if (moved)
+        {
+            SpawnNumber();
+        }
         UpdateView();
     }
 
     void MoveDown()
     {
-        CompressDown();
-        MergeDown();
-        CompressDown();
-        SpawnNumber();
+        bool moved = false;
+        moved |= CompressDown();
+        moved |= MergeDown();
+        moved |= CompressDown();
+        if (moved)
+        {
+            SpawnNumber();
+        }
         UpdateView();
     }
 
@@ -264,11 +335,35 @@ public class GameManager : MonoBehaviour
 
             tiles[i].SetNumber(grid[x, y]);
         }
+        scoreText.text = "Score: " + score;
+    }
+    
+    void ShowGameOver()
+    {
+        gameOverPanel.SetActive(true);
+    }
+
+    public void Restart()
+    {
+        gameOverPanel.SetActive(false);
+        score = 0;
+        for (int x = 0; x < 4; x++)
+        {
+            for (int y = 0; y < 4; y++)
+            {
+                grid[x, y] = 0;
+            }
+        }
+        SpawnNumber();
+        SpawnNumber();
+
+        UpdateView();
     }
 
     // Update is called once per frame
     void Update()
     {
+        UpdateView();
         if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             MoveLeft();
@@ -287,6 +382,16 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             MoveDown();
+        }
+
+        if (IsGameOver())
+        {
+            ShowGameOver();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Restart();
         }
     }
 }
