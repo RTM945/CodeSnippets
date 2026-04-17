@@ -11,9 +11,12 @@ public class GameManager : MonoBehaviour
     public Transform board;
     public TextMeshProUGUI scoreText;
     public GameObject gameOverPanel;
-
-    Tile[] tiles = new Tile[16];
+    
     int[,] grid = new int[4, 4];
+    
+    Tile[,] tileGrid = new Tile[4,4];
+    
+    Transform[,] cells = new Transform[4,4];
     
     int score = 0;
 
@@ -32,7 +35,10 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 16; i++)
         {
             GameObject obj = Instantiate(tilePrefab, board);
-            tiles[i] = obj.GetComponent<Tile>();
+            int x = i % 4;
+            int y = i / 4;
+            tileGrid[x, y] = obj.GetComponent<Tile>();
+            cells[x, y] = obj.transform;
         }
     }
 
@@ -71,8 +77,8 @@ public class GameManager : MonoBehaviour
 
         grid[x, y] = number;
 
-        tiles[index].SetNumber(number);
-        
+        tileGrid[x, y].SetNumber(number);
+        tileGrid[x, y].SpawnNumber(number);
     }
 
     bool IsGameOver()
@@ -120,6 +126,9 @@ public class GameManager : MonoBehaviour
                     {
                         grid[newX - 1, y] = grid[newX, y];
                         grid[newX, y] = 0;
+                        
+                     
+                        
                         newX--;
                         compress = true;
                     }
@@ -143,6 +152,7 @@ public class GameManager : MonoBehaviour
                     {
                         grid[newX + 1, y] = grid[newX, y];
                         grid[newX, y] = 0;
+                        
                         newX++;
                         compress = true;
                     }
@@ -166,6 +176,7 @@ public class GameManager : MonoBehaviour
                     {
                         grid[x, newY - 1] = grid[x, newY];
                         grid[x, newY] = 0;
+                        
                         newY--;
                         compress = true;
                     }
@@ -189,6 +200,7 @@ public class GameManager : MonoBehaviour
                     {
                         grid[x, newY + 1] = grid[x, newY];
                         grid[x, newY] = 0;
+                        
                         newY++;
                         compress = true;
                     }
@@ -333,7 +345,7 @@ public class GameManager : MonoBehaviour
             int x = i % 4;
             int y = i / 4;
 
-            tiles[i].SetNumber(grid[x, y]);
+            tileGrid[x, y].SetNumber(grid[x, y]);
         }
         scoreText.text = "Score: " + score;
     }
