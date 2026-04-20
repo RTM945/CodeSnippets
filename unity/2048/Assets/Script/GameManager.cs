@@ -7,16 +7,17 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
 
+    public Transform cellRoot;
+    public Transform tileRoot;
     public GameObject tilePrefab;
-    public Transform board;
     public TextMeshProUGUI scoreText;
     public GameObject gameOverPanel;
     
     int[,] grid = new int[4, 4];
     
-    Tile[,] tileGrid = new Tile[4,4];
+    Tile[,] tile = new Tile[4,4];
     
-    Transform[,] cells = new Transform[4,4];
+    Tile[,] cell = new Tile[4,4];
     
     int score = 0;
 
@@ -26,6 +27,8 @@ public class GameManager : MonoBehaviour
         Debug.Log("2048 Start");
 
         CreateGrid();
+        // 不 Force后面SpawnNumber拿到的position都是000
+        Canvas.ForceUpdateCanvases();
 
         Restart();
     }
@@ -34,11 +37,11 @@ public class GameManager : MonoBehaviour
     {
         for (int i = 0; i < 16; i++)
         {
-            GameObject obj = Instantiate(tilePrefab, board);
+            // 底图 GridLayout Group 自动布局
+            var obj = Instantiate(tilePrefab, cellRoot);
             int x = i % 4;
             int y = i / 4;
-            tileGrid[x, y] = obj.GetComponent<Tile>();
-            cells[x, y] = obj.transform;
+            cell[x, y] = obj.GetComponent<Tile>();
         }
     }
 
@@ -76,9 +79,12 @@ public class GameManager : MonoBehaviour
         int number = Random.value < 0.9f ? 2 : 4;
 
         grid[x, y] = number;
+        tile[x, y] = Instantiate(tilePrefab, tileRoot).GetComponent<Tile>();
+        // 动态生成的 tile 设置预定好的坐标
+        tile[x, y].transform.position = cell[x, y].transform.position;
 
-        tileGrid[x, y].SetNumber(number);
-        tileGrid[x, y].SpawnNumber(number);
+        tile[x, y].SetNumber(number);
+        tile[x, y].SpawnNumber(number);
     }
 
     bool IsGameOver()
@@ -127,7 +133,10 @@ public class GameManager : MonoBehaviour
                         grid[newX - 1, y] = grid[newX, y];
                         grid[newX, y] = 0;
                         
-                     
+                        // Tile 移动
+                        tile[newX - 1, y] = tile[newX, y];
+                        tile[newX, y] = null;
+                        tile[newX - 1, y].transform.position = cell[newX - 1, y].transform.position;
                         
                         newX--;
                         compress = true;
@@ -153,6 +162,10 @@ public class GameManager : MonoBehaviour
                         grid[newX + 1, y] = grid[newX, y];
                         grid[newX, y] = 0;
                         
+                        tile[newX + 1, y] = tile[newX, y];
+                        tile[newX, y] = null;
+                        tile[newX + 1, y].transform.position = cell[newX + 1, y].transform.position;
+                        
                         newX++;
                         compress = true;
                     }
@@ -176,6 +189,10 @@ public class GameManager : MonoBehaviour
                     {
                         grid[x, newY - 1] = grid[x, newY];
                         grid[x, newY] = 0;
+                        
+                        tile[x, newY - 1] = tile[x, newY];
+                        tile[x, newY] = null;
+                        tile[x, newY - 1].transform.position = cell[x, newY - 1].transform.position;
                         
                         newY--;
                         compress = true;
@@ -201,6 +218,10 @@ public class GameManager : MonoBehaviour
                         grid[x, newY + 1] = grid[x, newY];
                         grid[x, newY] = 0;
                         
+                        tile[x, newY + 1] = tile[x, newY];
+                        tile[x, newY] = null;
+                        tile[x, newY + 1].transform.position = cell[x, newY + 1].transform.position;
+                        
                         newY++;
                         compress = true;
                     }
@@ -223,6 +244,9 @@ public class GameManager : MonoBehaviour
                     grid[x + 1, y] = 0;
                     score += grid[x, y];
                     merged = true;
+                    
+                    Destroy(tile[x + 1, y].gameObject);
+                    tile[x + 1, y] = null;
                 }
             }
         }
@@ -242,6 +266,10 @@ public class GameManager : MonoBehaviour
                     score += grid[x, y];
                     grid[x - 1, y] = 0;
                     merged = true;
+                    
+                    // 合并的 tile 销毁
+                    Destroy(tile[x - 1, y].gameObject);
+                    tile[x - 1, y] = null;
                 }
             }
         }
@@ -261,6 +289,9 @@ public class GameManager : MonoBehaviour
                     score += grid[x, y];
                     grid[x, y + 1] = 0;
                     merged = true;
+                    
+                    Destroy(tile[x, y + 1].gameObject);
+                    tile[x, y + 1] = null;
                 }
             }
         }
@@ -280,6 +311,9 @@ public class GameManager : MonoBehaviour
                     score += grid[x, y];
                     grid[x, y - 1] = 0;
                     merged = true;
+                    
+                    Destroy(tile[x, y - 1].gameObject);
+                    tile[x, y - 1] = null;
                 }
             }
         }
@@ -344,8 +378,10 @@ public class GameManager : MonoBehaviour
         {
             int x = i % 4;
             int y = i / 4;
-
-            tileGrid[x, y].SetNumber(grid[x, y]);
+            if (tile[x, y] != null)
+            {
+                tile[x, y].SetNumber(grid[x, y]);
+            }
         }
         scoreText.text = "Score: " + score;
     }

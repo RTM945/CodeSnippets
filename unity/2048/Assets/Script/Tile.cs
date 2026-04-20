@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -9,6 +10,12 @@ public class Tile : MonoBehaviour
 {
     public Text text;
     private int number;
+    private Image bg;
+    
+    void Awake()
+    {
+        bg = GetComponent<Image>();
+    }
     
     public void MoveTo(Vector3 target)
     {
@@ -18,9 +25,26 @@ public class Tile : MonoBehaviour
 
     public void SpawnNumber(int number)
     {
-        text.transform.localScale = Vector3.zero;
-        Sequence popUpSequence = DOTween.Sequence();
-        popUpSequence.Append(text.transform.DOScale(1.2f, 0.3f).SetEase(Ease.OutBack));
+        // 底图变色 
+        if (number == 2)
+        {
+            bg.color = new Color(0, 0,0, 255);
+            // 咋log来着
+            Debug.Log(bg.color);
+        }
+        else if (number == 4)
+        {
+            bg.color = new Color(238, 225,201, 255);
+            Debug.Log(bg.color);
+        }
+        // 文字变色
+        text.color = new Color(117, 110,82, 255);
+        // dotween 动画
+        transform.localScale = Vector3.zero;
+
+        transform
+            .DOScale(1f, 0.75f)
+            .SetEase(Ease.OutBack, 1.5f);
     }
     
     public void PlayMerge()
