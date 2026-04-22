@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 
     public Transform cellRoot;
     public Transform tileRoot;
+    public GameObject cellPrefab;
     public GameObject tilePrefab;
     public TextMeshProUGUI scoreText;
     public GameObject gameOverPanel;
@@ -17,7 +18,7 @@ public class GameManager : MonoBehaviour
     
     Tile[,] tile = new Tile[4,4];
     
-    Tile[,] cell = new Tile[4,4];
+    Cell[,] cell = new Cell[4,4];
     
     int score = 0;
 
@@ -38,10 +39,10 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < 16; i++)
         {
             // 底图 GridLayout Group 自动布局
-            var obj = Instantiate(tilePrefab, cellRoot);
+            var obj = Instantiate(cellPrefab, cellRoot);
             int x = i % 4;
             int y = i / 4;
-            cell[x, y] = obj.GetComponent<Tile>();
+            cell[x, y] = obj.GetComponent<Cell>();
         }
     }
 
@@ -79,12 +80,16 @@ public class GameManager : MonoBehaviour
         int number = Random.value < 0.9f ? 2 : 4;
 
         grid[x, y] = number;
-        tile[x, y] = Instantiate(tilePrefab, tileRoot).GetComponent<Tile>();
+        tile[x, y] = Instantiate(tilePrefab).GetComponent<Tile>();
+        RectTransform rect = tile[x, y].GetComponent<RectTransform>();
         // 动态生成的 tile 设置预定好的坐标
         tile[x, y].transform.position = cell[x, y].transform.position;
-
+        tile[x, y].transform.SetParent(cell[x, y].transform, false);
+        rect.localPosition = Vector3.zero;
+        rect.localScale = Vector3.one;
+        rect.sizeDelta = Vector2.zero;
+        
         tile[x, y].SetNumber(number);
-        tile[x, y].SpawnNumber(number);
     }
 
     bool IsGameOver()
@@ -136,7 +141,7 @@ public class GameManager : MonoBehaviour
                         // Tile 移动
                         tile[newX - 1, y] = tile[newX, y];
                         tile[newX, y] = null;
-                        tile[newX - 1, y].transform.position = cell[newX - 1, y].transform.position;
+                        tile[newX - 1, y].transform.SetParent(cell[newX - 1, y].transform, false);
                         
                         newX--;
                         compress = true;
@@ -164,7 +169,7 @@ public class GameManager : MonoBehaviour
                         
                         tile[newX + 1, y] = tile[newX, y];
                         tile[newX, y] = null;
-                        tile[newX + 1, y].transform.position = cell[newX + 1, y].transform.position;
+                        tile[newX + 1, y].transform.SetParent(cell[newX + 1, y].transform, false);
                         
                         newX++;
                         compress = true;
@@ -192,7 +197,7 @@ public class GameManager : MonoBehaviour
                         
                         tile[x, newY - 1] = tile[x, newY];
                         tile[x, newY] = null;
-                        tile[x, newY - 1].transform.position = cell[x, newY - 1].transform.position;
+                        tile[x, newY - 1].transform.SetParent(cell[x, newY - 1].transform, false);
                         
                         newY--;
                         compress = true;
@@ -220,7 +225,7 @@ public class GameManager : MonoBehaviour
                         
                         tile[x, newY + 1] = tile[x, newY];
                         tile[x, newY] = null;
-                        tile[x, newY + 1].transform.position = cell[x, newY + 1].transform.position;
+                        tile[x, newY + 1].transform.SetParent(cell[x, newY + 1].transform, false);
                         
                         newY++;
                         compress = true;

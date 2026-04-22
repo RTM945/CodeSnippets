@@ -166,6 +166,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cellRoot: {fileID: 1255474148}
   tileRoot: {fileID: 576809407}
+  cellPrefab: {fileID: 1651852519641198354, guid: f3ded280dc186154e8e0f4be36a8fa80,
+    type: 3}
   tilePrefab: {fileID: 7730020842563873285, guid: 6910226057f41b448ac11835df2ec8eb,
     type: 3}
   scoreText: {fileID: 1794130082}
