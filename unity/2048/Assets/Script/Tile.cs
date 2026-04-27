@@ -11,6 +11,7 @@ public class Tile : MonoBehaviour
     public Text text;
     private int number;
     public Image bg;
+    public RectTransform rect;
 
     private readonly Dictionary<int, Color32> _bgColors = new Dictionary<int, Color32>()
     {
@@ -42,31 +43,10 @@ public class Tile : MonoBehaviour
         { 1024, new Color32(249, 246, 242, 255) },
         { 2048, new Color32(249, 246, 242, 255) },
     };
-    
-    public void MoveTo(Vector3 target)
-    {
-        transform.DOLocalMove(target, 0.15f)
-            .SetEase(Ease.OutCubic);
-    }
 
-    public void SpawnNumber(int number)
+    private void Awake()
     {
-        // dotween 动画
-        transform.localScale = Vector3.zero;
-        
-        transform
-            .DOScale(1f, 0.5f)
-            .SetEase(Ease.OutBack, 2f);
-    }
-    
-    public void PlayMerge()
-    {
-        transform.DOScale(1.2f, 0.1f)
-            .SetEase(Ease.OutBack)
-            .OnComplete(() =>
-            {
-                transform.DOScale(1f, 0.1f);
-            });
+        rect = GetComponent<RectTransform>();
     }
 
     public void SetNumber(int number)
@@ -75,6 +55,23 @@ public class Tile : MonoBehaviour
         text.text = number == 0 ? "" : number.ToString();
         bg.color = number > 2048 ? _bgColors[2049] : _bgColors[number];
         text.color = number > 2048 ? _textColors[2048] : _textColors[number];
+        
+        if (number < 100)
+        {
+            text.fontSize = 60;
+        }
+        else if (number < 1000)
+        {
+            text.fontSize = 50;
+        }
+        else if (number < 10000)
+        {
+            text.fontSize = 40;
+        }
+        else
+        {
+            text.fontSize = 32;
+        }
         
         transform.localScale = Vector3.zero;
         

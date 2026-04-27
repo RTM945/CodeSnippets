@@ -31,7 +31,9 @@ public class GameManager : MonoBehaviour
         // 不 Force后面SpawnNumber拿到的position都是000
         Canvas.ForceUpdateCanvases();
 
-        Restart();
+        SpawnNumber();
+        SpawnNumber();
+        UpdateView();
     }
 
     void CreateGrid()
@@ -400,13 +402,23 @@ public class GameManager : MonoBehaviour
     {
         gameOverPanel.SetActive(false);
         score = 0;
+        grid = new int[4, 4];
         for (int x = 0; x < 4; x++)
         {
             for (int y = 0; y < 4; y++)
             {
-                grid[x, y] = 0;
+                Destroy(tile[x, y]?.gameObject);
+                tile[x, y] = null;
+                Destroy(cell[x, y].gameObject);
+                cell[x, y] = null;
             }
         }
+        tile = new Tile[4,4];
+    
+        cell = new Cell[4,4];
+        
+        CreateGrid();
+        
         SpawnNumber();
         SpawnNumber();
 
